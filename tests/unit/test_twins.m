@@ -1,21 +1,26 @@
 function test_twins
 % Each twin in core/+ssm/ must equal its bvar-toolkit original, held verbatim in
-% tests/fixtures/bvar-toolkit/, byte for byte from the function line on. The one
-% permitted difference is diffmat's error identifiers.
+% tests/fixtures/bvar-toolkit/, byte for byte from the function line on. The
+% permitted differences are listed per function, each with the number of times
+% it must occur: diffmat's error identifiers, and ksc_rw_h0's lower Cholesky
+% factor (this library uses the lower factor throughout).
 root = getappdata(0, 'ssm_repo_root');
 fx = fullfile(root, 'tests', 'fixtures', 'bvar-toolkit', 'core', '+bvar');
 pairs = { ...
     'surform',     fullfile(fx, '+util', 'surform.m'),     {}; ...
     'tnormrnd',    fullfile(fx, '+util', 'tnormrnd.m'),    {}; ...
     'shaded_band', fullfile(fx, '+util', 'shaded_band.m'), {}; ...
-    'ksc_rw_h0',   fullfile(fx, '+sv', 'ksc_rw_h0.m'),     {}; ...
-    'diffmat',     fullfile(fx, '+util', 'diffmat.m'),     {'ssm:diffmat:', 'bvar:util:diffmat:'}};
+    'ksc_rw_h0',   fullfile(fx, '+sv', 'ksc_rw_h0.m'), ...
+        {'chol(Ph,''lower'')', 'chol(Ph)', 1; 'Ch''\randn(T,1)', 'Ch\randn(T,1)', 1}; ...
+    'diffmat',     fullfile(fx, '+util', 'diffmat.m'), ...
+        {'ssm:diffmat:', 'bvar:util:diffmat:', 2}};
 for ii = 1:size(pairs, 1)
     mine = body(fullfile(root, 'core', '+ssm', [pairs{ii,1} '.m']));
     subs = pairs{ii,3};
-    if ~isempty(subs)
-        assert(contains(mine, subs{1}), 'twins: ssm.%s has no %s identifiers', pairs{ii,1}, subs{1});
-        mine = strrep(mine, subs{1}, subs{2});
+    for s = 1:size(subs, 1)
+        assert(count(mine, subs{s,1}) == subs{s,3}, ...
+            'twins: ssm.%s must contain "%s" exactly %d times', pairs{ii,1}, subs{s,1}, subs{s,3});
+        mine = strrep(mine, subs{s,1}, subs{s,2});
     end
     assert(strcmp(mine, body(pairs{ii,2})), ...
         'twins: ssm.%s differs from its bvar-toolkit twin', pairs{ii,1});

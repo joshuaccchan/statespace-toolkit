@@ -11,9 +11,11 @@
 %   mixture indicators are drawn internally and discarded.
 %
 % The path is drawn in one block from its banded precision (Chan and Jeliazkov
-% 2009). Code-identical to bvar.sv.ksc_rw_h0 in bvar-toolkit, and the two must
-% stay so (tests/unit/test_twins.m). The SVRW.m files under replications/ are
-% different samplers with different signatures (tests/variant_map.md).
+% 2009). Code-identical to bvar.sv.ksc_rw_h0 in bvar-toolkit apart from the
+% Cholesky factor: this library uses the lower one throughout, and the draws are
+% bitwise the same (tests/unit/test_twins.m, test_ksc_rw_h0.m). The SVRW.m files
+% under replications/ are different samplers with different signatures
+% (tests/variant_map.md).
 
 function h = ksc_rw_h0(Ystar,h,sig,h0)
 T = length(h);
@@ -40,7 +42,7 @@ dconst = mi(S)'; invOmega = spdiags(1./sigi(S)',0,T,T);
 alph = Hh\[h0;sparse(T-1,1)];
 Kh = Hh'*invSh*Hh;
 Ph = Kh + invOmega;
-Ch = chol(Ph);
+Ch = chol(Ph,'lower');
 hhat = Ph\(Kh*alph + invOmega*(Ystar-dconst));
-h = hhat + Ch\randn(T,1);
+h = hhat + Ch'\randn(T,1);
 end
