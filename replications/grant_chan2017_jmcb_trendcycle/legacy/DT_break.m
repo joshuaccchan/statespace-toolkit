@@ -1,0 +1,153 @@
+% This script estimates the deterministic trend model with one break.
+
+% See:
+% Grant, A.L. and Chan, J.C.C. (2017). A Bayesian Model Comparison for 
+% Trend-Cycle Decompositions of Output, Journal of Money, Credit and Banking,
+% 49(2-3): 525-552
+
+%% prior
+mu0 = .75; Vmu = 1^2;
+tau00 = 750; Vtau0 = 100;
+phi0 = [1.3 -.7]'; invVphi = speye(2);
+sigc2_ub = 3;
+pri_sigc2 = @(x) log(1/sigc2_ub);
+R = 50000;
+count = 0;
+tempphi = repmat(phi0',R,1) + (chol(invVphi\speye(2),'lower')*randn(2,R))';
+for i=1:R
+    phic = tempphi(i,:)';
+    if sum(phic) < .99 && phic(2) - phic(1) < .99 && phic(2) > -.99
+        count = count+1;
+    end    
+end
+phi_const = 1/(count/R);
+prior = @(m,ph,sy,ta0) -log(2*pi) - log(Vmu) -.5*sum((m-mu0).^2/Vmu) ...
+    -log(2*pi)+.5*log(det(invVphi))+log(phi_const)-.5*(ph-phi0)'*invVphi*(ph-phi0)...
+    + pri_sigc2(sy) -.5*log(2*pi*Vtau0) - .5*(ta0-tau00)^2/Vtau0;
+
+disp('Starting MCMC for DT-t0.... ');
+disp(' ' );
+start_time = clock; 
+
+% initialize the Markov chain
+mu = [.81 .5]';
+phi = [1.34 -.7]';
+H = speye(T) - sparse(2:T,1:(T-1),ones(1,T-1),T,T);
+Hphi = speye(T) - phi(1)*sparse(2:T,1:(T-1),ones(1,T-1),T,T) + ...
+    - phi(2)*sparse(3:T,1:(T-2),ones(1,T-2),T,T);
+tau0 = y(1);
+sigc2 = .5;
+sigtau2 = 1.5;
+rho = -.9;
+del = [tau0; mu];
+ngrid = 500;
+
+%% compute a few things
+Xbeta = [[1;sparse(T-1,1)] ones(T,1)];
+XbetaXbeta = Xbeta'*Xbeta;
+Xdel = [ones(T,1) H\((1:T)'<t0) H\((1:T)'>=t0) ];
+
+%% initialize for storeage
+store_theta = zeros(nsims,6); % [mu, phi, sigc2, tau0]
+store_tau = zeros(nsims,T); 
+countphi = 0;
+
+rand('state', sum(100*clock) ); randn('state', sum(200*clock) );
+    
+for isim = 1:nsims+burnin
+  
+    %% sample phi
+    e = y-Xdel*del;
+    Xphi = [[0;e(1:T-1)] [0;0;e(1:T-2)]];    
+    Kphi = invVphi + Xphi'*Xphi/sigc2;
+    phihat = Kphi\(invVphi*phi0 + Xphi'*e/sigc2);
+    flag = 0; count = 0;
+    while flag == 0 && count < 100
+        phic = phihat + chol(Kphi,'lower')'\randn(2,1);
+        if sum(phic) < .99 && phic(2) - phic(1) < .99 && phic(2) > -.99
+            phi = phic;
+            flag = 1;
+            countphi = countphi + 1;
+        end
+        count = count + 1;
+    end
+    Hphi = speye(T) - phi(1)*sparse(2:T,1:(T-1),ones(1,T-1),T,T) + ...
+        - phi(2)*sparse(3:T,1:(T-2),ones(1,T-2),T,T);    
+        
+    %% sample sigc2
+    u = Hphi*(y-Xdel*del);
+    c1 = sum(u.^2);   
+    gy = @(x) -T/2*log(x) - 1./(2*x) * c1;
+    sigc2grid = linspace(.02-rand/100,sigc2_ub+rand/100,ngrid);
+    logpsigc2 = gy(sigc2grid) + pri_sigc2(sigc2grid);    
+    psigc2 = exp(logpsigc2-max(logpsigc2));
+    psigc2 = psigc2/sum(psigc2);
+    cumsumy = cumsum(psigc2);
+    sigc2 = sigc2grid(find(rand<cumsumy, 1 ));
+    
+    %% sample mu and tau0    
+    Kdel = diag([1/Vtau0  1/Vmu 1/Vmu]) + Xdel'*(Hphi'*Hphi)*Xdel/sigc2;
+    delhat = Kdel\([tau00/Vtau0; mu0/Vmu; mu0/Vmu] + 1/sigc2*Xdel'*(Hphi'*Hphi)*y);
+    del = delhat + chol(Kdel,'lower')'\randn(3,1);
+    tau0 = del(1);
+    mu = del(2:3);
+
+    if ( mod( isim, 10000 ) ==0 )
+        disp(  [ num2str( isim ) ' loops... ' ] )
+    end     
+    
+    if isim > burnin
+        isave = isim - burnin;
+        tau = Xdel*del;        
+        store_tau(isave,:) = tau';
+        store_theta(isave,:) = [mu' phi' sigc2 tau0];
+    end    
+end
+
+disp( ['MCMC takes '  num2str( etime( clock, start_time) ) ' seconds' ] );
+disp(' ' );
+
+if cp_ml
+    start_time = clock;
+    disp('Computing the marginal likelihood.... ');        
+    [ml mlstd] = ml_DT_break(y,store_theta,t0,prior,M);
+    disp( ['ML computation takes '  num2str( etime( clock, start_time) ) ' seconds' ] );
+end
+
+tauhat = median(store_tau)';
+tauCI = quantile(store_tau,[.1 .9])';
+thetahat = mean(store_theta)';
+thetastd = std(store_theta)';
+
+%% plot of graphs
+tid = linspace(1947,2014.75,T)';   
+figure;  
+subplot(1,2,1); 
+hold on 
+    plot(tid,tauhat, 'LineWidth',1,'Color','blue');
+    plot(tid,y,'--k','LineWidth',1);
+hold off
+box off; xlim([tid(1)-1 tid(end)+1]);
+legend('Trend', 'GDP','Location','NorthWest');    
+subplot(1,2,2);
+tmpy = repmat(y,1,2)-tauCI; 
+hold on        
+    plotCI(tid,tmpy(:,1),tmpy(:,2));
+    plot(tid, (y-tauhat), 'LineWidth',1,'Color','blue');
+    plot(tid, zeros(T,1),'-k','LineWidth',1);
+hold off
+box off; xlim([tid(1)-1 tid(end)+1]); ylim([-10.5 15])
+set(gcf,'Position',[100 100 800 300])  %% 1 by 2 graphs
+
+fprintf('\n'); 
+fprintf('Parameter   | Posterior mean (Posterior std. dev.):\n'); 
+fprintf('mu_1        | %.2f (%.2f)\n', thetahat(1), thetastd(1)); 
+fprintf('mu_2        | %.2f (%.2f)\n', thetahat(2), thetastd(2)); 
+fprintf('phi_1       | %.2f (%.2f)\n', thetahat(3), thetastd(3)); 
+fprintf('phi_2       | %.2f (%.2f)\n', thetahat(4), thetastd(4)); 
+fprintf('sigma^2_c   | %.2f (%.2f)\n', thetahat(5), thetastd(5)); 
+
+if cp_ml
+    fprintf('\n'); 
+    fprintf('log marginal likelihood: %.1f (%.2f)\n', ml, mlstd); 
+end
