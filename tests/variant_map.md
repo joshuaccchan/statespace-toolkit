@@ -1,0 +1,30 @@
+# Variant map
+
+For every function in `core/+ssm/`: where its code comes from, which legacy copies in this
+repository it matches, and how that was verified. A legacy file with the same role that
+computes something different is listed under **never merge** and keeps its own copy.
+
+Verification: "code" = code-identical once comments and blank lines are removed, apart
+from the differences named; "unit" = exact equality in `tests/unit/`, with stochastic
+functions compared draw for draw under a fixed seed.
+
+## Twins of bvar-toolkit Functions (18 September 2026)
+
+Each twin is its bvar-toolkit original from the function line on, byte for byte, checked
+by `tests/unit/test_twins.m` against the copies in `tests/fixtures/bvar-toolkit/` (bvar-toolkit
+commit `947df3b`). Only the headers differ, and `ssm.diffmat`'s error identifiers.
+
+| Function | Twin | Legacy copies in this repository | Verified |
+|---|---|---|---|
+| `ssm.surform` | `bvar.util.surform` | chan_clark_koop2018_jmcb_trendie `SURform.m` (code); chan2017_jbes_svm `SURform.m` and chan_grant2016_csda_dic `DIC/SURform.m` (`[r c]` for `[r,c]`); chan_eisenstat2015_er_mlce `ML_CE/SURform.m` (the same, and no closing `end`); fixture `chan-jeliazkov-2009/SURform.m` (a rewrite with an input check and an explicit size argument) | unit, all five (`test_surform`) |
+| `ssm.tnormrnd` | `bvar.util.tnormrnd` | chan_clark_koop2018_jmcb_trendie, chan_grant2016_eneco_garchsv, chan_koop_potter2016_jae_boundedpc `tnormrnd.m` (code); grant_chan2017_jedc_hpfilter and grant_chan2017_jmcb_trendcycle `tnormrnd.m` (`\|\|` and `&&` for `\|` and `&` on scalar conditions); chan_eisenstat2015_er_mlce `ML_CE/tnormrnd.m` (the same, spacing, and no closing `end`) | unit, all six, draw for draw with scalar and vector arguments (`test_tnormrnd`) |
+| `ssm.shaded_band` | `bvar.util.shaded_band` | none | unit (`test_shaded_band`) |
+| `ssm.ksc_rw_h0` | `bvar.sv.ksc_rw_h0` | none; bvar-toolkit verifies its twin against five published `SVRW.m` copies | unit, draw for draw against the twin (`test_ksc_rw_h0`) |
+| `ssm.diffmat` | `bvar.util.diffmat`, with error identifiers `ssm:diffmat:*` | new in bvar-toolkit; reproduces the inline spellings in chan2013_joe_masv `UC_MA.m` and `SV.m` and chan_grant2016_eneco_garchsv `loglike_garch_ma.m` | unit (`test_diffmat`) |
+
+## Never Merge
+
+| File | Why it is not `ssm.ksc_rw_h0` |
+|---|---|
+| chan_clark_koop2018_jmcb_trendie `legacy/SVRW.m` | `SVRW(Ystar,h,sig,h0,Vh)` takes a fifth argument, and its code differs in 19 lines |
+| fixture `bvar-toolkit/.../sp_code/SVRW.m` | `[h S] = SVRW(ystar,h,omega2h,Vh)` has no `h0`, also returns the mixture indicators, and its code differs in 26 lines |

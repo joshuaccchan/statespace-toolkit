@@ -1,4 +1,9 @@
 cac48b95633f873a3429dc9d12ec18ce *bayesian-macroeconometrics/code/matlab/chapter10/sample_SVM_h_ARMH.m
+bd5f2993520a1597b0dd91d42f39612b *bvar-toolkit/core/+bvar/+sv/ksc_rw_h0.m
+152a3098766f468daaadcd2c87a1d7eb *bvar-toolkit/core/+bvar/+util/diffmat.m
+a23ffc8e8ac9a05fe7288ecdbad2ad77 *bvar-toolkit/core/+bvar/+util/shaded_band.m
+cde5e63627a6300fcd316b66c7962c1b *bvar-toolkit/core/+bvar/+util/surform.m
+08d606a68d077186623970d8201ce4e9 *bvar-toolkit/core/+bvar/+util/tnormrnd.m
 aa8417b420d5fb2d2d6c806c85536ede *bvar-toolkit/replications/chan2023_joe_mlvarsv/legacy/utility/sample_CSV.m
 31998dcd3e43d2d8b2293a2ad2403f7f *bvar-toolkit/replications/chan_jeliazkov2009_statespace/legacy/sp_code/SVRW.m
 df408225aed8d6191fa75cf3e2a16f8d *bvar-toolkit/replications/chan_jeliazkov2009_statespace/legacy/sp_code/UC.m
