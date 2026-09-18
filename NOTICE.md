@@ -15,6 +15,5 @@ expected scholarly practice and is not a licensing condition.
 
 ## Not Covered
 
-Third-party code retains its original license and authorship: the third-party
-files bundled inside some legacy packages, and anything vendored under
-`third_party/`. See those files' own headers.
+Third-party code keeps its original license and authorship. Any that this
+repository vendors goes under `third_party/`, with its terms in its own header.
