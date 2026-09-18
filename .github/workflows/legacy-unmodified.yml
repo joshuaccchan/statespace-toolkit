@@ -1,0 +1,95 @@
+# The archived packages under replications/<slug>/legacy/ are the published
+# code, byte for byte, never edited. This job enforces it on every push and pull
+# request, and holds the anchor copies under tests/fixtures/ to the same rule.
+#
+# Each legacy tree at HEAD is compared against the as-published/<slug> tag
+# created when that package was imported: no MATLAB, no network, no checksum
+# manifest to keep in sync. provenance.md records the md5 of each original zip,
+# which ties the tags to the files distributed at joshuachan.org.
+#
+# A package directory with no matching tag fails, which catches a newly imported
+# package whose tag was never pushed, and so does a tag whose directory is gone.
+#
+# tests/fixtures/ holds verbatim copies of files from other repositories that the
+# equivalence tests run. Their md5s are in tests/fixtures/MD5SUMS, and a file
+# there with no entry fails, so none escapes the check.
+#
+# Restricted to pushes to main, for the same reason as the unit suite: a tag push
+# would re-run it over content the accompanying main push already checked.
+name: Legacy archives unmodified
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0        # full history and tags are needed for the comparison
+
+      - name: Every legacy archive must match its as-published tag
+        run: |
+          status=0
+          found=0
+          for dir in replications/*/legacy; do
+            [ -d "$dir" ] || continue
+            found=$((found + 1))
+            slug=$(basename "$(dirname "$dir")")
+            tag="as-published/$slug"
+            if ! git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+              echo "::error file=$dir::$slug has a legacy/ archive but no $tag tag - import incomplete, or the tag was not pushed"
+              status=1
+              continue
+            fi
+            if git diff --quiet "$tag" HEAD -- "$dir/"; then
+              echo "ok        $slug"
+            else
+              echo "::error file=$dir::$slug: the legacy archive differs from $tag - archived packages must never be edited"
+              git diff --name-status "$tag" HEAD -- "$dir/" | sed 's/^/            /'
+              status=1
+            fi
+          done
+
+          # A tag whose directory has gone missing is equally a break.
+          for tag in $(git tag -l 'as-published/*'); do
+            slug=${tag#as-published/}
+            if [ ! -d "replications/$slug/legacy" ]; then
+              echo "::error::$tag exists but replications/$slug/legacy/ does not"
+              status=1
+            fi
+          done
+
+          if [ "$found" -eq 0 ]; then
+            echo "::error::no replications/*/legacy directories found - the checkout looks wrong"
+            status=1
+          fi
+          echo "checked $found archived packages"
+          exit $status
+
+      - name: Every fixture must match its recorded md5
+        if: ${{ !cancelled() }}
+        run: |
+          cd tests/fixtures 2>/dev/null || { echo "::error::tests/fixtures/ is missing"; exit 1; }
+          if [ ! -s MD5SUMS ]; then
+            echo "::error::tests/fixtures/MD5SUMS is missing or empty"
+            exit 1
+          fi
+          status=0
+          md5sum --check --strict --quiet MD5SUMS || status=1
+
+          # Every file here must have an entry, apart from MD5SUMS and README.md.
+          listed=$(sed -E 's/^[0-9a-f]{32} [ *]//' MD5SUMS | sort)
+          actual=$(find . -type f ! -name MD5SUMS ! -name README.md | sed 's|^\./||' | sort)
+          unlisted=$(comm -13 <(echo "$listed") <(echo "$actual"))
+          if [ -n "$unlisted" ]; then
+            echo "::error::files in tests/fixtures/ with no MD5SUMS entry:"
+            echo "$unlisted" | sed 's/^/            /'
+            status=1
+          fi
+          echo "checked $(grep -c . MD5SUMS) fixture files"
+          exit $status

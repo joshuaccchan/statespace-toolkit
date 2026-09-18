@@ -1,0 +1,46 @@
+# Runs on pushes to main and on pull requests, in two steps: the unit suite
+# (tests/unit/run_unit_tests.m), then setup.m and every example
+# (tests/run_examples.m). The second step runs even if the first fails.
+#
+# MATLAB is licensed automatically because the repository is public; a private
+# fork needs an MLM_LICENSE_TOKEN secret.
+#
+# A test that cannot run on a hosted runner, such as one reading data with
+# xlsread and a range argument (no runner has Excel), goes in SSM_SKIP_TESTS as
+# a comma-separated list. The unit runner names and counts every skipped test.
+#
+# Pushes are filtered to main because an unfiltered trigger also fires on every
+# as-published/<slug> tag, which would re-run the suite on content already tested.
+name: Unit tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up MATLAB
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          release: R2025b
+          products: >
+            Statistics_and_Machine_Learning_Toolbox
+
+      - name: Run the unit suite
+        uses: matlab-actions/run-command@v2
+        env:
+          SSM_SKIP_TESTS: ''
+        with:
+          command: run('tests/unit/run_unit_tests.m')
+
+      - name: Run setup.m and the examples
+        if: ${{ !cancelled() }}
+        uses: matlab-actions/run-command@v2
+        with:
+          command: run('tests/run_examples.m')
