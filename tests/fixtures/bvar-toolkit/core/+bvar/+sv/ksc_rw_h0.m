@@ -42,7 +42,7 @@ dconst = mi(S)'; invOmega = spdiags(1./sigi(S)',0,T,T);
 alph = Hh\[h0;sparse(T-1,1)];
 Kh = Hh'*invSh*Hh;
 Ph = Kh + invOmega;
-Ch = chol(Ph);
+Ch = chol(Ph,'lower');              % so that Ch*Ch' = Ph
 hhat = Ph\(Kh*alph + invOmega*(Ystar-dconst));
-h = hhat + Ch\randn(T,1);
+h = hhat + Ch'\randn(T,1);
 end
