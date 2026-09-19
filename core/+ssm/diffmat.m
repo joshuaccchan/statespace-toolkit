@@ -16,7 +16,7 @@
 %   MA(1) error transform:      H_psi  = I + psi*L   ->  diffmat(T, -psi)
 %
 % Code-identical to bvar.util.diffmat in bvar-toolkit apart from the error
-% identifiers (ssm:diffmat:*), and the two must stay so (tests/unit/test_twins.m).
+% identifiers (ssm:diffmat:*), and the two must stay so.
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and

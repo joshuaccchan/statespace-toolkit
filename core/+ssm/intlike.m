@@ -1,6 +1,6 @@
 % ssm.intlike - observed-data (integrated) log likelihood of a linear Gaussian
 % state space model, with the states integrated out, from banded precision
-% matrices.
+% matrices: the method of Chan and Jeliazkov (2009).
 %
 %   ll = ssm.intlike(y, Z, iR, P, b)
 %   [ll, alphahat, K] = ssm.intlike(y, Z, iR, P, b)
@@ -16,11 +16,9 @@
 %   alphahat : Tm x 1 posterior mean of alpha
 %   K        : Tm x Tm posterior precision of alpha, P + Z'*iR*Z
 %
-% The notation is the book's (Section 9.2, Exercise 9.3). The value is eq. (11)
-% of Chan and Jeliazkov (2009), p(y) = p(y|alpha)p(alpha)/p(alpha|y), evaluated
-% at alpha = alphahat, where the exponent of the denominator is zero. The two
+% The value uses the identity p(y) = p(y|alpha)p(alpha)/p(alpha|y), evaluated at
+% alpha = alphahat, where the exponent of the denominator is zero. The two
 % quadratic forms left are sums of squared residuals, so no large terms cancel.
-% Written for this toolkit (tests/unit/test_intlike.m).
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and

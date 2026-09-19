@@ -10,8 +10,7 @@
 %   N          : number of draws (default length(mu))
 %   t          : N x 1 vector of draws
 %
-% Code-identical to bvar.util.tnormrnd in bvar-toolkit, and the two must stay so
-% (tests/unit/test_twins.m).
+% Code-identical to bvar.util.tnormrnd in bvar-toolkit, and the two must stay so.
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and

@@ -9,8 +9,7 @@
 %          fitted series of the TVP regression y_t = X(t,:)*b_t
 %
 % Xout is the matrix Z = diag(x_1',...,x_T') of the book's TVP regression. Code-
-% identical to bvar.util.surform in bvar-toolkit, and the two must stay so
-% (tests/unit/test_twins.m).
+% identical to bvar.util.surform in bvar-toolkit, and the two must stay so.
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and

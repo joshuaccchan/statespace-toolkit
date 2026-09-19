@@ -1,5 +1,6 @@
 % ssm.simulate_states - draws from N(mu, inv(K)) given the precision matrix K: the
-% precision sampler, Algorithm 9.1 of Chan (forthcoming).
+% precision sampler of Chan and Jeliazkov (2009). See Algorithm 9.1 of Chan
+% (forthcoming) for a textbook treatment.
 %
 %   alpha = ssm.simulate_states(mu, K)
 %   alpha = ssm.simulate_states(mu, K, ndraws)
@@ -12,10 +13,6 @@
 %            makes each draw O(n).
 %   ndraws : number of independent draws (default 1)
 %   alpha  : n x ndraws matrix of draws
-%
-% The draw is mu + C'\z, with C = chol(K,'lower') and z ~ N(0, I): the spelling of
-% the published code, whose samplers this function reproduces draw for draw
-% (tests/unit/test_simulate_states.m). Written for this toolkit.
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and

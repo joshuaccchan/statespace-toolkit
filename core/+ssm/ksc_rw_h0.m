@@ -12,8 +12,8 @@
 %
 % The path is drawn in one block from its banded precision (Chan and Jeliazkov
 % 2009). Code-identical to bvar.sv.ksc_rw_h0 in bvar-toolkit, and the two must
-% stay so (tests/unit/test_twins.m). The SVRW.m files under replications/ are
-% different samplers with different signatures (tests/variant_map.md).
+% stay so. The SVRW.m files under replications/ are different samplers with
+% different signatures (tests/variant_map.md).
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and
