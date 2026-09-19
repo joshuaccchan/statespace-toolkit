@@ -23,17 +23,17 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up MATLAB
-        uses: matlab-actions/setup-matlab@v2
+        uses: matlab-actions/setup-matlab@v3
         with:
           release: R2025b
           products: >
             Statistics_and_Machine_Learning_Toolbox
 
       - name: Run the unit suite
-        uses: matlab-actions/run-command@v2
+        uses: matlab-actions/run-command@v3
         env:
           SSM_SKIP_TESTS: ''
         with:
@@ -41,6 +41,6 @@ jobs:
 
       - name: Run setup.m and the examples
         if: ${{ !cancelled() }}
-        uses: matlab-actions/run-command@v2
+        uses: matlab-actions/run-command@v3
         with:
           command: run('tests/run_examples.m')

@@ -11,6 +11,11 @@ function run_examples
 thisdir = fileparts(mfilename('fullpath'));
 root = fileparts(thisdir);
 
+% No example needs the Optimization Toolbox, which only four archived packages
+% use, so setup.m's warning about it is turned off while this runs.
+wopt = warning('off', 'ssm:setup:noOptim');
+restore = onCleanup(@() warning(wopt));
+
 % Take core/ off the path first, so the check below depends on setup.m alone
 % even in a session where it was already added.
 w = warning('off', 'MATLAB:rmpath:DirNotFound');
