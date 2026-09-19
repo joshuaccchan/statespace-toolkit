@@ -12,6 +12,10 @@
 %
 % Code-identical to bvar.util.tnormrnd in bvar-toolkit, and the two must stay so
 % (tests/unit/test_twins.m).
+%
+% See:
+% Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and
+% Applications, Chapman & Hall/CRC, Exercise 3.4.
 
 function t = tnormrnd(mu, sigma2, a, b, N)
 

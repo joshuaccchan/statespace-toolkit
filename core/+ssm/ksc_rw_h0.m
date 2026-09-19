@@ -16,6 +16,13 @@
 % bitwise the same (tests/unit/test_twins.m, test_ksc_rw_h0.m). The SVRW.m files
 % under replications/ are different samplers with different signatures
 % (tests/variant_map.md).
+%
+% See:
+% Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and
+% Applications, Chapman & Hall/CRC, Section 10.1.1.
+% Kim, S., Shephard, N. and Chib, S. (1998). Stochastic Volatility: Likelihood
+% Inference and Comparison with ARCH Models, Review of Economic Studies, 65(3):
+% 361-393.
 
 function h = ksc_rw_h0(Ystar,h,sig,h0)
 T = length(h);

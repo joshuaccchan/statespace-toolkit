@@ -17,6 +17,10 @@
 %
 % Code-identical to bvar.util.diffmat in bvar-toolkit apart from the error
 % identifiers (ssm:diffmat:*), and the two must stay so (tests/unit/test_twins.m).
+%
+% See:
+% Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and
+% Applications, Chapman & Hall/CRC, Section 9.1.1.
 
 function H = diffmat(T, a)
 if nargin < 2

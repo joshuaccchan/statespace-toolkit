@@ -10,7 +10,12 @@
 %
 % Draws on the current axes; call hold on first to plot lines over the band.
 % Code-identical to bvar.util.shaded_band in bvar-toolkit, and the two must stay
-% so (tests/unit/test_twins.m).
+% so (tests/unit/test_twins.m); the same computation as shaded_band.m in the
+% book's code for Chapter 14.
+%
+% See:
+% Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and
+% Applications, Chapman & Hall/CRC.
 
 function h = shaded_band(x, lo, hi, shade)
 if nargin < 4

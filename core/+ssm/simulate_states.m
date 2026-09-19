@@ -1,28 +1,32 @@
-% ssm.simulate_states - draws of a state path x ~ N(K\b, inv(K)) given its
-% posterior precision K: the precision sampler of Chan and Jeliazkov (2009).
+% ssm.simulate_states - draws from N(mu, inv(K)) given the precision matrix K: the
+% precision sampler, Algorithm 9.1 of Chan (forthcoming).
 %
-%   x = ssm.simulate_states(K, b)
-%   [x, xhat] = ssm.simulate_states(K, b, ndraws)
+%   alpha = ssm.simulate_states(mu, K)
+%   alpha = ssm.simulate_states(mu, K, ndraws)
 %
-%   K      : n x n posterior precision of the stacked path, symmetric positive
-%            definite. For a state space model it is banded, so a sparse K makes
-%            each draw O(n).
-%   b      : n x 1 vector with K*xhat = b. For y = X*x + e, e ~ N(0, Sig), and the
-%            prior x ~ N(m, inv(P)) implied by the state equation,
-%            K = P + X'*inv(Sig)*X and b = P*m + X'*inv(Sig)*y.
+%   mu     : n x 1 mean
+%   K      : n x n symmetric positive definite precision matrix. For the states of
+%            a linear Gaussian state space model (Theorem 9.1 of the book),
+%            K = P + Z'*inv(R)*Z and mu = K\(P*b + Z'*inv(R)*y), with the prior
+%            precision P = G'*inv(Q)*G and prior mean b. K is banded, so a sparse K
+%            makes each draw O(n).
 %   ndraws : number of independent draws (default 1)
-%   x      : n x ndraws matrix of draws
-%   xhat   : n x 1 posterior mean K\b
+%   alpha  : n x ndraws matrix of draws
 %
-% Written for this toolkit; it generalizes the inline draw of the published code.
-% The draw is xhat + chol(K,'lower')'\randn(n, ndraws), with xhat = K\b computed
-% separately: the spelling of that code, so that a sampler calling this function
-% reproduces the published one draw for draw (tests/unit/test_simulate_states.m).
+% The draw is mu + C'\z, with C = chol(K,'lower') and z ~ N(0, I): the spelling of
+% the published code, whose samplers this function reproduces draw for draw
+% (tests/unit/test_simulate_states.m). Written for this toolkit.
+%
+% See:
+% Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and
+% Applications, Chapman & Hall/CRC, Section 9.1.1 and Algorithm 9.1.
+% Chan, J.C.C. and Jeliazkov, I. (2009). Efficient Simulation and Integrated
+% Likelihood Estimation in State Space Models, International Journal of
+% Mathematical Modelling and Numerical Optimisation, 1(1/2): 101-120.
 
-function [x, xhat] = simulate_states(K, b, ndraws)
+function alpha = simulate_states(mu, K, ndraws)
 if nargin < 3
     ndraws = 1;
 end
-xhat = K\b;
-x = xhat + chol(K,'lower')'\randn(size(K,1), ndraws);
+alpha = mu + chol(K,'lower')'\randn(size(K,1), ndraws);
 end
