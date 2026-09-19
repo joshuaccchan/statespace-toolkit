@@ -85,46 +85,6 @@ end
 assert(isequal(Xm, X1), 'simulate_states: ndraws = 4 differs from four single draws');
 end
 
-function ssmtest_out = run_anchor(ssmtest_a, ssmtest_patches, ssmtest_tag)
-% Copy the anchor's files to a fresh folder, patch the script line by line, run
-% it whole, and return the named variables. Variable names are prefixed so that
-% the script, which runs in this workspace, cannot overwrite them.
-ssmtest_dir = tempname; mkdir(ssmtest_dir);
-ssmtest_clean = onCleanup(@() rmdir(ssmtest_dir, 's'));
-for ssmtest_f = ssmtest_a.files
-    copyfile(fullfile(ssmtest_a.dir, ssmtest_f{1}), ssmtest_dir);
-end
-ssmtest_txt = patch_lines(fileread(fullfile(ssmtest_a.dir, ssmtest_a.script)), ...
-    ssmtest_patches, ssmtest_a.script);
-ssmtest_file = fullfile(ssmtest_dir, ['anchor_' erase(ssmtest_a.script, '.m') '_' ssmtest_tag '.m']);
-ssmtest_fid = fopen(ssmtest_file, 'w');
-fwrite(ssmtest_fid, ssmtest_txt);
-fclose(ssmtest_fid);
-if ~isempty(ssmtest_a.seed)
-    rng(ssmtest_a.seed, 'twister');
-end
-evalc('run(ssmtest_file)');
-close all force
-ssmtest_out = struct();
-for ssmtest_v = ssmtest_a.out
-    ssmtest_out.(ssmtest_v{1}) = eval(ssmtest_v{1});
-end
-end
-
-function txt = patch_lines(txt, patches, script)
-% Replace whole lines, each identified by the statement it starts with; the file
-% keeps its own line endings.
-if contains(txt, sprintf('\r\n')), eol = sprintf('\r\n'); else, eol = newline; end
-lines = strsplit(txt, eol, 'CollapseDelimiters', false);
-for p = 1:size(patches, 1)
-    hit = find(startsWith(strtrim(lines), patches{p,1}));
-    assert(isscalar(hit), 'simulate_states: patch "%s" matches %d lines of %s', ...
-        patches{p,1}, numel(hit), script);
-    lines{hit} = patches{p,2};
-end
-txt = strjoin(lines, eol);
-end
-
 function [ms, Ps, Cs] = kalman_local_level(y, sig2, omega2, tau0)
 % Kalman filter and RTS smoother for y_t = tau_t + e_t, tau_t = tau_{t-1} + u_t,
 % tau_1 ~ N(tau0, omega2). Returns smoothed means, variances, and lag-one
