@@ -1,0 +1,23 @@
+MATLAB 25.2.0.3150157 (R2025b) Update 4
+19-Sep-2026 16:23:49
+
+Computing finite-difference Hessian using objective function.
+
+Local minimum possible.
+
+fminunc stopped because it cannot decrease the objective function
+along the current search direction.
+
+MCMC takes 0.192 seconds
+ 
+
+ML =
+
+ -141.2356
+
+
+MLstd =
+
+    0.0011
+
+Elapsed time is 1.209114 seconds.

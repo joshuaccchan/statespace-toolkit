@@ -1,0 +1,19 @@
+MATLAB 25.2.0.3150157 (R2025b) Update 4
+19-Sep-2026 16:54:52
+Starting GARCH.... 
+ 
+5000 loops... 
+10000 loops... 
+MCMC takes 21.714 seconds
+ 
+Computing the marginal likelihood.... 
+ML computation takes 0.531 seconds
+
+Parameter   | Posterior mean (Posterior std. dev.):
+mu          | 0.14 (0.11)
+alpha_0     | 0.21 (0.09)
+alpha_1     | 0.09 (0.01)
+beta_1      | 0.91 (0.01)
+
+log marginal likelihood: -2652.0 (0.01)
+Elapsed time is 25.791675 seconds.

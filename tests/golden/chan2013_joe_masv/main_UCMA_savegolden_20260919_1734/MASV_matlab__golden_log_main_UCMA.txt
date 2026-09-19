@@ -1,0 +1,12 @@
+MATLAB 25.2.0.3150157 (R2025b) Update 4
+19-Sep-2026 17:34:40
+Starting AR(2)-MA.... 
+ 
+5000 loops... 
+10000 loops... 
+MCMC takes 47.375 seconds
+ 
+stheta posterior means: [1.0872 0.964798 0.0805827]
+sbeta posterior means: [0.290322 0.928064 -0.0179487]
+spsi posterior means: -0.390041
+Elapsed time is 51.610901 seconds.

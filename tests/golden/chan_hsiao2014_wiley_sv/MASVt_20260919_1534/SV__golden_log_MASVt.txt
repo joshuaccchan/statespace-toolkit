@@ -1,0 +1,8 @@
+MATLAB 25.2.0.3150157 (R2025b) Update 4
+19-Sep-2026 15:34:54
+Starting MCMC.... 
+ 
+2000 loops... 
+MCMC takes 16.275 seconds
+ 
+Elapsed time is 19.137458 seconds.

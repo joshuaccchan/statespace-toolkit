@@ -1,0 +1,15 @@
+MATLAB 25.2.0.3150157 (R2025b) Update 4
+19-Sep-2026 16:23:54
+MCMC takes 0.511 seconds
+ 
+
+ML =
+
+ -141.0751
+
+
+MLstd =
+
+    0.0021
+
+Elapsed time is 4.196707 seconds.

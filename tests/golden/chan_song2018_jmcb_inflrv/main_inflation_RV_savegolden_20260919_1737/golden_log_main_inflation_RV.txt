@@ -1,0 +1,22 @@
+MATLAB 25.2.0.3150157 (R2025b) Update 4
+19-Sep-2026 17:37:56
+Estimating UCSV-RV.... 
+iteration: 5000
+iteration: 10000
+iteration: 15000
+iteration: 20000
+iteration: 25000
+iteration: 30000
+iteration: 35000
+iteration: 40000
+iteration: 45000
+iteration: 50000
+iteration: 55000
+iteration: 60000
+Post.sigma2h posterior means: 0.274742
+Post.sigma2g posterior means: 0.104075
+Post.sigma2z posterior means: 0.660972
+Post.a posterior means: [-0.452711 1.09246]
+Post.g1 posterior means: -1.90111
+Post.h1 posterior means: 2.29804
+Elapsed time is 38.591337 seconds.
