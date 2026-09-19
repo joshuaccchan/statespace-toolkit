@@ -51,6 +51,6 @@ alph = Hh\[h0;sparse(T-1,1)];
 Kh = Hh'*invSh*Hh;
 Ph = Kh + invOmega;
 Ch = chol(Ph,'lower');              % so that Ch*Ch' = Ph
-hhat = Ph\(Kh*alph + invOmega*(Ystar-dconst));
+hhat = (Ch')\(Ch\(Kh*alph + invOmega*(Ystar-dconst)));
 h = hhat + Ch'\randn(T,1);
 end
