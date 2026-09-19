@@ -2,7 +2,7 @@
 % a Gaussian proposal at the mode of the target: the algorithm of Chan (2017).
 %
 %   [alpha, accept] = ssm.armh(alpha, logf, gradK)
-%   [alpha, accept] = ssm.armh(alpha, logf, gradK, 'c_reject', 3, 'ForceAccept', false)
+%   [alpha, accept, ntry] = ssm.armh(alpha, logf, gradK, 'c_reject', 3, 'ForceAccept', false)
 %
 %   alpha         : n x 1 current state; on output the new state
 %   logf          : handle; logf(alpha) is the log target density, up to a constant
@@ -18,6 +18,7 @@
 %                   state, and a loose tolerance lets the proposal depend on it.
 %   'MaxIterAR'   : raise after this many rejected candidates (default 1000)
 %   accept        : true if the MH step took the candidate
+%   ntry          : number of candidates drawn in the accept-reject step
 %
 % The proposal is g = N(alphahat, K^{-1}) at the mode alphahat. Candidates from g
 % are kept with probability min{f/(c g), 1}, and the survivor passes an MH step.
@@ -31,7 +32,7 @@
 % Parameters: An Application to Inflation Modeling, Journal of Business and
 % Economic Statistics, 35(1): 17-28.
 
-function [alpha, accept] = armh(alpha, logf, gradK, opts)
+function [alpha, accept, ntry] = armh(alpha, logf, gradK, opts)
 arguments
     alpha (:,1) double
     logf (1,1) function_handle
@@ -86,4 +87,5 @@ accept = lalpha > log(rand) || opts.ForceAccept;
 if accept
     alpha = ac;
 end
+ntry = iter;
 end

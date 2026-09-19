@@ -14,7 +14,9 @@ function test_armh
 %     distribution of (h, s2) unchanged at c_reject = 0.2, 1, 3 and 20 and under a
 %     forced accept at a valid envelope, and it detects a wrong conditional and a
 %     forced accept below the envelope bound.
-% (4) A loose Tol, the two caps and bad c_reject values raise.
+% (4) A loose Tol, the two caps and bad c_reject values raise, and ntry counts the
+%     accept-reject candidates: a positive integer, larger on average at a larger
+%     c_reject.
 % (5) runs last: the published script samples (mu, phi) in a loop with no cap,
 %     which a broken kernel can send into an endless search, so (1)-(4) must
 %     catch a broken kernel first.
@@ -118,6 +120,15 @@ for c_reject = {0, -3, Inf, NaN, [1 10]}
         assert(~strcmp(err.identifier, 'test:noThrow'), '%s', err.message);
     end
 end
+rng(7, 'twister'); nt = zeros(100, 2);
+for i = 1:100
+    [~, ~, nt(i,1)] = ssm.armh(h, logf, gradK, 'c_reject', 1);
+    [~, ~, nt(i,2)] = ssm.armh(h, logf, gradK, 'c_reject', 20);
+end
+assert(all(nt(:) >= 1 & nt(:) == round(nt(:))), 'armh: ntry must be a positive integer');
+assert(mean(nt(:,2)) > mean(nt(:,1)), ...
+    'armh: fewer candidates on average at c_reject = 20 (%.2f) than at 1 (%.2f)', ...
+    mean(nt(:,2)), mean(nt(:,1)));
 
 % --- (5) UC_SVM.m of Chan (2017), run whole, to rounding ------------------------
 a = struct('dir', fullfile(root, 'replications', 'chan2017_jbes_svm', 'legacy'), ...
