@@ -19,7 +19,7 @@
 %   'MaxIterAR'   : raise after this many rejected candidates (default 1000)
 %   accept        : true if the MH step took the candidate
 %
-% The proposal is g = N(alphahat, inv(K)) at the mode alphahat. Candidates from g
+% The proposal is g = N(alphahat, K^{-1}) at the mode alphahat. Candidates from g
 % are kept with probability min{f/(c g), 1}, and the survivor passes an MH step.
 % For a textbook discussion, see Chan (forthcoming), Sections 6.2.3, 10.2.2 and
 % 10.3.3.

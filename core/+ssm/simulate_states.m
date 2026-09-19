@@ -1,4 +1,4 @@
-% ssm.simulate_states - draws from N(mu, inv(K)) given the precision matrix K: the
+% ssm.simulate_states - draws from N(mu, K^{-1}) given the precision matrix K: the
 % precision sampler of Chan and Jeliazkov (2009). See Algorithm 9.1 of Chan
 % (forthcoming) for a textbook treatment.
 %
