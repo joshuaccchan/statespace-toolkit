@@ -10,7 +10,7 @@
 % 1. Simulated data. tauhat and diag(K^{-1}) equal the Kalman smoother's means and
 %    variances to rounding, and 10,000 draws match them within Monte Carlo error.
 % 2. US CPI inflation, 1948M1-2019M12, with sig2, omega2 and tau0 estimated: UC.m
-%    of the chan-jeliazkov-2009 repository, with the draw of tau by
+%    of the chan-jeliazkov-2009 repository, with the mean and the draw of tau by
 %    ssm.simulate_states.
 %
 % See Chan (forthcoming), Section 9.1.1, for a textbook treatment.
@@ -33,9 +33,9 @@ y = tau_true + sqrt(sig2)*randn(T,1);
 
 H = ssm.diffmat(T); HH = H'*H;
 K = HH/omega2 + speye(T)/sig2;                       % tridiagonal
-tauhat = K\(tau0/omega2*(HH*ones(T,1)) + y/sig2);
+c = tau0/omega2*(HH*ones(T,1)) + y/sig2;             % K*tauhat = c
 ndraws = 10000;
-draws = ssm.simulate_states(tauhat, K, ndraws);      % T x ndraws, whole paths
+[draws, tauhat] = ssm.simulate_states(K, c, ndraws); % T x ndraws, whole paths
 
 [m, v] = kalman_smoother(y, sig2, omega2, tau0);
 z = (mean(draws,2) - m)./sqrt(v/ndraws);
@@ -68,8 +68,7 @@ sig2 = 1; omega2 = .1; tau0 = 5;
 H = ssm.diffmat(T); HH = H'*H; HHiota = HH*ones(T,1);
 for isim = 1:nsim+burnin
     Ktau = HH/omega2 + speye(T)/sig2;
-    tau_hat = Ktau\(tau0/omega2*HHiota + y/sig2);
-    tau = ssm.simulate_states(tau_hat, Ktau);
+    tau = ssm.simulate_states(Ktau, tau0/omega2*HHiota + y/sig2);
     sig2 = 1/gamrnd(nu_sig0 + T/2,1/(S_sig0 + (y-tau)'*(y-tau)/2));
     omega2 = 1/gamrnd(nu_omega0 + T/2, ...
         1/(S_omega0 + (tau-tau0)'*HH*(tau-tau0)/2));

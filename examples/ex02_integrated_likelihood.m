@@ -110,8 +110,7 @@ tau_mean = zeros(T,1);
 for isim = 1:nsim+burnin
     % sample tau
     Ktau = HH/omega2 + HH_rho/sig2;
-    tau_hat = Ktau\(tau0/omega2*HHiota + HH_rho*y/sig2);
-    tau = ssm.simulate_states(tau_hat, Ktau);
+    tau = ssm.simulate_states(Ktau, tau0/omega2*HHiota + HH_rho*y/sig2);
     e = y - tau;
 
     % sample rho
