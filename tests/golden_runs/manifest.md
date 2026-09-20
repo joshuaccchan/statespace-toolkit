@@ -45,5 +45,5 @@ Each runs its recursive exercise for the model selected as shipped.
 | Package | Entry | Anchor | Runtime | Captured values |
 |---|---|---|---|---|
 | `chan_grant2016_eneco_garchsv` | `main_forecasting.m` | summary | 48 min | model 1 (SV), 782 forecast origins, with the `autocorr` patch; log predictive score -2160.5 |
-| `chan_clark_koop2018_jmcb_trendie` | `main_forecasting.m` | summary | running | model 1, 125 forecast origins |
+| `chan_clark_koop2018_jmcb_trendie` | `main_forecasting.m` | summary | 3.4 h | model 1 (M1) as shipped, 125 forecast origins; `xlsread` with a range (Excel). Its table of RMSFE and log predictive likelihood: 1Q 2.04, -170.56; 2Q 1.64, -156.25; 4Q 1.16, -137.45; 8Q 1.14, -140.84; 12Q 1.16, -143.36; 16Q 1.18, -143.84; 20Q 1.21, -146.08; 6-10Y 0.91, -112.31 |
 | `chan_koop_potter2016_jae_boundedpc` | `main_forecasting.m` | summary | running | model 1 (Bi-UC), 168 forecast origins |
