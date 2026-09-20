@@ -97,6 +97,16 @@ for j = 1:4
     X1(:,j) = ssm.simulate_states(K, b);
 end
 assert(isequal(Xm, X1), 'simulate_states: ndraws = 4 differs from four single draws');
+
+% --- (4) the returned Cholesky factor ---------------------------------------------
+% C must be the lower factor of K itself, so a caller can reuse it instead of
+% factorizing K again, and asking for it must not change the draws
+rng(11, 'twister'); [Xc, mc, C] = ssm.simulate_states(K, b, 3);
+rng(11, 'twister'); X2 = ssm.simulate_states(K, b, 3);
+assert(isequal(Xc, X2), 'simulate_states: the third output changes the draws');
+assert(istril(C) && norm(full(C*C' - K), inf) < 1e-12, ...
+    'simulate_states: C must be the lower Cholesky factor of K');
+assert(norm(C'\(C\b) - mc, inf) < 1e-12, 'simulate_states: C must solve K*alphahat = c');
 end
 
 function [ms, Ps, Cs] = kalman_local_level(y, sig2, omega2, tau0)

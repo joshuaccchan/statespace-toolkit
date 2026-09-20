@@ -6,6 +6,7 @@
 %
 %   [alpha, alphahat] = ssm.simulate_states(K, c)
 %   [alpha, alphahat] = ssm.simulate_states(K, c, ndraws)
+%   [alpha, alphahat, C] = ssm.simulate_states(K, c, ndraws)
 %
 %   K        : n x n symmetric positive definite precision matrix. For the states of
 %              a linear Gaussian state space model (Theorem 9.1 of the book),
@@ -16,6 +17,9 @@
 %   ndraws   : number of independent draws (default 1)
 %   alpha    : n x ndraws matrix of draws
 %   alphahat : n x 1 mean, K\c
+%   C        : lower Cholesky factor of K, so that a caller needing a further solve
+%              with K, such as conditioning the draw on a linear restriction, does not
+%              factorize it a second time
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and
@@ -24,7 +28,7 @@
 % Likelihood Estimation in State Space Models, International Journal of
 % Mathematical Modelling and Numerical Optimisation, 1(1/2): 101-120, Algorithm 1.
 
-function [alpha, alphahat] = simulate_states(K, c, ndraws)
+function [alpha, alphahat, C] = simulate_states(K, c, ndraws)
 if nargin < 3
     ndraws = 1;
 end
