@@ -149,9 +149,6 @@ re-estimates published models of US trend inflation, the output gap and trend ou
 of those models come from packages archived here: Chan (2013); Chan, Koop and Potter (2013);
 Grant and Chan (2017, JMCB); Grant and Chan (2017, JEDC); and Chan, Clark and Koop (2018).
 
-[chan-jeliazkov-2009](https://github.com/joshuaccchan/chan-jeliazkov-2009) holds the worked
-examples that ex01, ex03 and ex06 rewrite.
-
 ## Citation
 
 Cite the paper behind each method you use. The table in

@@ -1,0 +1,36 @@
+cff-version: 1.2.0
+title: "statespace-toolkit: MATLAB code for Bayesian state space models"
+message: >-
+  If you use this software, please cite both the paper whose method you use
+  (see the Citation section of README.md) and this software record.
+type: software
+authors:
+  - family-names: Chan
+    given-names: Joshua C. C.
+    orcid: "https://orcid.org/0000-0003-3632-128X"
+    affiliation: Purdue University
+repository-code: "https://github.com/joshuaccchan/statespace-toolkit"
+url: "https://joshuachan.org/code.html"
+abstract: >-
+  MATLAB code for Bayesian state space models. A tested library holds the
+  building blocks of their samplers: the precision sampler, which draws a whole
+  state path from the banded precision matrix of the states, the integrated
+  likelihood, the treatment of missing data and of data at mixed frequencies,
+  and an accept-reject Metropolis-Hastings step for states whose conditional
+  distribution is not Gaussian. Eight examples use them in complete samplers,
+  among them unobserved components, time-varying parameter, dynamic factor,
+  stochastic volatility in mean and TVP-MIDAS models. The repository also
+  archives fourteen replication packages, each archived file byte for byte as
+  published, and unit tests check the library against the published code it
+  replaces.
+keywords:
+  - Bayesian econometrics
+  - state space models
+  - precision sampler
+  - Markov chain Monte Carlo
+  - unobserved components
+  - stochastic volatility
+  - time-varying parameters
+  - missing data
+  - MATLAB
+license: MIT
