@@ -5,10 +5,9 @@
 % component, eps_t = rho*eps_{t-1} + u_t with u_t ~ N(0, sig2), eps_0 = 0 and
 % rho ~ U(-1, 1). In both, tau_t = tau_{t-1} + eta_t, eta_t ~ N(0, omega2), with
 % tau_1 ~ N(tau0, omega2). Given theta = (rho, sig2, omega2, tau0), each is a linear
-% Gaussian state space model, and ssm.intlike returns the integrated likelihood
-% p(y | theta), with the T = 260 states integrated out: the method of Chan and
-% Jeliazkov (2009). In M2 the measurement precision H_rho'*H_rho/sig2, with
-% H_rho = ssm.diffmat(T, rho), is banded.
+% Gaussian state space model with banded precision matrices, and ssm.intlike returns the
+% integrated likelihood p(y | theta), with the T = 260 states integrated out: the method
+% of Chan and Jeliazkov (2009).
 %
 % The marginal likelihood p(y) is then an integral over theta alone, three parameters
 % in M1 and four in M2. It is estimated by importance sampling on phi = (atanh rho,
@@ -19,13 +18,10 @@
 %
 % Two checks are printed:
 % 1. At each posterior mean, ssm.intlike equals the Kalman filter log likelihood.
-% 2. With tau0 added to the states, ssm.intlike integrates it out as well, leaving
+% 2. With tau0 moved into the states, ssm.intlike integrates it out as well, leaving
 %    two parameters in M1 and three in M2, few enough for quadrature on a grid. The
 %    quadrature values of log p(y) agree with the importance sampling estimates to
 %    within 0.01.
-%
-% See Chan (forthcoming), Sections 5.1.4 and 5.1.6 and Exercise 9.3, for a textbook
-% treatment.
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and

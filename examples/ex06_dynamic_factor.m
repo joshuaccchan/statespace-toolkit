@@ -3,20 +3,18 @@
 % y_it = a_i*f_t + eps_it, eps_it ~ N(0, sig2_i), i = 1, ..., n, with one factor
 % f_t = phi*f_{t-1} + u_t, u_t ~ N(0, omega2), f_0 = 0, and the loading a_1 of the first
 % series fixed at 1. Given the loadings and variances, the factor path
-% f = (f_1, ..., f_T)' has the tridiagonal precision
-% K = H_phi'*H_phi/omega2 + (sum_i a_i^2/sig2_i)*I_T, with H_phi = ssm.diffmat(T, phi),
-% and ssm.simulate_states draws it at once: the precision sampler of Chan and Jeliazkov
-% (2009). Given the factor, the loadings are independent, so one call to
-% ssm.simulate_states with a diagonal precision draws them all.
+% f = (f_1, ..., f_T)' has a tridiagonal precision, and ssm.simulate_states draws it at
+% once: the precision sampler of Chan and Jeliazkov (2009). Given the factor, the
+% loadings are independent, so one call to ssm.simulate_states with a diagonal
+% precision draws them all.
 %
-% FRED-MD, 92 monthly US series from March 1959 to November 2025, each transformed
-% as McCracken and Ng (2016) recommend and standardized, with industrial production
-% first: DFM.m of the chan-jeliazkov-2009 repository, which is the book's DFM.m,
-% written for one factor, with the means and draws of the factor and the loadings by
-% ssm.simulate_states. The book reports a posterior mean of phi of about 0.27, with a
-% 95% credible interval of (0.20, 0.33), and a factor near -16.5 in April 2020.
-%
-% See Chan (forthcoming), Section 11.2.3, for a textbook treatment.
+% FRED-MD, 92 monthly US series from March 1959 to November 2025, each transformed as
+% McCracken and Ng (2016) recommend and standardized, with industrial production first.
+% The sampler is that of DFM.m in the chan-jeliazkov-2009 repository and of the book's
+% chapter11/DFM.m, written here for one factor. The chan-jeliazkov-2009 copy reads each
+% date one month late; ex06 reads the dates as the book does. The book reports a
+% posterior mean of phi of about 0.27, with a 95% credible interval of (0.20, 0.33),
+% and a factor near -16.5 in April 2020.
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and

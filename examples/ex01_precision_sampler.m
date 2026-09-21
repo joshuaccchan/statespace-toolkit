@@ -7,13 +7,11 @@
 % ssm.simulate_states draws the whole path at once from the Cholesky factor of K,
 % without forming K^{-1}: the precision sampler of Chan and Jeliazkov (2009).
 %
-% 1. Simulated data. tauhat and diag(K^{-1}) equal the Kalman smoother's means and
+% 1. Generated data. tauhat and diag(K^{-1}) equal the Kalman smoother's means and
 %    variances to rounding, and 10,000 draws match them within Monte Carlo error.
 % 2. US CPI inflation, 1948M1-2019M12, with sig2, omega2 and tau0 estimated: UC.m
 %    of the chan-jeliazkov-2009 repository, with the mean and the draw of tau by
 %    ssm.simulate_states.
-%
-% See Chan (forthcoming), Section 9.1.1, for a textbook treatment.
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and
@@ -25,7 +23,7 @@
 run(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'setup.m'))
 fprintf('\n=== ex01: the precision sampler on a local level model ===\n');
 
-%% 1. Simulated data: the draws against the Kalman smoother and the truth
+%% 1. Generated data: the draws against the Kalman smoother and the truth
 rng(1, 'twister');
 T = 300; sig2 = 1; omega2 = .05; tau0 = 2;
 tau_true = tau0 + cumsum(sqrt(omega2)*randn(T,1));

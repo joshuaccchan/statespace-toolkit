@@ -144,8 +144,8 @@ w = [1 2 3 2 1]'/3;
 M = sparse(repmat((1:numel(qend))',5,1), reshape(qend - (0:4), [], 1), ...
     kron(w, ones(numel(qend),1)), numel(qend), T);
 
-% means are taken out rather than estimated: the aggregation weights sum to 3, so the
-% mean of monthly GDP growth implied by the quarterly mean is mean(zq)/3
+% the means are fixed at sample values and taken out: the aggregation weights sum to 3,
+% so the mean of monthly GDP growth implied by the quarterly mean is mean(zq)/3
 mug = mean(zq)/3;
 Y = [Xm - mean(Xm,1), nan(T,1)];
 zd = zq - 3*mug;

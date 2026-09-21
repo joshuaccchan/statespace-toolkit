@@ -8,8 +8,8 @@
 % with Omega a full 2 x 2 matrix: the model of Chan (2017). The sampler is that paper's
 % UC_SVM.m, in replications/chan2017_jbes_svm, with the path of gam drawn by
 % ssm.simulate_states and h by ssm.armh: the accept-reject Metropolis-Hastings step of
-% Chan (2017), whose Gaussian proposal sits at the mode of the conditional density of
-% h, found by Newton-Raphson with its banded negative Hessian.
+% Chan (2017), whose Gaussian proposal is centered at the mode of the conditional
+% density of h.
 %
 % 1. The posterior, from 20,000 draws after 5,000 of burn-in, and the acceptance rates
 %    of h and of (mu, phi). The chain starts where UC_SVM.m starts, and the first
@@ -18,8 +18,6 @@
 % 2. The acceptance rate against the envelope constant c_reject: 1,000 draws of h at
 %    each value, given the rest of the last state of the chain, with the MH acceptance
 %    rate and the number of candidates per draw.
-%
-% See Chan (forthcoming), Sections 6.2.3 and 10.3.3, for a textbook treatment.
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and

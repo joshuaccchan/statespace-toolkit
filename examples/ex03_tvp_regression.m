@@ -4,8 +4,7 @@
 % u_t ~ N(0, Omega), Omega = diag(omega_1^2, ..., omega_k^2), with
 % beta_1 ~ N(beta0, Omega). Stacked over t, y = Z*beta + eps with
 % Z = ssm.surform(X) = diag(x_1', ..., x_T'). Given the parameters, the path
-% beta = (beta_1', ..., beta_T')' is N(betahat, K^{-1}) with
-% K = kron(H'*H, Omega^{-1}) + Z'*Z/sig2, banded, where H = ssm.diffmat(T), and
+% beta = (beta_1', ..., beta_T')' is N(betahat, K^{-1}) with K banded, and
 % ssm.simulate_states draws the whole path at once: the precision sampler of Chan and
 % Jeliazkov (2009).
 %
@@ -14,15 +13,13 @@
 %    with Z by ssm.surform and the means and draws of beta and beta0 by
 %    ssm.simulate_states.
 % 2. Timing on generated data with k = 1, 2, 5 and 10 coefficients and T = 1,000 and
-%    5,000: one draw of the path by ssm.simulate_states, with the prior precision and
-%    K formed each time as in a Gibbs sampler, against one draw by the Kalman filter
-%    with backward sampling of Carter and Kohn (1994) and Fruhwirth-Schnatter (1994),
-%    written with k x k matrix operations, and for k = 1 also with scalar arithmetic.
-%    Both Carter-Kohn samplers are first checked against betahat and diag(K^{-1}).
-%    Which sampler is faster depends on k and on how each is coded; the table reports
-%    the times on the machine that runs it.
-%
-% See Chan (forthcoming), Section 9.3, for a textbook treatment.
+%    5,000: one draw of the path by ssm.simulate_states, with K formed each time as in
+%    a Gibbs sampler, against one draw by the Kalman filter with backward sampling of
+%    Carter and Kohn (1994) and Fruhwirth-Schnatter (1994), written with k x k matrix
+%    operations, and for k = 1 also with scalar arithmetic. Both Carter-Kohn samplers
+%    are first checked against betahat and diag(K^{-1}). Which sampler is faster
+%    depends on k and on how each is coded; the table reports the times on the machine
+%    that runs it.
 %
 % See:
 % Carter, C.K. and Kohn, R. (1994). On Gibbs Sampling for State Space Models,
