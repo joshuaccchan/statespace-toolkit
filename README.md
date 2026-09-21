@@ -27,12 +27,10 @@ R and Python for all fourteen chapters. The missing-data draw of ex05 comes from
 Zhu (2023), and the TVP-MIDAS model of ex08 from Chan, Poon and Zhu (2026).
 
 The eight scripts in [`examples/`](examples/) each run in under a minute. Start with ex01; ex02
-compares the local level model of ex01 with one that adds an AR(1) transitory component. Three of
-the scripts, ex01, ex03 and ex06, rewrite the worked examples of the chan-jeliazkov-2009
-repository with the library functions. ex04 does the same for the book's
-`chapter09/UC_output_gap.m`, and ex07 for `UC_SVM.m` of Chan (2017). ex08 imposes its linear
-restriction by the same update of an unconstrained draw that ex05 uses for the quarterly
-aggregation.
+compares the local level model of ex01 with one that adds an AR(1) transitory component. ex04
+rewrites the book's `chapter09/UC_output_gap.m` with the library functions, and ex07 does the
+same for `UC_SVM.m` of Chan (2017). ex08 imposes its linear restriction by the same update of an
+unconstrained draw that ex05 uses for the quarterly aggregation.
 
 | Script | What it shows | Data |
 |---|---|---|
@@ -109,7 +107,7 @@ package, and `ssm(...)` still constructs the toolbox's state space object.
 
 The unit tests check each function against the code it comes from or replaces. `ssm.surform` and
 `ssm.tnormrnd` are run beside every copy in the archived packages, four of `SURform.m` and six of
-`tnormrnd.m`, and beside the `SURform.m` of chan-jeliazkov-2009. They must give identical output,
+`tnormrnd.m`, and must give identical output,
 `ssm.tnormrnd` draw for draw under a fixed seed. For `ssm.simulate_states`, the tests run the
 published scripts `UC.m`, `linreg_tvp.m` and `DFM.m` on a short chain twice: once as published,
 and once with the lines the function replaces swapped for a call to it. `UC_SVM.m` is run the same

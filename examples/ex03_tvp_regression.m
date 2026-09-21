@@ -9,9 +9,8 @@
 % Jeliazkov (2009).
 %
 % 1. US PCE inflation on the output gap and lagged inflation, 1960Q2-2019Q4, with
-%    x_t = (1, gap_t, y_{t-1})': linreg_tvp.m of the chan-jeliazkov-2009 repository,
-%    with Z by ssm.surform and the means and draws of beta and beta0 by
-%    ssm.simulate_states.
+%    x_t = (1, gap_t, y_{t-1})', Z by ssm.surform, and the means and draws of beta and
+%    beta0 by ssm.simulate_states.
 % 2. Timing on generated data with k = 1, 2, 5 and 10 coefficients and T = 1,000 and
 %    5,000: one draw of the path by ssm.simulate_states, with K formed each time as in
 %    a Gibbs sampler, against one draw by the Kalman filter with backward sampling of

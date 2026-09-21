@@ -9,9 +9,8 @@
 %
 % 1. Generated data. tauhat and diag(K^{-1}) equal the Kalman smoother's means and
 %    variances to rounding, and 10,000 draws match them within Monte Carlo error.
-% 2. US CPI inflation, 1948M1-2019M12, with sig2, omega2 and tau0 estimated: UC.m
-%    of the chan-jeliazkov-2009 repository, with the mean and the draw of tau by
-%    ssm.simulate_states.
+% 2. US CPI inflation, 1948M1-2019M12, with sig2, omega2 and tau0 estimated, and the
+%    mean and the draw of tau by ssm.simulate_states.
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and
@@ -39,7 +38,7 @@ ndraws = 10000;
 z = (mean(draws,2) - m)./sqrt(v/ndraws);
 vr = var(draws,0,2)./v;
 band = quantile(draws, [.05 .95], 2);
-fprintf('\n1. Simulated data, T = %d\n', T);
+fprintf('\n1. Generated data, T = %d\n', T);
 fprintf('   %-42s %.1e\n', 'max |tauhat - smoother mean|', max(abs(tauhat - m)));
 fprintf('   %-42s %.1e\n', 'max |diag(K^{-1}) - smoother variance|', ...
     max(abs(diag(inv(full(K))) - v)));               % dense inverse, for this check only
@@ -96,7 +95,7 @@ hb = ssm.shaded_band((1:numel(tau_true))', band(:,1), band(:,2));
 hs = plot(1:numel(tau_true), tau_true, 'k', 'LineWidth', 1.2);
 hm = plot(1:numel(tau_true), mean(draws,2), 'r', 'LineWidth', 1.2);
 hold off; box off
-title('simulated trend: truth, posterior mean, 90% band')
+title('generated trend: truth, posterior mean, 90% band')
 legend([hs hm hb], {'true \tau_t', 'posterior mean', '90% band'}, 'Location', 'best'); legend boxoff
 subplot(2,1,2); hold on
 hb = ssm.shaded_band(tid, tau_q(:,1), tau_q(:,2));

@@ -10,10 +10,8 @@
 %
 % FRED-MD, 92 monthly US series from March 1959 to November 2025, each transformed as
 % McCracken and Ng (2016) recommend and standardized, with industrial production first.
-% The sampler is that of DFM.m in the chan-jeliazkov-2009 repository and of the book's
-% chapter11/DFM.m, written here for one factor. The chan-jeliazkov-2009 copy reads each
-% date one month late; ex06 reads the dates as the book does. The book reports a
-% posterior mean of phi of about 0.27, with a 95% credible interval of (0.20, 0.33),
+% The sampler is that of the book's chapter11/DFM.m, written here for one factor. The book
+% reports a posterior mean of phi of about 0.27, with a 95% credible interval of (0.20, 0.33),
 % and a factor near -16.5 in April 2020.
 %
 % See:
