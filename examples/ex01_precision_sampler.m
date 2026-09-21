@@ -7,10 +7,13 @@
 % ssm.simulate_states draws the whole path at once from the Cholesky factor of K,
 % without forming K^{-1}: the precision sampler of Chan and Jeliazkov (2009).
 %
-% 1. Generated data. tauhat and diag(K^{-1}) equal the Kalman smoother's means and
-%    variances to rounding, and 10,000 draws match them within Monte Carlo error.
-% 2. US CPI inflation, 1948M1-2019M12, with sig2, omega2 and tau0 estimated, and the
-%    mean and the draw of tau by ssm.simulate_states.
+% Section 1 checks that the sampler draws from the right distribution. On generated data,
+% with the parameters known, tauhat and diag(K^{-1}) equal the means and variances of the
+% Kalman smoother to rounding, and 10,000 draws match them within Monte Carlo error.
+%
+% Section 2 uses the sampler in estimation. A Gibbs sampler estimates the trend of US CPI
+% inflation, 1948M1-2019M12, drawing tau by ssm.simulate_states in each sweep and sig2,
+% omega2 and tau0 from their conditional distributions.
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and

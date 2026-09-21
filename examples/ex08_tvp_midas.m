@@ -28,9 +28,12 @@
 % sine terms sum to zero over a full period, so the restriction fixes the first
 % coefficient at 1/m.
 %
-% Section 1 checks the two conditional draws against dense algebra. Section 2 runs the
-% whole sampler on 200 periods generated from the model itself, with the innovation
-% variances set at their prior means. At five to ten times the prior means the variances
+% Section 1 checks that the two conditional draws come from the right distributions,
+% against dense algebra.
+%
+% Section 2 checks that the whole sampler recovers the paths and variances that generated
+% the data, on 200 periods generated from the model itself with the innovation variances
+% set at their prior means. At five to ten times the prior means the variances
 % come back at about a third of their true values and the paths are oversmoothed, since
 % at T = 200, against an error variance of about one, they are weakly identified. The
 % Monte Carlo experiments of the paper generate from nonlinear beta density and

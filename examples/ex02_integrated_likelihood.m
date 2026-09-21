@@ -16,12 +16,16 @@
 % their covariance: the cross-entropy fit of a Gaussian (Chan and Eisenstat, 2015),
 % with heavier tails to keep the importance weights bounded.
 %
-% Two checks are printed:
-% 1. At each posterior mean, ssm.intlike equals the Kalman filter log likelihood.
-% 2. With tau0 moved into the states, ssm.intlike integrates it out as well, leaving
-%    two parameters in M1 and three in M2, few enough for quadrature on a grid. The
-%    quadrature values of log p(y) agree with the importance sampling estimates to
-%    within 0.01.
+% Section 1 draws the parameters of each model from their posterior by Gibbs sampling,
+% with rho held at 0 for M1.
+%
+% Section 2 checks ssm.intlike: at each posterior mean, it equals the log likelihood from
+% the Kalman filter to rounding.
+%
+% Section 3 compares the two models by marginal likelihood. It estimates log p(y) by
+% importance sampling and checks the estimates by quadrature: with tau0 moved into the
+% states, ssm.intlike integrates it out as well, leaving two parameters in M1 and three in
+% M2, few enough for a grid. The two agree to within 0.01.
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and

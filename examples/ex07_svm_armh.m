@@ -11,13 +11,14 @@
 % Chan (2017), whose Gaussian proposal is centered at the mode of the conditional
 % density of h.
 %
-% 1. The posterior, from 20,000 draws after 5,000 of burn-in, and the acceptance rates
-%    of h and of (mu, phi). The chain starts where UC_SVM.m starts, and the first
-%    candidate for h is accepted outright, as in UC_SVM.m: from a start far from the
-%    target, the chain can reject every candidate.
-% 2. The acceptance rate against the envelope constant c_reject: 1,000 draws of h at
-%    each value, given the rest of the last state of the chain, with the MH acceptance
-%    rate and the number of candidates per draw.
+% Section 1 estimates the model on US CPI inflation, from 20,000 draws after 5,000 of
+% burn-in, and reports the acceptance rates of h and of (mu, phi). The chain starts where
+% UC_SVM.m starts, and the first candidate for h is accepted outright, as in UC_SVM.m:
+% from a start far from the target, the chain can reject every candidate.
+%
+% Section 2 shows how the acceptance rate depends on the envelope constant c_reject:
+% 1,000 draws of h at each value, given the rest of the last state of the chain, with the
+% MH acceptance rate and the number of candidates per draw.
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and
@@ -29,6 +30,7 @@
 run(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'setup.m'))
 fprintf('\n=== ex07: stochastic volatility in mean, h drawn by accept-reject MH ===\n');
 
+%% 1. The posterior and the acceptance rates
 y = readmatrix(fullfile(fileparts(mfilename('fullpath')), 'data', 'USCPI_quarterly.csv'), ...
     'Range', 'C2:C312');
 T = length(y);

@@ -9,8 +9,9 @@
 % H2 = ssm.lagpolymat(T, [2 -1]) is the second-difference matrix and
 % Hphi = ssm.lagpolymat(T, phi), and ssm.simulate_states draws the whole path at once.
 %
-% US real GDP, 1947Q1-2019Q4: the book's chapter09/UC_output_gap.m, with the means and
-% draws of tau, phi and (tau_0, tau_{-1}) by ssm.simulate_states. The AR coefficients
+% The example estimates the output gap and trend growth of US real GDP, 1947Q1-2019Q4,
+% with the sampler of the book's chapter09/UC_output_gap.m and the means and draws of tau,
+% phi and (tau_0, tau_{-1}) by ssm.simulate_states. The AR coefficients
 % are drawn from their Gaussian full conditional and kept when stationary, and sigtau2,
 % under a uniform prior on (0, 0.01), by griddy Gibbs. The specification is similar to
 % Grant and Chan (2017), with the AR(2) cycle of Morley, Nelson and Zivot (2003). For

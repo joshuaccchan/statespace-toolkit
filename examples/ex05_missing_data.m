@@ -2,7 +2,7 @@
 %
 % In a conditionally Gaussian state space model, the missing values are jointly Gaussian
 % given the observed values, the states and the parameters, and their precision matrix is
-% banded, so they are drawn in one block from a single Cholesky factor: Chan, Poon and
+% banded, so they are drawn in one block from a single Cholesky factor; see Chan, Poon and
 % Zhu (2023). Write the stacked data as y = So*yo + Sm*ym, with the selection matrices
 % ssm.select_obs returns. Stacking the measurement equation gives
 % Go*yo + Gm*ym = W*alpha + X*beta + e with e ~ N(0, Sigma), where Go and Gm include any
@@ -13,9 +13,10 @@
 %
 % which ssm.simulate_states draws without forming K^{-1}.
 %
-% Section 1 removes values from a generated VAR(1) in three patterns at once: a series
-% that starts late, a hole in the middle, and a ragged edge at the end. The draws are
-% checked against the values removed and against the dense conditional normal.
+% Section 1 checks that the missing values are drawn from the right distribution. It
+% removes values from a generated VAR(1) in three patterns at once, a series that starts
+% late, a hole in the middle and a ragged edge at the end, and compares the draws with the
+% values removed and with the dense conditional normal.
 %
 % Section 2 estimates monthly real GDP growth, which no statistical agency publishes. It
 % enters a monthly VAR as a fourth variable that is missing in every month. Each observed

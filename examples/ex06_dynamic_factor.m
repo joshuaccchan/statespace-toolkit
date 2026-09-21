@@ -8,11 +8,12 @@
 % loadings are independent, so one call to ssm.simulate_states with a diagonal
 % precision draws them all.
 %
-% FRED-MD, 92 monthly US series from March 1959 to November 2025, each transformed as
-% McCracken and Ng (2016) recommend and standardized, with industrial production first.
-% The sampler is that of the book's chapter11/DFM.m, written here for one factor. The book
-% reports a posterior mean of phi of about 0.27, with a 95% credible interval of (0.20, 0.33),
-% and a factor near -16.5 in April 2020.
+% The example extracts a business-cycle indicator, the factor, from FRED-MD: 92 monthly US
+% series from March 1959 to November 2025, each transformed as McCracken and Ng (2016)
+% recommend and standardized, with industrial production first. The sampler is that of
+% the book's chapter11/DFM.m, written here for one factor, and the estimates reproduce
+% those the book reports: a posterior mean of phi of about 0.27, with a 95% credible
+% interval of (0.20, 0.33), and a factor near -16.5 in April 2020.
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and
