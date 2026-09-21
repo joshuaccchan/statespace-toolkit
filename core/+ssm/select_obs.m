@@ -10,9 +10,8 @@
 %   yo : No x 1 vector of observed values, ordered as So takes them
 %
 % y = (y_1', ..., y_T')' stacks the n variables within each period, and yo and ym follow
-% that order, so the precision of (ym | yo), Gm'*inv(Sigma)*Gm, keeps the bandedness of
-% Sigma and of the difference matrices in Gm. [So, Sm] is a permutation matrix, so both
-% factors have full column rank and Sm'*y recovers the missing values of a completed y.
+% that order, so the precision of ym given yo is banded whenever the precision of y is.
+% [So, Sm] is a permutation matrix, so Sm'*y recovers the missing values of a completed y.
 % An all-observed or all-missing pattern gives the corresponding matrix Tn x 0. Written
 % for this toolkit.
 %

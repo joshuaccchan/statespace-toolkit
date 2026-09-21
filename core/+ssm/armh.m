@@ -14,8 +14,8 @@
 %                   the first sweeps of a chain; the uniform is drawn regardless
 %   'Start'       : starting point of the mode search (default: the current state)
 %   'Tol', 'MaxIterMode' : passed to ssm.mode_newton (defaults 1e-4 and 100). A Tol
-%                   above 1e-3 is refused: the search starts from the current
-%                   state, and a loose tolerance lets the proposal depend on it.
+%                   above 1e-3 is refused: by default the search starts from the
+%                   current state, and a loose tolerance lets the proposal depend on it.
 %   'MaxIterAR'   : raise after this many rejected candidates (default 1000)
 %   accept        : true if the MH step took the candidate
 %   ntry          : number of candidates drawn in the accept-reject step
@@ -23,7 +23,7 @@
 % The proposal is g = N(alphahat, K^{-1}) at the mode alphahat. Candidates from g
 % are kept with probability min{f/(c g), 1}, and the survivor passes an MH step.
 % For a textbook discussion, see Chan (forthcoming), Sections 6.2.3, 10.2.2 and
-% 10.3.3.
+% 10.3.3. Written for this toolkit.
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and

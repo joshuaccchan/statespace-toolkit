@@ -1,6 +1,6 @@
 % ssm.diffmat - the sparse first-order difference matrix of a state equation,
-% H = I_T - a*L, where L is the first subdiagonal (the lag operator on a stacked
-% path).
+% H = I_T - a*L, where L has ones on the first subdiagonal and zeros elsewhere
+% (the lag operator on a stacked path).
 %
 %   H = ssm.diffmat(T)        % a = 1: the random-walk difference matrix
 %   H = ssm.diffmat(T, a)
@@ -9,14 +9,14 @@
 %   a : scalar autoregressive coefficient (default 1)
 %   H : T x T sparse lower bidiagonal matrix
 %
-% For x_t = a*x_{t-1} + u_t with u ~ N(0, S), H*x = u, so the path has precision
-% H'*inv(S)*H, which is banded. Sign conventions, both of which appear in the
+% For x_t = a*x_{t-1} + u_t with u ~ N(0, S), H*x = u + a*x_0*e_1, so the path has
+% precision H'*inv(S)*H, which is banded. Sign conventions, both of which appear in the
 % papers:
 %   AR(1) / random-walk state:  H_rho  = I - rho*L   ->  diffmat(T, rho)
 %   MA(1) error transform:      H_psi  = I + psi*L   ->  diffmat(T, -psi)
 %
-% Code-identical to bvar.util.diffmat in bvar-toolkit apart from the error
-% identifiers (ssm:diffmat:*), and the two must stay so.
+% Written for bvar-toolkit, and code-identical to bvar.util.diffmat there apart
+% from the error identifiers (ssm:diffmat:*); the two must stay so.
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and

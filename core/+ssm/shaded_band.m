@@ -5,7 +5,7 @@
 %
 %   x      : points on the horizontal axis, numeric or datetime
 %   lo, hi : lower and upper bounds at those points, the same length as x
-%   shade  : grey level in [0, 1] (default .85)
+%   shade  : gray level in [0, 1] (default .85)
 %   h      : handle to the fill object
 %
 % Draws on the current axes; call hold on first to plot lines over the band.

@@ -4,11 +4,14 @@
 %   t = ssm.tnormrnd(mu, sigma2, a, b)
 %   t = ssm.tnormrnd(mu, sigma2, a, b, N)
 %
-%   mu, sigma2 : mean and VARIANCE of the untruncated normal, either scalars,
-%                which are expanded to N identical values, or length-N vectors
-%   a, b       : truncation bounds, scalar or length-N
+%   mu, sigma2 : mean and VARIANCE of the untruncated normal, both scalars,
+%                which are expanded to N identical values, or both N x 1 vectors
+%   a, b       : truncation bounds, each a scalar or an N x 1 vector
 %   N          : number of draws (default length(mu))
 %   t          : N x 1 vector of draws
+%
+% A row vector among the arguments expands against the N x 1 uniform draws to an
+% N x N result, with no error.
 %
 % Code-identical to bvar.util.tnormrnd in bvar-toolkit, and the two must stay so.
 %

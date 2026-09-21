@@ -10,8 +10,8 @@
 %
 % For x_t = phi_1*x_{t-1} + ... + phi_p*x_{t-p} + u_t with the pre-sample values set to
 % zero, H*x = u; nonzero pre-sample values enter through a vector the caller adds.
-% Second differences are phi = [2 -1], an AR(2) is phi = [phi_1 phi_2], and for a
-% scalar a, ssm.lagpolymat(T, a) equals ssm.diffmat(T, a). Written for this toolkit.
+% Second differences are phi = [2 -1], and for a scalar a, ssm.lagpolymat(T, a)
+% equals ssm.diffmat(T, a). Written for this toolkit.
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and

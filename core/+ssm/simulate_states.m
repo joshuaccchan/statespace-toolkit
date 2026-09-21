@@ -2,7 +2,7 @@
 % and alphahat solves K*alphahat = c: Algorithm 1 of Chan and Jeliazkov (2009), which
 % obtains the mean and the draws from one Cholesky factor of K. It is a more efficient
 % implementation of Algorithm 9.1 of Chan (forthcoming), which takes the mean as an
-% input and so needs a separate solve with K to compute it.
+% input and so needs a separate solve with K to compute it. Written for this toolkit.
 %
 %   [alpha, alphahat] = ssm.simulate_states(K, c)
 %   [alpha, alphahat] = ssm.simulate_states(K, c, ndraws)

@@ -11,7 +11,7 @@
 %   iR       : Tn x Tn precision inv(R), sparse (diagonal or banded)
 %   P, b     : Tm x Tm prior precision and Tm x 1 prior mean of alpha implied by
 %              the transition equation G*alpha = btilde + eta, eta ~ N(0, Q):
-%              P = G'*inv(Q)*G and b = G\btilde, sparse and banded
+%              P = G'*inv(Q)*G, sparse and banded, and b = G\btilde
 %   ll       : log p(y), with alpha integrated out
 %   alphahat : Tm x 1 posterior mean of alpha
 %   K        : Tm x Tm posterior precision of alpha, P + Z'*iR*Z
@@ -19,6 +19,8 @@
 % The value uses the identity p(y) = p(y|alpha)p(alpha)/p(alpha|y), evaluated at
 % alpha = alphahat, where the exponent of the denominator is zero. The two
 % quadratic forms left are sums of squared residuals, so no large terms cancel.
+%
+% Written for this toolkit.
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and

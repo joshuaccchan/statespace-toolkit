@@ -34,7 +34,7 @@ none.
 | `chan2018_er_spectest` | `main_UCSV.m` | summary | 10 min | reads `OECD_G7CPI.xls` with `xlsread` and a range, which needs Excel. Its table: omega2_h 0.11, omega2_g 0.11; log BF_uh 81.9 (6.10), BF_ug 13.9 (3.04), BF_u,gh 204.9 (4.97). Then errors at the same `legend` call |
 | `chan_clark_koop2018_jmcb_trendie` | `main_estimation.m` | summary | 4.1 min | model 1 (M1) as shipped; `xlsread` with a range (Excel); progress only. savegolden: store_theta means (11); pistar, d, b, lamv and lamn paths |
 | `chan_koop_potter2016_jae_boundedpc` | `biUC.m` | summary | 9.1 min | prints the model specification only. savegolden: rhou means 1.619, -0.676; sig2 means 0.110, 0.107, 0.024, 0.0075, 0.0023, 0.0018; the trend, NAIRU, lambda and volatility paths |
-| `chan_song2018_jmcb_inflrv` | `main_inflation_RV.m` | bitwise | 31 s | seeds with `rng(123)`; model 1 (UCSV-RV) as shipped; progress only. savegolden: sigma2h 0.275, sigma2g 0.104, sigma2z 0.661, a (-0.453, 1.092), g1 -1.901, h1 2.298 |
+| `chan_song2018_jmcb_inflrv` | `main_inflation_RV.m` | bitwise | 31 s | model 1 (UCSV-RV) as shipped, which never seeds (the scripts of models 2-8 call `rng(123)`); progress only. savegolden: sigma2h 0.275, sigma2g 0.104, sigma2z 0.661, a (-0.453, 1.092), g1 -1.901, h1 2.298 |
 | `grant_chan2017_jedc_hpfilter` | `main_script.m` | summary | 76 s | its table: phi_1 1.31, phi_2 -0.37, sigma^2_c 0.76, sigma^2_tau 0.00, rho -0.01; log ML -369.8 (0.03) |
 | `grant_chan2017_jmcb_trendcycle` | `main_UC.m` | summary | 66 s | its table: mu 0.78, phi_1 0.97, phi_2 -0.38, sigma^2_c 1.08, sigma^2_tau 1.79, rho -0.87; log ML -365.0 (0.04) |
 
