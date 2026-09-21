@@ -73,25 +73,8 @@ permanent `as-published/<paper>` git tag and the source zip's md5 recorded in
 | The observed-data deviance information criterion for volatility models | Chan & Grant (2016, JFEC) | `chan_grant2016_jfec_dicsv` | `main_SV.m` |
 | Tests of whether a model needs its time variation or its stochastic volatility | Chan (2018, ER) | `chan2018_er_spectest` | `main_NAIRU.m`, `main_UCSV.m` |
 
-[`tests/golden/`](tests/golden/) holds the output of every entry script except `semireg.m`, whose
-data are restricted. Each script was run on MATLAB R2025b as published, or with the smallest patch
-that lets it run, and the scripts whose results go only to figures were run again with a numeric
-capture appended. [`tests/golden_runs/manifest.md`](tests/golden_runs/manifest.md) lists each run
-with its runtime and its main results. Your own run should match them bitwise, in a fresh MATLAB
-session, where the manifest marks a run as bitwise, and within Monte Carlo error otherwise. The
-manifest also records the scripts that stop with an error or need a patch. Three points apply
-when you run the entry scripts:
-
-- The scripts of `chan_grant2016_eneco_garchsv` call `autocorr(u, nlag)`, a form the Econometrics
-  Toolbox of R2025b rejects. Put
-  [`tests/golden_runs/patches/chan_grant2016_eneco_garchsv/autocorr.m`](tests/golden_runs/patches/chan_grant2016_eneco_garchsv/autocorr.m)
-  beside them; it returns what that call returned.
-- `main_NAIRU.m` and `main_UCSV.m` of `chan2018_er_spectest` stop at
-  `legend('posterior','prior',1)`, a positional location that R2025b rejects, after printing all
-  their results. `main_UCSV.m` also passes a range to `xlsread` to read an `.xls` file, and
-  reading a range from an `.xls` file needs Excel.
-- `main_forecasting.m` of `chan_koop_potter2016_jae_boundedpc` prints its log predictive
-  likelihoods in the order CPI, unemployment rate, joint, under the heading `Joint, CPI, Urate`.
+[`tests/golden_runs/manifest.md`](tests/golden_runs/manifest.md) names the few legacy scripts that
+do not run as shipped.
 
 ## Build on the Code
 
