@@ -1,5 +1,7 @@
 # statespace-toolkit
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22884655.svg)](https://doi.org/10.5281/zenodo.22884655)
+
 MATLAB code for Bayesian state space models by [Joshua Chan](https://joshuachan.org). The library
 under `core/` holds the building blocks of their samplers, from the precision sampler and the
 integrated likelihood to the draw of missing data and an accept-reject Metropolis-Hastings step
@@ -166,6 +168,13 @@ the library:
   Inference and Comparison with ARCH Models, *Review of Economic Studies*, 65(3): 361-393.
 - The other functions: Chan, J.C.C. (forthcoming). *Bayesian Macroeconometrics: Methods and
   Applications*, Chapman & Hall/CRC.
+
+To cite the toolkit itself:
+
+> Chan, J. C. C. (2026). *statespace-toolkit: MATLAB code for Bayesian state space models*. Zenodo. https://doi.org/10.5281/zenodo.22884655
+
+The DOI resolves to the latest release. `CITATION.cff` holds the machine-readable record that
+GitHub's "Cite this repository" button reads.
 
 ## License
 
