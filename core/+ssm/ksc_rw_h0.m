@@ -33,17 +33,17 @@ mi = [-10.12999 -3.97281 -8.56686 2.77786 .61942 1.79518 -1.08819] - 1.2704;  %%
 sigi = [5.79596 2.61369 5.17950 .16735 .64009 .34023 1.26261];
 sqrtsigi = sqrt(sigi);
 
-%% sample S from a 7-point distrete distribution
+%% sample S from a 7-point discrete distribution
 temprand = rand(T,1);
 q = repmat(pi,T,1).*normpdf(repmat(Ystar,1,7),repmat(h,1,7)+repmat(mi,T,1), repmat(sqrtsigi,T,1));
 q = q./repmat(sum(q,2),1,7);
 S = 7 - sum(repmat(temprand,1,7)<cumsum(q,2),2)+1;
 
 %% sample h
-% y^* = h + d + \epsilon, \epsilon \sim N(0,\Omega),
-% Hh = \alpha + \nu, \nu \ sim N(0,S),
-% where d_t = Ez_t, \Omega = diag(\omega_1,\ldots,\omega_n),
-% \omega_t = var z_t, S = diag(sig, \ldots, sig)
+% Given the indicators S: Ystar = h + d + e with e ~ N(0,Omega), where d_t and
+% Omega_tt are the mean and variance of mixture component S_t; and
+% Hh*h = [h0;0] + v with v ~ N(0,sig*I_T), so h has prior mean alph = Hh\[h0;0]
+% and precision Kh.
 Hh =  speye(T) - spdiags(ones(T-1,1),-1,T,T);
 invSh = spdiags(1/sig*ones(T,1),0,T,T);
 dconst = mi(S)'; invOmega = spdiags(1./sigi(S)',0,T,T);

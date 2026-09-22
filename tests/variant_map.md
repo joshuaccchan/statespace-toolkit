@@ -12,11 +12,12 @@ functions compared draw for draw under a fixed seed.
 
 Each twin is its bvar-toolkit original from the function line on, byte for byte, checked
 by `tests/unit/test_twins.m` against the copies in `tests/fixtures/bvar-toolkit/` (bvar-toolkit
-commit `b8f7021`, and `fa17f41` for `ksc_rw_h0`). Only the headers differ, apart from
+commit `b8f7021`, and `e412336` for `ksc_rw_h0`). Only the headers differ, apart from
 `ssm.diffmat`'s error identifiers. Both libraries use the lower Cholesky factor throughout;
 bvar-toolkit switched `ksc_rw_h0` to it in `d3b9494`, with bitwise the same draws. In
 `fa17f41` it made `ksc_rw_h0` compute the mean with that factor, as `(Ch')\(Ch\b)`, which
-changes the draws in the last bits, and `ssm.ksc_rw_h0` followed.
+changes the draws in the last bits, and `ssm.ksc_rw_h0` followed. `e412336` corrected the
+comment on the draw of h in both.
 
 | Function | Twin | Legacy copies in this repository | Verified |
 |---|---|---|---|
