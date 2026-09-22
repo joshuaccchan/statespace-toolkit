@@ -2,13 +2,13 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22884655.svg)](https://doi.org/10.5281/zenodo.22884655)
 
-MATLAB code for Bayesian state space models by [Joshua Chan](https://joshuachan.org). The library
-under `core/` holds the building blocks of their samplers, from the precision sampler and the
+A MATLAB library for Bayesian state space models: unobserved components, time-varying parameter,
+stochastic volatility and dynamic factor models, with samplers that draw the whole state path at
+once. The library under `core/` holds their building blocks, from the precision sampler and the
 integrated likelihood to the draw of missing data and an accept-reject Metropolis-Hastings step
-for states whose conditional distribution is not Gaussian. Eight examples use them in complete
-samplers. The repository also archives fourteen replication packages from
-[joshuachan.org](https://joshuachan.org/code.html), each archived file byte for byte as
-published.
+for states whose conditional distribution is not Gaussian. Eight [examples](examples/) use them in
+complete samplers. The repository also archives fourteen replication packages from
+[joshuachan.org](https://joshuachan.org/code.html) exactly as published.
 
 ```matlab
 run setup.m                 % adds core/ to the path
