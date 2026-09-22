@@ -102,7 +102,8 @@ them.
 Five of these functions, `ssm.diffmat`, `ssm.ksc_rw_h0`, `ssm.shaded_band`, `ssm.surform` and
 `ssm.tnormrnd`, have the same code as their counterparts in
 [bvar-toolkit](https://github.com/joshuaccchan/bvar-toolkit), apart from the error identifiers of
-`ssm.diffmat`. A unit test checks each against a pinned copy of the bvar-toolkit original. The
+`ssm.diffmat`. A unit test checks each against a pinned copy of the bvar-toolkit original.
+`bvar.util.select_obs` in bvar-toolkit copies `ssm.select_obs`, apart from its error identifier. The
 Econometrics Toolbox has a class named `ssm`: calls such as `ssm.simulate_states` resolve to this
 package, and `ssm(...)` still constructs the toolbox's state space object.
 
