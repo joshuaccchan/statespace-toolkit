@@ -28,17 +28,17 @@
 % sine terms sum to zero over a full period, so the restriction fixes the first
 % coefficient at 1/m.
 %
-% Section 1 checks that the two conditional draws come from the right distributions,
-% against dense algebra.
+% Section 1 checks the two conditional draws against dense algebra: the posterior mean of
+% b, and the restriction, the mean and the covariance of the draws of theta.
 %
 % Section 2 checks that the whole sampler recovers the paths and variances that generated
 % the data, on 200 periods generated from the model itself with the innovation variances
 % set at their prior means. At five to ten times the prior means the variances
 % come back at about a third of their true values and the paths are oversmoothed, since
 % at T = 200, against an error variance of about one, they are weakly identified. The
-% Monte Carlo experiments of the paper generate from nonlinear beta density and
-% exponential Almon weights instead, to measure how well the linear parameterization
-% approximates them.
+% Monte Carlo experiments of the paper generate the data from beta density and exponential
+% Almon weighting functions, which are nonlinear in their parameters, to measure how well
+% the linear parameterization approximates them.
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and
@@ -126,7 +126,8 @@ om2_true = [1e-3; 1e-3]; xi2_true = Sxi/(nuxi-1); sig2g_true = Sg/(nug-1);
 
 B_true = zeros(T, pb); Th_true = zeros(T, q); g_true = zeros(T, 1);
 b = [0; 1];
-th = [1; 2; -3]; th = th/(th'*vsum);             % a hump, scaled to satisfy the restriction
+% the initial weights th'*V make one cycle over the lags
+th = [1; 2; -3]; th = th/(th'*vsum);             % scaled to satisfy the restriction
 Pv = eye(q) - (vsum*vsum')/(vsum'*vsum);         % keeps the walk on the hyperplane
 gt = 0;
 for t = 1:T
@@ -189,7 +190,7 @@ for loop = 1:nsim + burnin
     end
 end
 fprintf('sampling takes %.1f seconds\n', toc(start_time));
-fprintf('the restriction holds in every draw: max residual %.2e\n', max(store_res));
+fprintf('restriction residual, every draw: max abs value %.2e\n', max(store_res));
 
 fprintf('\n%-28s %9s %9s %9s\n', 'quantity', 'RMSE', 'post sd', 'coverage');
 report('alpha_t', store_B(:,:,1), B_true(:,1));

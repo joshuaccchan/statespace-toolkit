@@ -2,7 +2,7 @@
 %
 % y_it = a_i*f_t + eps_it, eps_it ~ N(0, sig2_i), i = 1, ..., n, with one factor
 % f_t = phi*f_{t-1} + u_t, u_t ~ N(0, omega2), f_0 = 0, and the loading a_1 of the first
-% series fixed at 1. Given the loadings and variances, the factor path
+% series fixed at 1. Given phi, the loadings and the variances, the factor path
 % f = (f_1, ..., f_T)' has a tridiagonal precision, and ssm.simulate_states draws it at
 % once: the precision sampler of Chan and Jeliazkov (2009). Given the factor, the
 % loadings are independent, so one call to ssm.simulate_states with a diagonal
@@ -143,8 +143,9 @@ drawnow
 fprintf('\nex06 done.\n');
 
 function shade_nber_recessions(ymin, ymax)
-% The book's shade_nber_recessions.m: shades the NBER recessions from peak to trough
-% on the current axes, whose x-axis is in decimal years
+% The book's shade_nber_recessions.m without its closing uistack and set(ax,'Layer','top')
+% lines: shades the NBER recessions from peak to trough on the current axes, whose x-axis
+% is in decimal years
 
 % NBER peak-to-trough dates (month precision)
 % [peak_year peak_month  trough_year trough_month]

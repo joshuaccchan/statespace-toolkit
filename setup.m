@@ -1,6 +1,7 @@
 % setup.m - put statespace-toolkit on the MATLAB path for this session.
 %
-%   run setup.m          (from anywhere; the script locates the repo itself)
+%   run setup.m                    (from the repository root)
+%   run('<path-to-repo>/setup.m')  (from any other folder)
 %
 % Adds the repo's core/ folder to the path. core/ contains the MATLAB package
 % folder +ssm, so functions are called with the package prefix, ssm.<name>.
@@ -13,9 +14,9 @@
 %
 %   run('<path-to-repo>/setup.m')
 %
-% Replication drivers are not added to the path: each lives beside the package
-% it runs, under replications/<slug>/, and expects that folder as the working
-% directory so that its legacy data files resolve.
+% The archived packages under replications/<slug>/legacy/ are not added to the
+% path: run each entry script from its own folder, so that its data files and
+% functions resolve.
 
 ssm_root = fileparts(mfilename('fullpath'));
 addpath(fullfile(ssm_root, 'core'));
@@ -23,7 +24,8 @@ addpath(fullfile(ssm_root, 'core'));
 if isempty(ver('stats'))
     warning('ssm:setup:noStats', ...
         ['The Statistics and Machine Learning Toolbox is not available. ' ...
-         'Every archived package calls gamrnd.']);
+         'ssm.tnormrnd, ssm.ksc_rw_h0 and most of the examples need it, ' ...
+         'and every archived package calls gamrnd.']);
 end
 if isempty(ver('optim'))
     warning('ssm:setup:noOptim', ...

@@ -29,7 +29,8 @@
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and
-% Applications, Chapman & Hall/CRC, Sections 5.1.4 and 5.1.6 and Exercise 9.3.
+% Applications, Chapman & Hall/CRC, Sections 5.1.4, 5.1.6, 9.1.1 and 9.1.2, and
+% Exercise 9.3.
 % Chan, J.C.C. and Eisenstat, E. (2015). Marginal Likelihood Estimation with the
 % Cross-Entropy Method, Econometric Reviews, 34(3): 256-285.
 % Chan, J.C.C. and Jeliazkov, I. (2009). Efficient Simulation and Integrated
@@ -183,8 +184,9 @@ end
 function [lml, nse] = is_logml(phi_draws, logkernel, R)
 % Log marginal likelihood by importance sampling, with a multivariate t importance
 % density (5 degrees of freedom) located at the mean of the posterior draws of phi and
-% scaled by their covariance. logkernel(phi) is the log posterior kernel of phi. The
-% numerical standard error comes from 20 batches.
+% scaled by their covariance. phi_draws holds one draw per row, logkernel(phi) is the
+% log posterior kernel of phi, and R, the number of importance draws, is a multiple
+% of 20. The numerical standard error comes from 20 batches.
 nu = 5;
 m = mean(phi_draws)'; C = chol(cov(phi_draws),'lower'); k = numel(m);
 z = randn(k,R)./sqrt(chi2rnd(nu,1,R)/nu);

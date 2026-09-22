@@ -122,7 +122,8 @@ for j = 1:numel(names)
         theta_mean(j), theta_CI(:,j));
 end
 fprintf('   phi accepted in %.1f%% of sweeps\n', 100*count_phi/(nsim + burnin));
-fprintf('   2019Q4: output gap %.2f [%.2f, %.2f], annualized trend growth %.2f [%.2f, %.2f]\n', ...
+fprintf(['   2019Q4: output gap %.2f, 90%% band [%.2f, %.2f]; annualized trend growth ' ...
+    '%.2f, 90%% band [%.2f, %.2f]\n'], ...
     y(T) - tau_mean(T), gap_q(T,:), mu_mean(T), mu_q(T,:));
 
 %% Figures: the output gap and trend growth, NBER recessions shaded
@@ -172,8 +173,9 @@ x_draw = x_grid(idx);
 end
 
 function shade_nber_recessions(ymin, ymax)
-% The book's shade_nber_recessions.m: shades the NBER recessions from peak to trough
-% on the current axes, whose x-axis is in decimal years
+% The book's shade_nber_recessions.m without its closing uistack and set(ax,'Layer','top')
+% lines: shades the NBER recessions from peak to trough on the current axes, whose x-axis
+% is in decimal years
 
 % NBER peak-to-trough dates (month precision)
 % [peak_year peak_month  trough_year trough_month]

@@ -1,7 +1,7 @@
 %% ex01 - The precision sampler on a local level model
 %
-% y_t = tau_t + eps_t, eps_t ~ N(0, sig2), and tau_t = tau_{t-1} + u_t,
-% u_t ~ N(0, omega2), with tau_1 ~ N(tau0, omega2). Given y and the parameters, the
+% y_t = tau_t + eps_t, eps_t ~ N(0, sig2), and tau_t = tau_{t-1} + eta_t,
+% eta_t ~ N(0, omega2), with tau_1 ~ N(tau0, omega2). Given y and the parameters, the
 % trend tau = (tau_1, ..., tau_T)' is N(tauhat, K^{-1}) with K = H'*H/omega2 + I/sig2
 % tridiagonal, where H = ssm.diffmat(T) is the T x T first-difference matrix.
 % ssm.simulate_states draws the whole path at once from the Cholesky factor of K,
