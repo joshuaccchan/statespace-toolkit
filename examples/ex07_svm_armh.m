@@ -2,11 +2,12 @@
 %
 % y_t = tau_t + alpha_t*exp(h_t) + e_t, e_t ~ N(0, exp(h_t)), where y_t is quarterly US
 % CPI inflation, 1948Q1-2025Q3, 400 times the log change in the quarterly average CPI.
-% The log-volatility follows h_t = mu + phi*(h_{t-1} - mu) + beta*y_{t-1} + v_t,
-% v_t ~ N(0, sig2), with h_1 from the stationary distribution, and
-% gam_t = (alpha_t, tau_t)' is a random walk, gam_t = gam_{t-1} + w_t, w_t ~ N(0, Omega),
-% with Omega a full 2 x 2 matrix: the model of Chan (2017). The sampler is that paper's
-% UC_SVM.m, in replications/chan2017_jbes_svm, with the path of gam drawn by
+% The log-volatility follows h_t = mu + phi*(h_{t-1} - mu) + v_t, v_t ~ N(0, sig2), with
+% h_1 ~ N(mu, sig2/(1-phi^2)), and gam_t = (alpha_t, tau_t)' is a random walk,
+% gam_t = gam_{t-1} + w_t, w_t ~ N(0, Omega), with Omega a full 2 x 2 matrix. ex07 is a
+% simpler version of the model of Chan (2017), whose state equation for h also has the
+% term beta*y_{t-1}. The sampler is that of the paper's UC_SVM.m, in
+% replications/chan2017_jbes_svm, without the draw of beta, with the path of gam drawn by
 % ssm.simulate_states and h by ssm.armh: the accept-reject Metropolis-Hastings step of
 % Chan (2017), whose Gaussian proposal is centered at the mode of the conditional
 % density of h.
@@ -17,8 +18,8 @@
 % from a start far from the target, the chain can reject every candidate.
 %
 % Section 2 shows how the acceptance rate depends on the envelope constant c_reject:
-% 1,000 draws of h at each value, given the rest of the last state of the chain, with the
-% MH acceptance rate and the number of candidates per draw.
+% 1,000 draws of h at each value, from the target density of the last draw of h in the
+% chain, with the MH acceptance rate and the number of candidates per draw.
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and
@@ -43,18 +44,16 @@ nloop = 25000; burnin = 5000;
 phi0 = .97; Vphi = .1^2;
 mu0 = 0; Vmu = 10;
 Vgam = 10*eye(2); invVgam = Vgam\speye(2);
-beta0 = 0; Vbeta = 10;
 nuOmega = 10; SOmega = (nuOmega+3)*diag([.1^2 .25^2]);
 nuh = 10; Sh = .2^2*(nuh-1);
 
 % initialize the Markov chain, as in UC_SVM.m
-beta = 0;
 mu = log(var(y)); phi = .98; sig2 = .2^2;
 Omega = diag([.1^2 .25^2]);
 h = mu + sqrt(sig2)*randn(T,1);
 exph = exp(h);
 
-store_theta = zeros(nloop - burnin,7);                     % [mu beta phi sig2 Omega([1 2 4])]
+store_theta = zeros(nloop - burnin,6);                     % [mu phi sig2 Omega([1 2 4])]
 store_alp = zeros(nloop - burnin,T);
 store_h = zeros(nloop - burnin,T);
 
@@ -75,7 +74,7 @@ for loop = 1:nloop
 
     % sample h by accept-reject MH
     HinvSH = Hphi'*sparse(1:T,1:T,[(1-phi^2)/sig2; 1/sig2*ones(T-1,1)])*Hphi;
-    deltah = Hphi\([mu; mu*(1-phi)*ones(T-1,1)] + [0;y(1:end-1)]*beta);
+    deltah = Hphi\[mu; mu*(1-phi)*ones(T-1,1)];
     s2 = (y-tau).^2;
     logf_h = @(x) -.5*(x-deltah)'*HinvSH*(x-deltah) -.5*sum(x) ...
         -.5*exp(-x)'*(y-tau-alp.*exp(x)).^2;
@@ -87,18 +86,12 @@ for loop = 1:nloop
         counth = counth + 1;
     end
 
-    % sample beta
-    ybeta = h(2:end) - mu - phi*(h(1:end-1)-mu);
-    Dbeta = 1/(1/Vbeta + y(1:end-1)'*y(1:end-1)/sig2);
-    betahat = Dbeta*(beta0/Vbeta + y(1:end-1)'*ybeta/sig2);
-    beta = betahat + sqrt(Dbeta)*randn;
-
     % sample Omega
     err = reshape(gam(3:end,:) - gam(1:end-2,:),2,T-1)';
     Omega = iwishrnd(SOmega + err'*err,nuOmega + T-1);
 
     % sample sig2
-    errh = [(h(1)-mu)*sqrt(1-phi^2); h(2:end)-phi*h(1:end-1)-mu*(1-phi)-y(1:end-1)*beta];
+    errh = [(h(1)-mu)*sqrt(1-phi^2); h(2:end)-phi*h(1:end-1)-mu*(1-phi)];
     newSh = Sh + sum(errh.^2)/2;
     sig2 = 1/gamrnd(newnuh, 1./newSh);
 
@@ -119,12 +112,12 @@ for loop = 1:nloop
         i = loop - burnin;
         store_h(i,:) = h';
         store_alp(i,:) = alp';
-        store_theta(i,:) = [mu beta phi sig2 Omega([1 2 4])];
+        store_theta(i,:) = [mu phi sig2 Omega([1 2 4])];
     end
 end
 thetahat = mean(store_theta)';
 thetaCI = quantile(store_theta,[.05 .95])';
-names = {'mu', 'beta', 'phi', 'sigma2', 'omega2_alpha', 'omega_{alpha,tau}', 'omega2_tau'};
+names = {'mu', 'phi', 'sigma2', 'omega2_alpha', 'omega_{alpha,tau}', 'omega2_tau'};
 fprintf(['\n1. Quarterly US CPI inflation, 1948Q1-2025Q3, T = %d, %d draws after ' ...
     '%d burn-in\n'], T, nloop - burnin, burnin);
 fprintf('   %-18s %15s   %s\n', 'parameter', 'posterior mean', '90% credible interval');
@@ -136,7 +129,7 @@ fprintf('   acceptance rates: h %.3f, (mu, phi) %.3f\n', counth/nloop, countlam/
 %% 2. The acceptance rate against the envelope constant
 ndraw = 1000;
 fprintf(['\n2. Acceptance against the envelope constant, %d draws of h at each value,\n' ...
-    '   given the rest of the last state of the chain\n'], ndraw);
+    '   from the target density of the last draw of h in the chain\n'], ndraw);
 fprintf('   %9s %15s %21s\n', 'c_reject', 'MH acceptance', 'candidates per draw');
 for c = [0.5 1 3 10]
     hc = h; nacc = 0; ntries = 0;
@@ -168,7 +161,7 @@ fprintf('\nex07 done.\n');
 
 function [lam, g] = proplam(h,sig2)
 % proplam.m of chan2017_jbes_svm: a t proposal for (mu, phi), from a Newton-Raphson
-% (BHHH) step on the conditional density of (mu, atanh(phi)), with the density g of
+% (BHHH) step on the conditional density of (mu, atanh(phi)), with the log density g of
 % the proposal. The published loop stops at the first step larger than 1e-4 and
 % never at its cap, so a first step below 1e-4 loops forever; here the cap stops it,
 % and the fallback below then applies. The published code is otherwise unchanged.

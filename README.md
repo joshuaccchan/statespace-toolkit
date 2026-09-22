@@ -30,9 +30,10 @@ Zhu (2023), and the TVP-MIDAS model of ex08 from Chan, Poon and Zhu (2026).
 
 The eight scripts in [`examples/`](examples/) each run in under a minute. Start with ex01; ex02
 compares the local level model of ex01 with one that adds an AR(1) transitory component. ex04
-rewrites the book's `chapter09/UC_output_gap.m` with the library functions, and ex07 does the
-same for `UC_SVM.m` of Chan (2017). ex08 imposes its linear restriction by the same update of an
-unconstrained draw that ex05 uses for the quarterly aggregation.
+rewrites the book's `chapter09/UC_output_gap.m` with the library functions, and ex07 estimates a
+simpler version of the model of Chan (2017) with the sampler of its `UC_SVM.m`. ex08 imposes its
+linear restriction by the same update of an unconstrained draw that ex05 uses for the quarterly
+aggregation.
 
 | Script | What it shows | Data |
 |---|---|---|
