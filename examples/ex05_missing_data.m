@@ -1,10 +1,10 @@
-%% ex05 - Missing data and mixed frequencies: a ragged edge, and monthly GDP
+%% ex05 - Missing data and mixed frequencies, on generated data
 %
 % In a conditionally Gaussian state space model, the missing values are jointly Gaussian
-% given the observed values, the states and the parameters, and their precision matrix is
-% banded, so they are drawn in one block from a single Cholesky factor; see Chan, Poon and
-% Zhu (2023). Write the stacked data as y = So*yo + Sm*ym, with the selection matrices
-% ssm.select_obs returns. Stacking the measurement equation gives
+% given the observed values, the states alpha and the parameters theta, and their
+% precision matrix is banded, so they are drawn in one block from a single Cholesky
+% factor; see Chan, Poon and Zhu (2023). Write the stacked data as y = So*yo + Sm*ym, with
+% the selection matrices ssm.select_obs returns. Stacking the measurement equation gives
 % Go*yo + Gm*ym = W*alpha + X*beta + e with e ~ N(0, Sigma), where Go and Gm include any
 % difference matrices the model applies to y, and then
 %
@@ -13,26 +13,27 @@
 %
 % which ssm.simulate_states draws without forming K^{-1}.
 %
-% Section 1 checks that the missing values are drawn from the right distribution. It
+% Section 1 prints what ssm.select_obs returns for the first illustration in Section 2.1
+% of the paper: two periods of three variables, with y_{3,1}, y_{1,2} and y_{3,2} missing.
+%
+% Section 2 checks that the missing values are drawn from the right distribution. It
 % removes values from a generated VAR(1) in three patterns at once, a series that starts
 % late, a hole in the middle and a ragged edge at the end, and compares the draws with the
-% values removed and with the dense conditional normal.
+% values removed and with the mean and covariance of the conditional normal, from dense
+% algebra on the joint normal of y.
 %
-% Section 2 estimates monthly real GDP growth, which no statistical agency publishes. It
-% enters a monthly VAR as a fourth variable that is missing in every month. Each observed
-% quarterly growth rate is tied to five consecutive monthly values by the log-linear
-% aggregation of Mariano and Murasawa (2003),
+% Section 3 checks the draw under a mixed-frequency constraint. In a generated monthly
+% VAR(1) with known parameters, two series are observed every month and the third only
+% through the log-linear quarterly aggregation of Mariano and Murasawa (2003),
 %
 %   z = (y_t + 2*y_{t-1} + 3*y_{t-2} + 2*y_{t-3} + y_{t-4})/3,
 %
-% which stacks over the sample into the hard constraint M*ym = z. The quarterly rates fix
-% the weighted sum of the monthly values in each quarter, and the three monthly indicators
-% fix their timing within the quarter, through the VAR dynamics and the contemporaneous
-% covariance. One update of an unconstrained draw imposes the constraint exactly,
+% at the last month of each quarter after the first, which stacks into the hard
+% constraint M*ym = z. One update of an unconstrained draw u imposes it exactly,
 % ym = u + K^{-1}*M'*(M*K^{-1}*M')^{-1}*(z - M*u), reusing the Cholesky factor
-% ssm.simulate_states returns. The result is a set of model implied monthly GDP
-% estimates, and their accuracy depends on the indicators and on the VAR. Mariano and
-% Murasawa (2003, 2010) and Schorfheide and Song (2015) estimate monthly GDP this way.
+% ssm.simulate_states returns. The draws are compared with the values removed, before and
+% after the update, and with the conditional normal of ym given yo and z, from dense
+% algebra on the joint normal of (y, z).
 %
 % See:
 % Chan, J.C.C., Poon, A. and Zhu, D. (2023). High-Dimensional Conditionally Gaussian
@@ -41,19 +42,40 @@
 % Mariano, R.S. and Murasawa, Y. (2003). A New Coincident Index of Business Cycles
 % Based on Monthly and Quarterly Series, Journal of Applied Econometrics, 18(4):
 % 427-443.
-% Mariano, R.S. and Murasawa, Y. (2010). A Coincident Index, Common Factors, and
-% Monthly Real GDP, Oxford Bulletin of Economics and Statistics, 72(1): 27-46.
-% McCracken, M.W. and Ng, S. (2016). FRED-MD: A Monthly Database for Macroeconomic
-% Research, Journal of Business and Economic Statistics, 34(4): 574-589.
 % Rue, H. and Held, L. (2005). Gaussian Markov Random Fields: Theory and Applications,
 % Chapman & Hall/CRC, Algorithm 2.6.
-% Schorfheide, F. and Song, D. (2015). Real-Time Forecasting with a Mixed-Frequency
-% VAR, Journal of Business and Economic Statistics, 33(3): 366-380.
 
 run(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'setup.m'))
 fprintf('\n=== ex05: missing data and mixed frequencies ===\n');
 
-%% Section 1: a late start, a hole and a ragged edge, in a generated VAR(1)
+%% Section 1: what ssm.select_obs returns, on the first illustration of the paper
+Ytrue = [1 2 3; 4 5 6];                          % each value is its place in the stacked y
+Y = Ytrue;
+Y(1,3) = NaN; Y(2,1) = NaN; Y(2,3) = NaN;        % y_{3,1}, y_{1,2} and y_{3,2}
+[So, Sm, yo] = ssm.select_obs(Y);
+
+fprintf('\n-- Section 1: ssm.select_obs, T = 2, n = 3, y_{3,1}, y_{1,2} and y_{3,2} missing\n');
+fprintf('Y, one period per row:\n');
+fprintf('  %5g %5g %5g\n', Y');
+fprintf('\n%-9s %5s    %-5s      %s\n', 'stacked', 'y', 'So', 'Sm');
+ystack = reshape(Y', [], 1);
+Sfull = full([So Sm]);
+lab = {'y_{1,1}', 'y_{2,1}', 'y_{3,1}', 'y_{1,2}', 'y_{2,2}', 'y_{3,2}'};
+for i = 1:numel(ystack)
+    fprintf('%-9s %5g    %d %d %d      %d %d %d\n', lab{i}, ystack(i), Sfull(i,:));
+end
+fprintf('yo = (%s)''\n', strjoin(compose('%g', yo'), ', '));
+
+ym = Sm'*reshape(Ytrue', [], 1);                 % the missing values of the complete data
+yrec = So*yo + Sm*ym;
+fprintf('\nwith ym = (%s)'', So*yo + Sm*ym = (%s)'', the complete stacked data:\n', ...
+    strjoin(compose('%g', ym'), ', '), strjoin(compose('%g', yrec'), ', '));
+fprintf('  max abs difference %g\n', norm(yrec - reshape(Ytrue', [], 1), inf));
+is_perm = all(Sfull(:) == 0 | Sfull(:) == 1) && all(sum(Sfull,1) == 1) && all(sum(Sfull,2) == 1);
+fprintf('[So Sm] is a permutation matrix (entries 0 or 1, one 1 in each row and column): %s\n', ...
+    mat2str(is_perm));
+
+%% Section 2: a late start, a hole and a ragged edge, in a generated VAR(1)
 rng(42);
 n = 4; T = 200;
 Phi = [.5 .1 0 0; .2 .4 .1 0; 0 .2 .5 .1; .1 0 .2 .3];
@@ -88,7 +110,7 @@ band = quantile(ym, [.05 .95], 2);
 inside = ytrue_m >= band(:,1) & ytrue_m <= band(:,2);
 [blo, bup] = bandwidth(full(K));
 
-fprintf('\n-- Section 1: %d of %d values blanked out, VAR(1) with n = %d, T = %d\n', ...
+fprintf('\n-- Section 2: %d of %d values blanked out, VAR(1) with n = %d, T = %d\n', ...
     numel(ytrue_m), T*n, n, T);
 fprintf('precision of the missing data: %d x %d, %d nonzeros, bandwidth %d\n', ...
     size(K,1), size(K,2), nnz(K), max(blo,bup));
@@ -107,103 +129,88 @@ end
 fprintf('%-22s %5d %9.3f %9.3f %8.1f%%\n', 'all', numel(ytrue_m), ...
     sqrt(mean((ymhat - ytrue_m).^2)), mean(sd), 100*mean(inside));
 
-% the same moments, from conditioning the joint normal of y with dense algebra
+% the known answer: condition the joint normal of y on yo with dense algebra
 V = inv(full(H'*iSig*H));
 io = find(~isnan(reshape(Y', T*n, 1)));
 mudense = V(im,io)*(V(io,io)\yo);
-fprintf('\nmean against dense conditioning:   max abs difference %.2e\n', ...
+Vdense = V(im,im) - V(im,io)*(V(io,io)\V(io,im));
+fprintf('\nmean against dense:                  max abs difference %.2e\n', ...
     norm(ymhat - mudense, inf));
-fprintf('draws against that mean:           max abs difference %.3f posterior sd\n', ...
-    max(abs(mean(ym,2) - ymhat)./sd));
+fprintf('K^{-1} against the dense covariance: max abs difference %.2e\n', ...
+    max(max(abs(inv(full(K)) - Vdense))));
+fprintf('draws against the dense mean:        max abs difference %.3f posterior sd\n', ...
+    max(abs(mean(ym,2) - mudense)./sqrt(diag(Vdense))));
+fprintf(['draws'' covariance against dense:     max abs difference %.1f%% of its ' ...
+    'largest entry\n'], 100*max(max(abs(cov(ym') - Vdense)))/max(max(abs(Vdense))));
 
-%% Section 2: estimating monthly GDP
+%% Section 3: a series observed only through its quarterly aggregates
 rng(42);
-nsim = 4000; burnin = 1000;
+n = 3; T = 120;                                  % ten years of months
+Phi = [.5 .1 .1; .1 .4 .1; .2 .2 .4];
+CSig = [1 0 0; .5 1 0; .5 .3 .6];
+Sig = CSig*CSig';
 
-% three monthly indicators, September 1989 to December 2024, as percent growth
-raw = readtable(fullfile(fileparts(mfilename('fullpath')), 'data', 'FRED-MD.csv'), ...
-    'VariableNamingRule', 'preserve');
-month_idx = round(12*raw{:,1});
-keep = month_idx >= 1989*12+9 & month_idx <= 2024*12+12;
-ind = {'INDPRO', 'PAYEMS', 'RPI'};
-[~, cols] = ismember(ind, raw.Properties.VariableNames);
-Xm = 100*raw{keep, cols};
-assert(all(~isnan(Xm(:))), 'the indicators must be complete over this sample');
-mid = month_idx(keep);
-T = size(Xm,1);
-n = numel(ind) + 1;                              % the indicators and monthly GDP growth
+Ytrue = zeros(T,n);
+yt = zeros(n,1);
+for t = 1:T
+    yt = Phi*yt + CSig*randn(n,1);
+    Ytrue(t,:) = yt';
+end
 
-% quarterly real GDP growth, 1990Q1 to 2024Q4, in percent
-gdp = readmatrix(fullfile(fileparts(mfilename('fullpath')), 'data', 'USGDP.csv'), ...
-    'Range', 'B173:B313');                       % 1989Q4-2024Q4
-zq = 100*diff(log(gdp));
-qend = (7:3:T)';                                 % the last month of each quarter
-assert(numel(zq) == numel(qend), 'the quarterly and monthly samples must line up');
-
-% the aggregation z = (y_t + 2*y_{t-1} + 3*y_{t-2} + 2*y_{t-3} + y_{t-4})/3, as M*ym = z
+% the aggregation of series 3 at the last month of each quarter, as M*ym = z; the first
+% quarter is left out because its aggregate needs months 0 and -1, before the sample
+qend = (6:3:T)';
+nq = numel(qend);
 w = [1 2 3 2 1]'/3;
-M = sparse(repmat((1:numel(qend))',5,1), reshape(qend - (0:4), [], 1), ...
-    kron(w, ones(numel(qend),1)), numel(qend), T);
+M = sparse(repmat((1:nq)',5,1), reshape(qend - (0:4), [], 1), ...
+    kron(w, ones(nq,1)), nq, T);
+z = M*Ytrue(:,3);
 
-% the means are fixed at sample values and taken out: the aggregation weights sum to 3,
-% so the mean of monthly GDP growth implied by the quarterly mean is mean(zq)/3
-mug = mean(zq)/3;
-Y = [Xm - mean(Xm,1), nan(T,1)];
-zd = zq - 3*mug;
-[So, Sm, yo] = ssm.select_obs(Y);
+Y = [Ytrue(:,1:2), nan(T,1)];
+[So, Sm, yo] = ssm.select_obs(Y);                % ym = (y_{3,1}, ..., y_{3,T})'
 L = sparse(2:T,1:T-1,1,T,T);
+H = speye(T*n) - kron(L, Phi);
+iSig = kron(speye(T), inv(Sig));
+Gm = H*Sm; Go = H*So;
+K = Gm'*iSig*Gm;
+ndraws = 20000;
+[u, uhat, C] = ssm.simulate_states(K, -Gm'*iSig*(Go*yo), ndraws);
+U = C'\(C\full(M'));                             % K^{-1}*M', by the factor already formed
+MU = M*U;
+ym = u + U*(MU\(z - M*u));
+ymhat = uhat + U*(MU\(z - M*uhat));              % the same update, applied to the mean
 
-% prior: vec(A) | Sigma ~ N(0, Sigma kron V0) for y_t = A'*y_{t-1} + e_t, Sigma ~ IW(nu0, S0)
-iV0 = eye(n)/.5^2; nu0 = n + 3; S0 = eye(n);
-A = zeros(n); Sigma = cov(Xm(:,1))*eye(n);
-store_g = zeros(nsim, T);
-store_res = zeros(nsim, 1);
+% the known answer: condition the joint normal of (y, z), z = M*Sm'*y, with dense algebra
+V = inv(full(H'*iSig*H));
+Mz = M*Sm';
+Vyz = [V, V*Mz'; Mz*V, Mz*V*Mz'];
+im = find(isnan(reshape(Y', T*n, 1)));
+ic = [find(~isnan(reshape(Y', T*n, 1))); T*n + (1:nq)'];   % yo and z
+mudense = Vyz(im,ic)*(Vyz(ic,ic)\[yo; z]);
+Vdense = Vyz(im,im) - Vyz(im,ic)*(Vyz(ic,ic)\Vyz(ic,im));
+Vupd = C'\(C\eye(T)) - U*(MU\U');                % K^{-1} - U*(M*U)^{-1}*U', formed to check
+[blo, bup] = bandwidth(full(K));
 
-fprintf('\n-- Section 2: %d months, %d quarterly observations, n = %d, %d draws\n', ...
-    T, numel(zq), n, nsim);
-start_time = tic;
-for loop = 1:nsim + burnin
-    % (1) monthly GDP growth, drawn under the aggregation constraint
-    H = speye(T*n) - kron(L, A');
-    iSig = kron(speye(T), inv(Sigma));
-    Gm = H*Sm; Go = H*So;
-    K = Gm'*iSig*Gm;
-    [u, ~, C] = ssm.simulate_states(K, -Gm'*iSig*(Go*yo));
-    U = C'\(C\full(M'));                         % K^{-1}*M', by the factor already formed
-    ymd = u + U*((M*U)\(zd - M*u));
+fprintf(['\n-- Section 3: VAR(1) with n = %d, T = %d months, series 3 only in %d quarterly ' ...
+    'aggregates\n'], n, T, nq);
+fprintf('precision of the missing data: %d x %d, %d nonzeros, bandwidth %d; %d draws\n', ...
+    size(K,1), size(K,2), nnz(K), max(blo,bup), ndraws);
+fprintf('M*ym - z after the update, every draw:     max abs value %.2e\n', ...
+    max(max(abs(M*ym - z))));
+fprintf('mean of the update against dense:          max abs difference %.2e\n', ...
+    norm(ymhat - mudense, inf));
+fprintf('covariance of the update against dense:    max abs difference %.2e\n', ...
+    max(max(abs(Vupd - Vdense))));
+fprintf('draws against the dense mean:              max abs difference %.3f posterior sd\n', ...
+    max(abs(mean(ym,2) - mudense)./sqrt(diag(Vdense))));
+fprintf(['draws'' covariance against dense:           max abs difference %.1f%% of its ' ...
+    'largest entry\n'], 100*max(max(abs(cov(ym') - Vdense)))/max(max(abs(Vdense))));
 
-    % (2) the VAR coefficients and covariance, from the completed data
-    Ycomp = reshape(So*yo + Sm*ymd, n, T)';
-    Xreg = [zeros(1,n); Ycomp(1:T-1,:)];
-    Kpost = iV0 + Xreg'*Xreg;
-    Apost = Kpost\(Xreg'*Ycomp);
-    Spost = S0 + Ycomp'*Ycomp - Apost'*Kpost*Apost;
-    Sigma = iwishrnd((Spost + Spost')/2, nu0 + T);
-    A = Apost + chol(Kpost,'lower')'\randn(n)*chol(Sigma,'lower')';
-
-    if loop > burnin
-        store_g(loop-burnin,:) = ymd' + mug;
-        store_res(loop-burnin) = norm(M*ymd - zd, inf);
-    end
+ytrue_m = Ytrue(:,3);
+fprintf('\n%-30s %9s %9s %9s\n', 'series 3, drawn given', 'RMSE', 'post sd', 'coverage');
+D = {'the monthly series', u, uhat; 'and the quarterly aggregates', ym, ymhat};
+for g = 1:size(D,1)
+    band = quantile(D{g,2}, [.05 .95], 2);
+    fprintf('%-30s %9.3f %9.3f %8.1f%%\n', D{g,1}, sqrt(mean((D{g,3} - ytrue_m).^2)), ...
+        mean(std(D{g,2}, 0, 2)), 100*mean(ytrue_m >= band(:,1) & ytrue_m <= band(:,2)));
 end
-fprintf('sampling takes %.1f seconds\n', toc(start_time));
-
-ghat = mean(store_g, 1)';
-gband = quantile(store_g, [.05 .95], 1)';
-fprintf('the aggregation constraint holds in every draw: max residual %.2e\n', ...
-    max(store_res));
-fprintf('the posterior mean path aggregates to the observed quarters: max gap %.2e\n', ...
-    norm(M*(ghat - mug) - zd, inf));
-fprintf('correlation of estimated monthly GDP growth with industrial production: %.2f\n', ...
-    corr(ghat, Xm(:,1)));
-
-fprintf('\nestimated monthly real GDP growth, percent per month, a latent variable\n');
-fprintf('of the model: posterior mean (90%% band)\n');
-show = find(mid >= 2020*12+2 & mid <= 2020*12+7);
-for j = show'
-    fprintf('  %4d M%02d %7.2f  (%6.2f, %6.2f)\n', floor((mid(j)-1)/12), ...
-        mid(j) - 12*floor((mid(j)-1)/12), ghat(j), gband(j,1), gband(j,2));
-end
-k2020q2 = find(qend == find(mid == 2020*12+6));
-fprintf('  2020Q2 from these months %7.2f, observed %7.2f\n', ...
-    w'*ghat(qend(k2020q2) - (0:4)'), zq(k2020q2));

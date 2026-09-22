@@ -41,7 +41,7 @@ aggregation.
 | `ex02_integrated_likelihood` | Two models compared by marginal likelihood, with the states integrated out by `ssm.intlike`, checked against a Kalman filter and quadrature | US PCE inflation |
 | `ex03_tvp_regression` | A time-varying parameter Phillips curve, and the precision sampler timed against the Kalman filter with backward sampling | US PCE inflation and output gap; generated |
 | `ex04_output_gap` | The output gap from a local linear trend with an AR(2) cycle, built with `ssm.lagpolymat` | US real GDP |
-| `ex05_missing_data` | Missing data and mixed frequencies with `ssm.select_obs`: a ragged edge, checked against dense algebra and the values removed, and monthly GDP estimated from quarterly GDP and monthly indicators | generated; FRED-MD and US real GDP |
+| `ex05_missing_data` | Missing data and mixed frequencies with `ssm.select_obs`: the selection matrices of a small pattern, then a ragged edge and a series observed only through quarterly aggregates, both checked against dense algebra and the values removed | generated |
 | `ex06_dynamic_factor` | A dynamic factor model with one factor, as a business-cycle indicator | FRED-MD |
 | `ex07_svm_armh` | Stochastic volatility in mean, with the log-volatility drawn by accept-reject Metropolis-Hastings, `ssm.armh` | US CPI inflation |
 | `ex08_tvp_midas` | A MIDAS regression with time-varying weights under a linear restriction, checked against dense algebra and the truth | generated |
