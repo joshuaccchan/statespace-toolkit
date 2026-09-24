@@ -96,11 +96,12 @@ them.
 | `ssm.mode_newton` | Finds the mode of a concave log density by Newton-Raphson, with a banded Hessian | through `ssm.armh` |
 | `ssm.armh` | Takes the accept-reject Metropolis-Hastings step of Chan (2017), for states whose conditional distribution is not Gaussian | ex07 |
 | `ssm.ksc_rw_h0` | Draws the log-volatility path of a random walk by the auxiliary mixture sampler of Kim, Shephard and Chib (1998) | ex08 |
+| `ssm.ksc_rw_diffuse` | Draws the log-volatility path of a random walk whose first value has a normal prior with mean zero, by the same sampler | not yet in an example |
 | `ssm.tnormrnd` | Draws from a truncated normal distribution | ex02 |
 | `ssm.shaded_band` | Shades credible bands in figures | ex01, ex03, ex04, ex07 |
 
-Five of these functions, `ssm.diffmat`, `ssm.ksc_rw_h0`, `ssm.shaded_band`, `ssm.surform` and
-`ssm.tnormrnd`, have the same code as their counterparts in
+Six of these functions, `ssm.diffmat`, `ssm.ksc_rw_diffuse`, `ssm.ksc_rw_h0`, `ssm.shaded_band`,
+`ssm.surform` and `ssm.tnormrnd`, have the same code as their counterparts in
 [bvar-toolkit](https://github.com/joshuaccchan/bvar-toolkit), apart from the error identifiers of
 `ssm.diffmat`. A unit test checks each against a pinned copy of the bvar-toolkit original.
 `bvar.util.select_obs` in bvar-toolkit copies `ssm.select_obs`, apart from its error identifier. The
@@ -119,6 +120,9 @@ way for `ssm.armh`, and the published functions `sample_CSV.m` and the book's
 `sample_SVM_h_ARMH.m` are run on generated data beside `ssm.armh`, with the same target. Each of
 these tests checks that the random number stream ends in the same state and that the draws agree
 to rounding error.
+
+`ssm.ksc_rw_diffuse` is checked the same way against `SVRW.m` of Chan, Clark and Koop (2018),
+which draws the same path when its initial value `h0` is zero.
 
 `ssm.intlike` is checked against a Kalman filter and against two archived functions that compute
 it, `intlike_UC0.m` and `intlike_tvpvar.m`. `ssm.diffmat` and `ssm.lagpolymat` are checked against the matrices the published
@@ -166,8 +170,9 @@ the library:
   Statistics*, 35(1): 17-28.
 - `ssm.select_obs`: Chan, J.C.C., Poon, A. and Zhu, D. (2023). High-Dimensional Conditionally
   Gaussian State Space Models with Missing Data, *Journal of Econometrics*, 236(1): 105468.
-- `ssm.ksc_rw_h0`: Kim, S., Shephard, N. and Chib, S. (1998). Stochastic Volatility: Likelihood
-  Inference and Comparison with ARCH Models, *Review of Economic Studies*, 65(3): 361-393.
+- `ssm.ksc_rw_h0` and `ssm.ksc_rw_diffuse`: Kim, S., Shephard, N. and Chib, S. (1998). Stochastic
+  Volatility: Likelihood Inference and Comparison with ARCH Models, *Review of Economic Studies*,
+  65(3): 361-393.
 - The other functions: Chan, J.C.C. (forthcoming). *Bayesian Macroeconometrics: Methods and
   Applications*, Chapman & Hall/CRC.
 

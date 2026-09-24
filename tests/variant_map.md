@@ -12,8 +12,8 @@ functions compared draw for draw under a fixed seed.
 
 Each twin is its bvar-toolkit original from the function line on, byte for byte, checked
 by `tests/unit/test_twins.m` against the copies in `tests/fixtures/bvar-toolkit/` (bvar-toolkit
-commit `b8f7021`, and `e412336` for `ksc_rw_h0`). Only the headers differ, apart from
-`ssm.diffmat`'s error identifiers. Both libraries use the lower Cholesky factor throughout;
+commit `b8f7021`, and `e412336` for `ksc_rw_h0` and `ksc_rw_diffuse`). Only the headers differ,
+apart from `ssm.diffmat`'s error identifiers. Both libraries use the lower Cholesky factor throughout;
 bvar-toolkit switched `ksc_rw_h0` to it in `d3b9494`, with bitwise the same draws. In
 `fa17f41` it made `ksc_rw_h0` compute the mean with that factor, as `(Ch')\(Ch\b)`, which
 changes the draws in the last bits, and `ssm.ksc_rw_h0` followed. `e412336` corrected the
@@ -25,6 +25,7 @@ comment on the draw of h in both.
 | `ssm.tnormrnd` | `bvar.util.tnormrnd` | chan_clark_koop2018_jmcb_trendie, chan_grant2016_eneco_garchsv, chan_koop_potter2016_jae_boundedpc `tnormrnd.m` (code); grant_chan2017_jedc_hpfilter and grant_chan2017_jmcb_trendcycle `tnormrnd.m` (`\|\|` and `&&` for `\|` and `&` on scalar conditions); chan_eisenstat2015_er_mlce `ML_CE/tnormrnd.m` (the same, spacing, and no closing `end`) | unit, all six, draw for draw with scalar and vector arguments (`test_tnormrnd`) |
 | `ssm.shaded_band` | `bvar.util.shaded_band` | none | unit (`test_shaded_band`) |
 | `ssm.ksc_rw_h0` | `bvar.sv.ksc_rw_h0` | none; bvar-toolkit verifies its twin against five published `SVRW.m` copies | unit, draw for draw against the twin (`test_ksc_rw_h0`) |
+| `ssm.ksc_rw_diffuse` | `bvar.sv.ksc_rw_diffuse` (fixture at bvar-toolkit `e412336`) | chan_clark_koop2018_jmcb_trendie `SVRW.m` with `h0 = 0`, the same draw with the mean solved by backslash. Never merge with `ssm.ksc_rw_h0`, which has another initial condition | unit (`test_ksc_rw_diffuse`), 22 September 2026: draw for draw against the twin; against `SVRW.m`, the same random number stream and the path to rounding |
 | `ssm.diffmat` | `bvar.util.diffmat`, with error identifiers `ssm:diffmat:*` | new in bvar-toolkit; reproduces the inline spellings in chan2013_joe_masv `UC_MA.m` and `SV.m` and chan_grant2016_eneco_garchsv `loglike_garch_ma.m` | unit (`test_diffmat`) |
 
 ## Written Here

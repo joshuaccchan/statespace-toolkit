@@ -1,0 +1,52 @@
+% ssm.ksc_rw_diffuse - KSC auxiliary-mixture sampler for the log-volatility path,
+% random-walk state equation with h_1 ~ N(0,Vh):
+%   ystar_t = h_t + eps_t,  eps_t = log of a chi^2_1 draw, approximated by the
+%             Kim-Shephard-Chib (1998) 7-component normal mixture,
+%   h_t = h_{t-1} + v_t,  v_t ~ N(0,omega2h),  h_1 ~ N(0,Vh),  both VARIANCES.
+%
+%   [h, S] = ssm.ksc_rw_diffuse(ystar, h, omega2h, Vh)
+%
+%   ystar is T x 1; h on input is the current path and on output the new draw; S is
+%   the T x 1 vector of mixture indicators, in 1:7, drawn alongside h. Random numbers
+%   per call: rand(T,1), then randn(T,1).
+%
+% The path is drawn in one block from its banded precision (Chan and Jeliazkov
+% 2009). Code-identical to bvar.sv.ksc_rw_diffuse in bvar-toolkit, and the two must
+% stay so; it draws what SVRW.m of chan_clark_koop2018_jmcb_trendie draws with
+% h0 = 0. Never merge with ssm.ksc_rw_h0, whose h_1 ~ N(h0,sig) has another
+% initial condition.
+%
+% See:
+% Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and
+% Applications, Chapman & Hall/CRC, Section 10.1.1.
+% Chan, J.C.C. and Jeliazkov, I. (2009). Efficient Simulation and Integrated
+% Likelihood Estimation in State Space Models, International Journal of
+% Mathematical Modelling and Numerical Optimisation, 1(1/2): 101-120.
+% Kim, S., Shephard, N. and Chib, S. (1998). Stochastic Volatility: Likelihood
+% Inference and Comparison with ARCH Models, Review of Economic Studies, 65(3):
+% 361-393.
+
+function [h,S] = ksc_rw_diffuse(ystar,h,omega2h,Vh)
+
+T = length(h);
+%% parameters for the Gaussian mixture
+pi = [0.0073 .10556 .00002 .04395 .34001 .24566 .2575];
+mui = [-10.12999 -3.97281 -8.56686 2.77786 .61942 1.79518 -1.08819] - 1.2704;
+sigma2i = [5.79596 2.61369 5.17950 .16735 .64009 .34023 1.26261];
+sigmai = sqrt(sigma2i);
+
+%% sample S from a 7-point distrete distribution
+temprand = rand(T,1);
+q = repmat(pi,T,1).*normpdf(repmat(ystar,1,7),repmat(h,1,7) ...
+    +repmat(mui,T,1),repmat(sigmai,T,1));
+q = q./repmat(sum(q,2),1,7);
+S = 7 - sum(repmat(temprand,1,7)<cumsum(q,2),2)+1;
+
+%% sample h
+H = speye(T) - sparse(2:T,1:(T-1),ones(1,T-1),T,T);
+invOmegah = spdiags([1/Vh; 1/omega2h*ones(T-1,1)],0,T,T);
+d = mui(S)'; invSigystar = spdiags(1./sigma2i(S)',0,T,T);
+Kh = H'*invOmegah*H + invSigystar;
+Ch = chol(Kh,'lower');              % so that Ch*Ch' = Kh
+hhat = (Ch')\(Ch\(invSigystar*(ystar-d)));
+h = hhat + Ch'\randn(T,1);          % note the transpose

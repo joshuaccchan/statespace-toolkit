@@ -1,4 +1,5 @@
 cac48b95633f873a3429dc9d12ec18ce *bayesian-macroeconometrics/code/matlab/chapter10/sample_SVM_h_ARMH.m
+ffd0feacfba889ff5696bf79bd7cd3a2 *bvar-toolkit/core/+bvar/+sv/ksc_rw_diffuse.m
 1f7c2a18310b0ca71781cce26c873e30 *bvar-toolkit/core/+bvar/+sv/ksc_rw_h0.m
 152a3098766f468daaadcd2c87a1d7eb *bvar-toolkit/core/+bvar/+util/diffmat.m
 a23ffc8e8ac9a05fe7288ecdbad2ad77 *bvar-toolkit/core/+bvar/+util/shaded_band.m
