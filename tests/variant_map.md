@@ -12,7 +12,7 @@ functions compared draw for draw under a fixed seed.
 
 Each twin is its bvar-toolkit original from the function line on, byte for byte, checked
 by `tests/unit/test_twins.m` against the copies in `tests/fixtures/bvar-toolkit/` (bvar-toolkit
-commit `b8f7021`, and `e412336` for `ksc_rw_h0` and `ksc_rw_diffuse`). Only the headers differ,
+commit `b8f7021`, and `e412336` for `ksc_rw_h0`, `ksc_ar1_mean` and `ksc_rw_diffuse`). Only the headers differ,
 apart from `ssm.diffmat`'s error identifiers. Both libraries use the lower Cholesky factor throughout;
 bvar-toolkit switched `ksc_rw_h0` to it in `d3b9494`, with bitwise the same draws. In
 `fa17f41` it made `ksc_rw_h0` compute the mean with that factor, as `(Ch')\(Ch\b)`, which
@@ -25,6 +25,7 @@ comment on the draw of h in both.
 | `ssm.tnormrnd` | `bvar.util.tnormrnd` | chan_clark_koop2018_jmcb_trendie, chan_grant2016_eneco_garchsv, chan_koop_potter2016_jae_boundedpc `tnormrnd.m` (code); grant_chan2017_jedc_hpfilter and grant_chan2017_jmcb_trendcycle `tnormrnd.m` (`\|\|` and `&&` for `\|` and `&` on scalar conditions); chan_eisenstat2015_er_mlce `ML_CE/tnormrnd.m` (the same, spacing, and no closing `end`) | unit, all six, draw for draw with scalar and vector arguments (`test_tnormrnd`) |
 | `ssm.shaded_band` | `bvar.util.shaded_band` | none | unit (`test_shaded_band`) |
 | `ssm.ksc_rw_h0` | `bvar.sv.ksc_rw_h0` | none; bvar-toolkit verifies its twin against five published `SVRW.m` copies | unit, draw for draw against the twin (`test_ksc_rw_h0`) |
+| `ssm.ksc_ar1_mean` | `bvar.sv.ksc_ar1_mean` (fixture at bvar-toolkit `e412336`) | chan2013_joe_masv `SV.m`, the same draw with the arguments in another order and the prior mean formed in another order of operations | unit (`test_ksc_ar1_mean`), 22 September 2026: draw for draw against the twin; against `SV.m`, the same mixture indicators and random number stream, and the path to rounding |
 | `ssm.ksc_rw_diffuse` | `bvar.sv.ksc_rw_diffuse` (fixture at bvar-toolkit `e412336`) | chan_clark_koop2018_jmcb_trendie `SVRW.m` with `h0 = 0`, the same draw with the mean solved by backslash. Never merge with `ssm.ksc_rw_h0`, which has another initial condition | unit (`test_ksc_rw_diffuse`), 22 September 2026: draw for draw against the twin; against `SVRW.m`, the same random number stream and the path to rounding |
 | `ssm.diffmat` | `bvar.util.diffmat`, with error identifiers `ssm:diffmat:*` | new in bvar-toolkit; reproduces the inline spellings in chan2013_joe_masv `UC_MA.m` and `SV.m` and chan_grant2016_eneco_garchsv `loglike_garch_ma.m` | unit (`test_diffmat`) |
 
@@ -41,6 +42,15 @@ generalizes, and none is substituted into the legacy-derived twins above.
 | `ssm.lagpolymat` | the lag polynomial matrices I - phi_1*L - ... - phi_p*L^p built inline: the second-difference matrix and the AR(2) matrix of the book's `chapter09/UC_output_gap.m`, the AR(2) matrix of chan2018_er_spectest `TV_NAIRU_AR2.m`, and `ssm.diffmat` for p = 1. The SV(2) scripts of chan_grant2016_eneco_garchsv and chan_grant2016_jfec_dicsv build a different matrix, whose second row has no phi term because the first two states are initial values; they are not generalized here | unit (`test_lagpolymat`), 19 September 2026: bitwise equal to each spelling above and to `ssm.diffmat(T, a)` for a random walk, an AR(1) and an MA(1) transform; `H*x` equals `filter([1 -phi], 1, x)`; lags beyond the path drop out |
 | `ssm.armh` | the accept-reject Metropolis-Hastings steps of the same three implementations: Newton mode, Gaussian proposal, screening with `c = c_reject*f(mode)/g(mode)`, `c_reject = 3` (`kappa` in the book's code), and the MH correction, with random numbers drawn in the same order | unit (`test_armh`), 18 September 2026: 40 sweeps of the book's function give bitwise the same draws, acceptances and random number stream; 50 sweeps of `sample_CSV.m` and 150 of `UC_SVM.m` run whole give the same acceptances and stream, with draws within 8.9e-16 and 3.5e-13; Geweke tests at `c_reject` = 0.2, 1, 3 and 20 and with forced accepts. |
 | `ssm.select_obs` | the split of stacked data into observed and missing values, `y = So*yo + Sm*ym`, written from Section 2.1 of Chan, Poon and Zhu (2023), whose code is not archived here; twin: `bvar.util.select_obs` in bvar-toolkit, copied from here | unit (`test_select_obs`), 19 September 2026: both illustrations of that section reproduced exactly; `[So, Sm]` a permutation matrix; the conditional mean and precision of the missing values of a VAR(1) with a hole and a ragged edge equal to dense Gaussian conditioning |
+
+## Extracted from an Archived Package (22 September 2026)
+
+A function whose body is taken from a package archived here, with every edit listed.
+It has no bvar-toolkit twin: bvar-toolkit does not archive the package.
+
+| Function | Source | Edits | Verified |
+|---|---|---|---|
+| `ssm.ksc_rw_noncentered` | chan2018_er_spectest `legacy/SVRW_gam.m`, the noncentered log-volatility draw of Chan (2018), which `UCSV_gam.m` and `TV_NAIRU_AR2.m` call | the name; the posterior means of htilde and of (h0, omegah) solved with the Cholesky factor of the draw, where `SVRW_gam.m` factors each matrix again with backslash; the comments. Its `h0` is the level of h; that of `ssm.ksc_rw_h0` is a known value at time 0 | unit (`test_ksc_rw_noncentered`): one call, and `UCSV_gam.m` run whole for 400 sweeps on the quarterly CPI inflation of `examples/data`, bitwise equal to a copy of `SVRW_gam.m` with the same two solves (every output, stored draw and log ordinate, and the random number stream); a change of 1e-9 to a mixture constant fails both parts |
 
 ## Never Merge
 

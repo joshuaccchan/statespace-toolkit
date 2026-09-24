@@ -1,0 +1,53 @@
+% bvar.sv.ksc_ar1_mean - KSC auxiliary-mixture sampler for the log-volatility
+% path, stationary AR(1)-with-mean state equation:
+%   ystar_t = h_t + eps_t,  eps_t approximated by the Kim-Shephard-Chib (1998)
+%             7-component normal mixture,
+%   h_t = mu + rho*(h_{t-1} - mu) + v_t,  v_t ~ N(0,sig2),
+%   h_1 ~ N(mu, sig2/(1-rho^2))  (stationary initialization).
+%
+%   [h,S] = bvar.sv.ksc_ar1_mean(ystar, h, mu, rho, sig2)
+%
+%   ystar is T x 1; h on input is the current path and on output the new draw;
+%   sig2 is a VARIANCE. S is the T x 1 vector of mixture indicators, in 1:7,
+%   drawn alongside h.
+%
+% NOT interchangeable with the random-walk variants ksc_rw_h0 / ksc_rw_diffuse:
+% different state equations.
+%
+% See:
+% Kim, S., Shephard, N. and Chib, S. (1998). Stochastic Volatility: Likelihood
+% Inference and Comparison with ARCH Models, Review of Economic Studies, 65(3):
+% 361-393.
+% Chan, J.C.C. and Jeliazkov, I. (2009). Efficient Simulation and Integrated
+% Likelihood Estimation in State Space Models, International Journal of
+% Mathematical Modelling and Numerical Optimisation, 1(1/2): 101-120.
+% Chan, J.C.C. (2023). Comparing Stochastic Volatility Specifications for
+% Large Bayesian VARs, Journal of Econometrics, 235(2): 1419-1446.
+
+function [h,S] = ksc_ar1_mean(ystar,h,mu,rho,sig2)
+T = length(h);
+    % 7-component normal mixture
+p_N = [0.0073 .10556 .00002 .04395 .34001 .24566 .2575];
+m_N = [-10.12999 -3.97281 -8.56686 2.77786 .61942 1.79518 -1.08819] - 1.2704;  % means already adjusted!!
+sig2_N = [5.79596 2.61369 5.17950 .16735 .64009 .34023 1.26261];
+
+    % sample S from a 7-point distrete distribution
+tmprand = rand(T,1);
+q = repmat(p_N,T,1).*normpdf(repmat(ystar,1,7),repmat(h,1,7)+repmat(m_N,T,1),...
+    repmat(sqrt(sig2_N),T,1));
+q = q./repmat(sum(q,2),1,7);
+S = 7 - sum(repmat(tmprand,1,7)<cumsum(q,2),2)+1;
+
+    % sample h using the precision sampler
+% y^* = h + d + \epsilon, \epsilon \sim N(0,\Omega)
+% h  ~ N(mu 1_T, sig2(Hrho' S^{-1} Hrho)^{-1}),
+% where S^{-1} = diag(1-rho^2,1,1,...,1)
+
+Hrho = speye(T) - sparse(2:T,1:(T-1),rho*ones(1,T-1),T,T);
+HiSH = Hrho'*sparse(1:T,1:T,[1-rho^2, ones(1,T-1)])*Hrho;
+d = m_N(S)'; iOmega = sparse(1:T,1:T,1./sig2_N(S));
+Kh = HiSH/sig2 + iOmega;
+CKh = chol(Kh,'lower');
+h_hat = (CKh')\(CKh\(mu/sig2*HiSH*ones(T,1) + iOmega*(ystar-d)));
+h = h_hat + CKh'\randn(T,1);
+end
