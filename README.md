@@ -193,8 +193,7 @@ GitHub's "Cite this repository" button reads.
 
 ## License
 
-MIT; see [`LICENSE`](LICENSE). The license covers the archived packages too. Third-party files
-keep their own licenses, among them `kde2d.m` in `grant_chan2017_jedc_hpfilter`, the kernel
-density estimator of Botev, Grotowski and Kroese (2010). [`NOTICE.md`](NOTICE.md) states what the
-license covers and that citing the papers is scholarly practice, which the license does not
-require.
+MIT; see [`LICENSE`](LICENSE). The license covers the archived packages too. The one third-party
+file, `kde2d.m` in `grant_chan2017_jedc_hpfilter`, the kernel density estimator of Botev,
+Grotowski and Kroese (2010), keeps its own terms. [`NOTICE.md`](NOTICE.md) states what the license
+covers.
