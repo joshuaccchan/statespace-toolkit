@@ -10,8 +10,8 @@ reproducible and within Monte Carlo error where it is not.
 1. `run_golden.ps1 -Slug <slug> -Entry <script.m>` does, in order:
    - copies `replications/<slug>/legacy/` to
      `%LOCALAPPDATA%\statespace-toolkit\golden_runs\<slug>_<time>\`, outside the
-     repository, because Dropbox locks freshly written files and would sync the MCMC
-     scratch output;
+     repository, because a sync client locks freshly written files and would sync the
+     MCMC scratch output;
    - overlays `tests/golden_runs/patches/<slug>/` if that folder exists;
    - finds the entry script in the copy, runs it from its own folder under
      `matlab -batch`, and logs what it prints;
@@ -35,7 +35,7 @@ reproducible and within Monte Carlo error where it is not.
 | Folder | Adds or changes | Why |
 |---|---|---|
 | `chan_grant2016_eneco_garchsv/autocorr.m` | adds a function, written here | the scripts call `autocorr(u, nlag)`, the positional form R2025b's Econometrics Toolbox rejects; the function returns what that call returned, and equals the 2003 MathWorks `autocorr` bit for bit on the package's data and on generated series |
-| `<slug>-savegolden/...` (12 scripts in 8 packages) | appends a numeric capture to the entry script | the script's results go only to figures or stay in the workspace, so the as-shipped log holds nothing to compare; the capture prints the results the script computes and saves their posterior means and 5% and 95% quantiles to `golden_capture.mat`, and the legacy code runs unchanged before it. Each patch is the legacy file byte for byte, with a header comment above it and the capture below it, in the file's own line endings |
+| `<slug>-savegolden/...` (12 scripts in 7 packages) | appends a numeric capture to the entry script | the script's results go only to figures or stay in the workspace, so the as-shipped log holds nothing to compare; the capture prints the results the script computes and saves their posterior means and 5% and 95% quantiles to `golden_capture.mat`, and the legacy code runs unchanged before it. Each patch is the legacy file byte for byte, with a header comment above it and the capture below it, in the file's own line endings |
 
 Scripts with an in-script model selector (`main_UCMA.m`, `main_inflation_RV.m` and the three
 `main_forecasting.m`) are captured at the selection they ship with; the other models are not

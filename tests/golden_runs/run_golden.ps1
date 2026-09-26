@@ -5,9 +5,9 @@ param(
     [Parameter(Mandatory = $true)][string]$Slug,
     [Parameter(Mandatory = $true)][string]$Entry,
     [int]$TimeoutMinutes = 720,
-    # Build copies live OUTSIDE the repo: the repo sits in Dropbox, whose sync client
-    # locks freshly written files (breaks the fresh-copy step) and would pointlessly
-    # sync large MCMC scratch output.
+    # Build copies live OUTSIDE the repo, in case it sits in a synced folder: a sync
+    # client locks freshly written files (breaks the fresh-copy step) and would
+    # pointlessly sync large MCMC scratch output.
     [string]$BuildRoot = (Join-Path $env:LOCALAPPDATA 'statespace-toolkit\golden_runs'),
     # Override the patch overlay folder (default: patches/<slug>). Used for variant
     # runs, e.g. flipping an in-script model selector; capture dirs get -Label appended.
