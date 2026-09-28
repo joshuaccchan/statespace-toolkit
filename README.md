@@ -6,7 +6,7 @@ A MATLAB library for Bayesian state space models: unobserved components, time-va
 stochastic volatility and dynamic factor models, with samplers that draw the whole state path at
 once. The library under `core/` holds their building blocks, from the precision sampler and the
 integrated likelihood to the draw of missing data and an accept-reject Metropolis-Hastings step
-for states whose conditional distribution is not Gaussian. Nine [examples](examples/) use them,
+for states whose conditional distribution is not Gaussian. Ten [examples](examples/) use them,
 all but ex05 in complete samplers. The repository also archives fourteen replication packages from
 [joshuachan.org](https://joshuachan.org/code.html) exactly as published.
 
@@ -28,13 +28,15 @@ Applications* (Chapman & Hall/CRC, forthcoming): see the
 R and Python for all fourteen chapters. The missing-data draw of ex05 comes from Chan, Poon and
 Zhu (2023), and the TVP-MIDAS model of ex09 from Chan, Poon and Zhu (2026).
 
-The nine scripts in [`examples/`](examples/) each run in under a minute. Start with ex01; ex02
+The ten scripts in [`examples/`](examples/) each run in under a minute. Start with ex01; ex02
 compares the local level model of ex01 with one that adds an AR(1) transitory component. ex04
 rewrites the book's `chapter09/UC_output_gap.m` with the library functions. ex07 follows the
 book's Section 10.1.1 on the auxiliary mixture sampler for stochastic volatility, and ex08
 estimates a simpler version of the model of Chan (2017) with the sampler of the paper's
 `UC_SVM.m`, in `replications/chan2017_jbes_svm`. ex09 imposes its linear restriction by the same
-update of an unconstrained draw that ex05 uses for the quarterly aggregation.
+update of an unconstrained draw that ex05 uses for the quarterly aggregation. ex10 fits the
+stochastic volatility models of Chan and Hsiao (2014), with MA(1) and Student-t errors, to daily
+returns on silver.
 
 | Script | What it shows | Data |
 |---|---|---|
@@ -47,6 +49,7 @@ update of an unconstrained draw that ex05 uses for the quarterly aggregation.
 | `ex07_aux_mixture` | The auxiliary mixture sampler for stochastic volatility, `ssm.ksc_rw_h0`: the seven-component mixture against the exact density it approximates, the collapsed Gibbs sampler checked against the truth, and the draws reweighted to the exact posterior | generated |
 | `ex08_svm_armh` | Stochastic volatility in mean, with the log-volatility drawn by accept-reject Metropolis-Hastings, `ssm.armh` | US CPI inflation |
 | `ex09_tvp_midas` | A MIDAS regression with time-varying weights under a linear restriction, checked against dense algebra and the truth | generated |
+| `ex10_sv_ma_t` | Stochastic volatility with MA(1) and Student-t errors, the models of Chan and Hsiao (2014) with mean zero: the log-volatility drawn by `ssm.ksc_ar1_mean`, and the MA coefficient and the degrees of freedom by Metropolis-Hastings with normal proposals at modes found by `ssm.mode_newton` | silver returns |
 
 [`examples/data/README.md`](examples/data/README.md) gives the source of every data file and the
 rows each example reads.
@@ -95,14 +98,14 @@ sampler from them.
 | `ssm.diffmat` | Builds the first-difference matrix of a state equation, I - aL | ex01-ex03, ex06-ex09 |
 | `ssm.lagpolymat` | Builds the matrix of a lag polynomial, such as second differences or an AR(2) | ex04 |
 | `ssm.surform` | Builds the design matrix of a regression whose coefficients vary over time | ex03, ex08, ex09 |
-| `ssm.mode_newton` | Finds the mode of a concave log density by Newton-Raphson, with a banded Hessian | through `ssm.armh` |
+| `ssm.mode_newton` | Finds the mode of a concave log density by Newton-Raphson, with a banded Hessian | ex10, and through `ssm.armh` |
 | `ssm.armh` | Takes the accept-reject Metropolis-Hastings step of Chan (2017), for states whose conditional distribution is not Gaussian | ex08 |
 | `ssm.ksc_rw_h0` | Draws the log-volatility path of a random walk by the auxiliary mixture sampler of Kim, Shephard and Chib (1998) | ex07, ex09 |
-| `ssm.ksc_ar1_mean` | Draws the log-volatility path of a stationary AR(1) by the same sampler | not yet in an example |
+| `ssm.ksc_ar1_mean` | Draws the log-volatility path of a stationary AR(1) by the same sampler | ex10 |
 | `ssm.ksc_rw_diffuse` | Draws the log-volatility path of a random walk whose first value has a normal prior with mean zero, by the same sampler | not yet in an example |
 | `ssm.ksc_rw_noncentered` | Draws a random-walk log-volatility in the noncentered form of Chan (2018), and returns the conditional mean and variance of its scale, which the Savage-Dickey ratio of that paper uses | not yet in an example |
 | `ssm.tnormrnd` | Draws from a truncated normal distribution | ex02 |
-| `ssm.shaded_band` | Shades credible bands in figures | ex01, ex03, ex04, ex07, ex08 |
+| `ssm.shaded_band` | Shades credible bands in figures | ex01, ex03, ex04, ex07, ex08, ex10 |
 
 Seven of these functions, `ssm.diffmat`, `ssm.ksc_ar1_mean`, `ssm.ksc_rw_diffuse`,
 `ssm.ksc_rw_h0`, `ssm.shaded_band`, `ssm.surform` and `ssm.tnormrnd`, have the same code as their
