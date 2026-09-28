@@ -1,4 +1,4 @@
-%% ex10 - Stochastic volatility with MA(1) and Student-t errors, on silver returns
+%% ex08 - Stochastic volatility with MA(1) and Student-t errors, on silver returns
 %
 % Three models of daily returns y_t, each with mean zero and a stationary AR(1)
 % log-volatility:
@@ -63,7 +63,7 @@
 % 361-393.
 
 run(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'setup.m'))
-fprintf('\n=== ex10: stochastic volatility with MA(1) and Student-t errors ===\n');
+fprintf('\n=== ex08: stochastic volatility with MA(1) and Student-t errors ===\n');
 
 rng(42);
 y = readmatrix(fullfile(fileparts(mfilename('fullpath')), 'data', 'silver.csv'));
@@ -105,7 +105,7 @@ end
 
 %% Figure: the volatility under each model, and the posteriors of psi and nu
 tid = linspace(2005, 2013, T)';
-figure('Name', 'ex10 SV with MA(1) and t errors');
+figure('Name', 'ex08 SV with MA(1) and t errors');
 subplot(2,1,1); hold on
 hb = ssm.shaded_band(tid, res{3}.volq(:,1), res{3}.volq(:,2));
 h1 = plot(tid, res{1}.vol, 'Color', [.6 .6 .6], 'LineWidth', 1);
@@ -125,7 +125,7 @@ histogram(res{3}.theta(:,5), 50, 'Normalization', 'pdf', 'EdgeColor', 'none');
 box off; title('posterior of \nu, SV-MA-t')
 drawnow
 
-fprintf('\nex10 done.\n');
+fprintf('\nex08 done.\n');
 
 function out = sampler(y, has_ma, has_t, nsim, burnin, pri)
 % one run of the sampler; has_ma and has_t switch on psi and lam

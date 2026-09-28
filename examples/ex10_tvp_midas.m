@@ -1,4 +1,4 @@
-%% ex09 - TVP-MIDAS on generated data: time-varying weights under a linear restriction
+%% ex10 - TVP-MIDAS on generated data: time-varying weights under a linear restriction
 %
 % A MIDAS regression (Ghysels, Sinko and Valkanov, 2007) relates a low-frequency variable
 % to a high-frequency predictor through a weighting function. Chan, Poon and Zhu (2026)
@@ -56,7 +56,7 @@
 % Chapman & Hall/CRC, Algorithm 2.6.
 
 run(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'setup.m'))
-fprintf('\n=== ex09: TVP-MIDAS on generated data ===\n');
+fprintf('\n=== ex10: TVP-MIDAS on generated data ===\n');
 
 rng(42);
 m = 12; K = m - 1; pb = 2;                       % high-frequency observations per period

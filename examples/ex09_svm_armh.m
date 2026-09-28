@@ -1,10 +1,10 @@
-%% ex08 - Stochastic volatility in mean with time-varying parameters, by accept-reject MH
+%% ex09 - Stochastic volatility in mean with time-varying parameters, by accept-reject MH
 %
 % y_t = tau_t + alpha_t*exp(h_t) + e_t, e_t ~ N(0, exp(h_t)), where y_t is quarterly US
 % CPI inflation, 1948Q1-2025Q3, 400 times the log change in the quarterly average CPI.
 % The log-volatility follows h_t = mu + phi*(h_{t-1} - mu) + v_t, v_t ~ N(0, sig2), with
 % h_1 ~ N(mu, sig2/(1-phi^2)), and gam_t = (alpha_t, tau_t)' is a random walk,
-% gam_t = gam_{t-1} + w_t, w_t ~ N(0, Omega), with Omega a full 2 x 2 matrix. ex08 is a
+% gam_t = gam_{t-1} + w_t, w_t ~ N(0, Omega), with Omega a full 2 x 2 matrix. ex09 is a
 % simpler version of the model of Chan (2017), whose state equation for h also has the
 % term beta*y_{t-1}. The sampler is that of the paper's UC_SVM.m, in
 % replications/chan2017_jbes_svm, without the draw of beta. The path of gam is drawn by
@@ -35,7 +35,7 @@
 % Mathematical Modelling and Numerical Optimisation, 1(1/2): 101-120.
 
 run(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'setup.m'))
-fprintf('\n=== ex08: stochastic volatility in mean, h drawn by accept-reject MH ===\n');
+fprintf('\n=== ex09: stochastic volatility in mean, h drawn by accept-reject MH ===\n');
 
 %% 1. The posterior and the acceptance rates
 y = readmatrix(fullfile(fileparts(mfilename('fullpath')), 'data', 'USCPI_quarterly.csv'), ...
@@ -149,7 +149,7 @@ end
 %% Figure: log-volatility and the volatility-in-mean coefficient
 hq = quantile(store_h, [.05 .95])';
 alpq = quantile(store_alp, [.05 .95])';
-figure('Name', 'ex08 SVM');
+figure('Name', 'ex09 SVM');
 subplot(1,2,1); hold on
 ssm.shaded_band(tid, hq(:,1), hq(:,2));
 plot(tid, mean(store_h)', 'k', 'LineWidth', 1.5);
@@ -163,7 +163,7 @@ hold off; box off; xlim([tid(1) tid(end)])
 title('\alpha_t: posterior mean and 90% band')
 drawnow
 
-fprintf('\nex08 done.\n');
+fprintf('\nex09 done.\n');
 
 function [lam, g] = proplam(h,sig2)
 % proplam.m of chan2017_jbes_svm: a t proposal for (mu, phi), from a Newton-Raphson
