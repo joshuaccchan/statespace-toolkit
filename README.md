@@ -6,8 +6,8 @@ A MATLAB library for Bayesian state space models: unobserved components, time-va
 stochastic volatility and dynamic factor models, with samplers that draw the whole state path at
 once. The library under `core/` holds their building blocks, from the precision sampler and the
 integrated likelihood to the draw of missing data and an accept-reject Metropolis-Hastings step
-for states whose conditional distribution is not Gaussian. Eight [examples](examples/) use them in
-complete samplers. The repository also archives fourteen replication packages from
+for states whose conditional distribution is not Gaussian. Nine [examples](examples/) use them,
+all but ex05 in complete samplers. The repository also archives fourteen replication packages from
 [joshuachan.org](https://joshuachan.org/code.html) exactly as published.
 
 ```matlab
@@ -26,14 +26,15 @@ Applications* (Chapman & Hall/CRC, forthcoming): see the
 [sample chapters](https://joshuachan.org/papers/BayesMacroBook_sample.pdf) and
 [its code repository](https://github.com/joshuaccchan/bayesian-macroeconometrics), with MATLAB,
 R and Python for all fourteen chapters. The missing-data draw of ex05 comes from Chan, Poon and
-Zhu (2023), and the TVP-MIDAS model of ex08 from Chan, Poon and Zhu (2026).
+Zhu (2023), and the TVP-MIDAS model of ex09 from Chan, Poon and Zhu (2026).
 
-The eight scripts in [`examples/`](examples/) each run in under a minute. Start with ex01; ex02
+The nine scripts in [`examples/`](examples/) each run in under a minute. Start with ex01; ex02
 compares the local level model of ex01 with one that adds an AR(1) transitory component. ex04
-rewrites the book's `chapter09/UC_output_gap.m` with the library functions, and ex07 estimates a
-simpler version of the model of Chan (2017) with the sampler of its `UC_SVM.m`. ex08 imposes its
-linear restriction by the same update of an unconstrained draw that ex05 uses for the quarterly
-aggregation.
+rewrites the book's `chapter09/UC_output_gap.m` with the library functions. ex07 follows the
+book's Section 10.1.1 on the auxiliary mixture sampler for stochastic volatility, and ex08
+estimates a simpler version of the model of Chan (2017) with the sampler of the paper's
+`UC_SVM.m`, in `replications/chan2017_jbes_svm`. ex09 imposes its linear restriction by the same
+update of an unconstrained draw that ex05 uses for the quarterly aggregation.
 
 | Script | What it shows | Data |
 |---|---|---|
@@ -41,10 +42,11 @@ aggregation.
 | `ex02_integrated_likelihood` | Two models compared by marginal likelihood, with the states integrated out by `ssm.intlike`, checked against a Kalman filter and quadrature | US PCE inflation |
 | `ex03_tvp_regression` | A time-varying parameter Phillips curve, and the precision sampler timed against the Kalman filter with backward sampling | US PCE inflation and output gap; generated |
 | `ex04_output_gap` | The output gap from a local linear trend with an AR(2) cycle, built with `ssm.lagpolymat` | US real GDP |
-| `ex05_missing_data` | Missing data and mixed frequencies with `ssm.select_obs`: the selection matrices of a small pattern, then a ragged edge and a series observed only through quarterly aggregates, both checked against dense algebra and the values removed | generated |
+| `ex05_missing_data` | Missing data and mixed frequencies with `ssm.select_obs`: the selection matrices of a small pattern, then a late start, a hole and a ragged edge in one VAR, and a series observed only through quarterly aggregates, both checked against dense algebra and the values removed | generated |
 | `ex06_dynamic_factor` | A dynamic factor model with one factor, as a business-cycle indicator | FRED-MD |
-| `ex07_svm_armh` | Stochastic volatility in mean, with the log-volatility drawn by accept-reject Metropolis-Hastings, `ssm.armh` | US CPI inflation |
-| `ex08_tvp_midas` | A MIDAS regression with time-varying weights under a linear restriction, checked against dense algebra and the truth | generated |
+| `ex07_aux_mixture` | The auxiliary mixture sampler for stochastic volatility, `ssm.ksc_rw_h0`: the seven-component mixture against the exact density it approximates, the collapsed Gibbs sampler checked against the truth, and the draws reweighted to the exact posterior | generated |
+| `ex08_svm_armh` | Stochastic volatility in mean, with the log-volatility drawn by accept-reject Metropolis-Hastings, `ssm.armh` | US CPI inflation |
+| `ex09_tvp_midas` | A MIDAS regression with time-varying weights under a linear restriction, checked against dense algebra and the truth | generated |
 
 [`examples/data/README.md`](examples/data/README.md) gives the source of every data file and the
 rows each example reads.
@@ -82,25 +84,25 @@ do not run as shipped.
 Across the fourteen packages the same code recurs: the truncated normal sampler is copied into six
 of them, and the function that builds the design matrix of a time-varying parameter regression
 into four. The `ssm` package under `core/` holds one copy of each step. Call the functions
-directly, or copy the example closest to your model; every example builds a complete sampler from
-them.
+directly, or copy the example closest to your model; every example but ex05 builds a complete
+sampler from them.
 
 | Function | Does | Shown in |
 |---|---|---|
-| `ssm.simulate_states` | Draws a state path from its posterior, given the banded precision matrix of the states: the precision sampler of Chan and Jeliazkov (2009) | ex01-ex08 |
+| `ssm.simulate_states` | Draws a state path from its posterior, given the banded precision matrix of the states: the precision sampler of Chan and Jeliazkov (2009) | ex01-ex06, ex08, ex09 |
 | `ssm.intlike` | Computes the log likelihood of a linear Gaussian state space model, with the states integrated out | ex02 |
 | `ssm.select_obs` | Splits the stacked data into observed and missing values, keeping the precision matrix of the missing values banded | ex05 |
-| `ssm.diffmat` | Builds the first-difference matrix of a state equation, I - aL | ex01-ex03, ex06-ex08 |
+| `ssm.diffmat` | Builds the first-difference matrix of a state equation, I - aL | ex01-ex03, ex06-ex09 |
 | `ssm.lagpolymat` | Builds the matrix of a lag polynomial, such as second differences or an AR(2) | ex04 |
-| `ssm.surform` | Builds the design matrix of a regression whose coefficients vary over time | ex03, ex07, ex08 |
+| `ssm.surform` | Builds the design matrix of a regression whose coefficients vary over time | ex03, ex08, ex09 |
 | `ssm.mode_newton` | Finds the mode of a concave log density by Newton-Raphson, with a banded Hessian | through `ssm.armh` |
-| `ssm.armh` | Takes the accept-reject Metropolis-Hastings step of Chan (2017), for states whose conditional distribution is not Gaussian | ex07 |
-| `ssm.ksc_rw_h0` | Draws the log-volatility path of a random walk by the auxiliary mixture sampler of Kim, Shephard and Chib (1998) | ex08 |
+| `ssm.armh` | Takes the accept-reject Metropolis-Hastings step of Chan (2017), for states whose conditional distribution is not Gaussian | ex08 |
+| `ssm.ksc_rw_h0` | Draws the log-volatility path of a random walk by the auxiliary mixture sampler of Kim, Shephard and Chib (1998) | ex07, ex09 |
 | `ssm.ksc_ar1_mean` | Draws the log-volatility path of a stationary AR(1) by the same sampler | not yet in an example |
 | `ssm.ksc_rw_diffuse` | Draws the log-volatility path of a random walk whose first value has a normal prior with mean zero, by the same sampler | not yet in an example |
 | `ssm.ksc_rw_noncentered` | Draws a random-walk log-volatility in the noncentered form of Chan (2018), and returns the conditional mean and variance of its scale, which the Savage-Dickey ratio of that paper uses | not yet in an example |
 | `ssm.tnormrnd` | Draws from a truncated normal distribution | ex02 |
-| `ssm.shaded_band` | Shades credible bands in figures | ex01, ex03, ex04, ex07 |
+| `ssm.shaded_band` | Shades credible bands in figures | ex01, ex03, ex04, ex07, ex08 |
 
 Seven of these functions, `ssm.diffmat`, `ssm.ksc_ar1_mean`, `ssm.ksc_rw_diffuse`,
 `ssm.ksc_rw_h0`, `ssm.shaded_band`, `ssm.surform` and `ssm.tnormrnd`, have the same code as their

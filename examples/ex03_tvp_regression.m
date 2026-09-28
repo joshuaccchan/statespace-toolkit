@@ -1,16 +1,18 @@
 %% ex03 - A time-varying parameter Phillips curve, and the precision sampler timed
 %
-% y_t = x_t'*beta_t + eps_t, eps_t ~ N(0, sig2), and beta_t = beta_{t-1} + u_t,
-% u_t ~ N(0, Omega), Omega = diag(omega_1^2, ..., omega_k^2), with
+% y_t = x_t'*beta_t + eps_t, eps_t ~ N(0, sig2), and beta_t = beta_{t-1} + eta_t,
+% eta_t ~ N(0, Omega), Omega = diag(omega_1^2, ..., omega_k^2), with
 % beta_1 ~ N(beta0, Omega). Stacked over t, y = Z*beta + eps with
 % Z = ssm.surform(X) = diag(x_1', ..., x_T'). Given the parameters, the path
 % beta = (beta_1', ..., beta_T')' is N(betahat, K^{-1}) with K banded, and
 % ssm.simulate_states draws the whole path at once: the precision sampler of Chan and
 % Jeliazkov (2009).
 %
-% Section 1 estimates a time-varying parameter Phillips curve: US PCE inflation on the
-% output gap and lagged inflation, 1960Q2-2019Q4, with x_t = (1, gap_t, y_{t-1})', Z by
-% ssm.surform, and the means and draws of beta and beta0 by ssm.simulate_states.
+% Section 1 estimates the time-varying parameter Phillips curve of Section 9.3.2 of the
+% book Bayesian Macroeconometrics (Chan, forthcoming), with the priors and sampler of its
+% chapter09/linreg_tvp.m: US PCE inflation on the output gap and lagged inflation,
+% 1960Q2-2019Q4, with x_t = (1, gap_t, y_{t-1})', and beta and beta0 drawn by
+% ssm.simulate_states.
 %
 % Section 2 compares the speed of the precision sampler with that of the Kalman filter
 % with backward sampling of Carter and Kohn (1994) and Fruhwirth-Schnatter (1994), on
@@ -19,18 +21,18 @@
 % sampler, against one draw by the Carter-Kohn sampler, written with k x k matrix
 % operations, and for k = 1 also with scalar arithmetic. Both Carter-Kohn samplers are
 % first checked against betahat and diag(K^{-1}). Which sampler is faster depends on k
-% and on how each is coded; the table reports the times on the machine that runs it.
+% and on how each is coded; the printed times are for the machine that runs the example.
 %
 % See:
 % Carter, C.K. and Kohn, R. (1994). On Gibbs Sampling for State Space Models,
-% Biometrika, 81: 541-553.
+% Biometrika, 81(3): 541-553.
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and
 % Applications, Chapman & Hall/CRC, Section 9.3.
 % Chan, J.C.C. and Jeliazkov, I. (2009). Efficient Simulation and Integrated
 % Likelihood Estimation in State Space Models, International Journal of
 % Mathematical Modelling and Numerical Optimisation, 1(1/2): 101-120.
 % Fruhwirth-Schnatter, S. (1994). Data Augmentation and Dynamic Linear Models,
-% Journal of Time Series Analysis, 15: 183-202.
+% Journal of Time Series Analysis, 15(2): 183-202.
 
 run(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'setup.m'))
 fprintf('\n=== ex03: a TVP Phillips curve, and the precision sampler timed ===\n');
@@ -149,7 +151,8 @@ for kt = [1 2 5 10]
         Zt = ssm.surform(Xt); ZZt = Zt'*Zt; Zyt = Zt'*yt;
         tp = zeros(nrep,1); tk = zeros(nrep,1); ts = zeros(nrep,1);
         for r = 1:nrep
-            tic;                                           % as in a Gibbs sampler
+            % the timing includes forming K, as in a Gibbs sampler
+            tic;
             iOmega = sparse(1:kt,1:kt,1./omega2t);
             P = kron(HHt, iOmega);
             Kt = P + ZZt/sig2t;
@@ -176,7 +179,7 @@ fprintf(['   k = 1, Carter-Kohn in scalar arithmetic: %.2f ms at T = 1000, ' ...
 
 %% Figure: the coefficient paths of the Phillips curve
 tid = 1960.25 + (0:T-1)'/4;                                % quarterly, 1960Q2-2019Q4
-labels = {'intercept', 'output gap', 'lagged inflation'};
+labels = {'constant', 'output gap', 'lagged inflation'};
 figure('Name', 'ex03 TVP Phillips curve');
 for j = 1:k
     subplot(k,1,j); hold on

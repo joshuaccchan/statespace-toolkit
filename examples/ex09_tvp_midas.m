@@ -1,44 +1,43 @@
-%% ex08 - TVP-MIDAS on generated data: time-varying weights under a linear restriction
+%% ex09 - TVP-MIDAS on generated data: time-varying weights under a linear restriction
 %
-% A MIDAS regression relates a low-frequency variable to a high-frequency predictor
-% through a weighting function. Chan, Poon and Zhu (2026) let the weights and the
-% coefficients vary over time and parameterize the weighting function linearly, which
-% keeps the model a linear Gaussian state space model:
+% A MIDAS regression (Ghysels, Sinko and Valkanov, 2007) relates a low-frequency variable
+% to a high-frequency predictor through a weighting function. Chan, Poon and Zhu (2026)
+% let the weights and the coefficients vary over time and parameterize the weighting
+% function linearly:
 %
 %   y_t = alpha_t + beta_t*theta_t'*V*x_t + e_t,   e_t ~ N(0, exp(g_t)),
 %
-% where x_t collects the K+1 high-frequency observations falling in period t and
+% where x_t collects the m = K+1 high-frequency observations falling in period t and
 % V = [v_0, ..., v_K] holds the basis functions, so the weight on lag k is
 % B(k; theta_t) = theta_t'*v_k. Here v_k is the Fourier basis [1, cos(2*pi*k/m),
-% sin(2*pi*k/m)]'; the Almon lag polynomial [1, k, k^2]', the paper's other basis, is
-% far more collinear. The coefficients b_t = [alpha_t, beta_t]' and theta_t follow
-% random walks with diagonal covariances Omega and Xi, and the log-volatility g_t a
-% random walk with variance sigma2_g.
+% sin(2*pi*k/m)]'; the Almon lag polynomial [1, k, k^2]', the other basis of Chan, Poon
+% and Zhu (2026), is far more collinear. The coefficients b_t = [alpha_t, beta_t]' and
+% theta_t follow random walks with diagonal covariances Omega and Xi, and the
+% log-volatility g_t a random walk with variance sigma2_g and g_0 = 0. The path of g is
+% drawn by ssm.ksc_rw_h0, the auxiliary mixture sampler of Kim, Shephard and Chib (1998),
+% which ex07 illustrates.
 %
 % Given theta the model is linear in b, and given b it is linear in theta, so each block
-% is drawn in one call to ssm.simulate_states from a banded precision. Separating beta_t
-% from theta_t needs a normalization, and the paper imposes the T restrictions
-% theta_t'*V*1 = 1, which make the draw of theta Gaussian truncated to a hyperplane.
-% Updating an unconstrained draw imposes them,
-%
-%   theta = thetatilde + K^{-1}*M'*(M*K^{-1}*M')^{-1}*(1 - M*thetatilde),
-%
-% with M = I_T kron (1'*V'), reusing the Cholesky factor ssm.simulate_states returns, as
-% ex05 does for the mixed-frequency aggregation. Under the Fourier basis the cosine and
-% sine terms sum to zero over a full period, so the restriction fixes the first
-% coefficient at 1/m.
+% is drawn from its banded precision in one call to ssm.simulate_states, the precision
+% sampler of Chan and Jeliazkov (2009), as in the time-varying parameter regression of
+% Section 9.3 of the book Bayesian Macroeconometrics (Chan, forthcoming). Separating
+% beta_t from theta_t needs a normalization, and Chan, Poon and Zhu (2026) impose the T
+% restrictions theta_t'*V*1 = 1, which make the draw of theta Gaussian truncated to a
+% hyperplane. Updating an unconstrained draw imposes them (Algorithm 2.6 of Rue and
+% Held, 2005), with the restriction matrix M = I_T kron (1'*V'), reusing the Cholesky
+% factor ssm.simulate_states returns; ex05 uses the same update for a mixed-frequency
+% aggregation constraint. Under the Fourier basis the cosine and sine terms sum to zero
+% over a full period, so the restriction fixes the first coefficient at 1/m.
 %
 % Section 1 checks the two conditional draws against dense algebra: the posterior mean of
 % b, and the restriction, the mean and the covariance of the draws of theta.
 %
 % Section 2 checks that the whole sampler recovers the paths and variances that generated
 % the data, on 200 periods generated from the model itself with the innovation variances
-% set at their prior means. At five to ten times the prior means the variances
-% come back at about a third of their true values and the paths are oversmoothed, since
-% at T = 200, against an error variance of about one, they are weakly identified. The
-% Monte Carlo experiments of the paper generate the data from beta density and exponential
-% Almon weighting functions, which are nonlinear in their parameters, to measure how well
-% the linear parameterization approximates them.
+% set at their prior means. The Monte Carlo experiments of Chan, Poon and Zhu (2026)
+% generate the data from beta density and exponential Almon weighting functions, which
+% are nonlinear in their parameters, to measure how well the linear parameterization
+% approximates them.
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and
@@ -57,14 +56,15 @@
 % Chapman & Hall/CRC, Algorithm 2.6.
 
 run(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'setup.m'))
-fprintf('\n=== ex08: TVP-MIDAS on generated data ===\n');
+fprintf('\n=== ex09: TVP-MIDAS on generated data ===\n');
 
 rng(42);
 m = 12; K = m - 1; pb = 2;                       % high-frequency observations per period
 V = [ones(1,K+1); cos(2*pi*(0:K)/m); sin(2*pi*(0:K)/m)];
 q = size(V,1);
 vsum = V*ones(K+1,1);                            % the restriction is theta_t'*vsum = 1
-nuom = 5; Som = .004; nuxi = 10; Sxi = .001; nug = 5; Sg = .04;   % prior, as in the paper
+% the priors of Chan, Poon and Zhu (2026)
+nuom = 5; Som = .004; nuxi = 10; Sxi = .001; nug = 5; Sg = .04;
 Vb = 10; Vth = 10;
 
 %% Section 1: the conditional draws against dense algebra
@@ -97,7 +97,8 @@ for i = 1:ndraws
     D(:,i) = tht + U*(MU\(ones(T,1) - M*tht));
 end
 
-Sig = inv(full(Kth));  mu = Sig*cth;             % the dense truncated-Gaussian moments
+% the dense moments of theta, unconstrained (mu, Sig) and on the hyperplane (mu_c, Sig_c)
+Sig = inv(full(Kth));  mu = Sig*cth;
 A = Sig*M';  Gm = M*A;
 mu_c = mu + A*(Gm\(ones(T,1) - M*mu));
 Sig_c = Sig - A*(Gm\A');
@@ -112,7 +113,7 @@ fprintf('b: posterior mean against K\\c                  %.2e\n', ...
 fprintf('theta: restriction residual, every draw        %.2e\n', max(max(abs(M*D - 1))));
 fprintf('theta: the pinned coefficient against 1/m      %.2e\n', ...
     max(max(abs(D(1:q:end,:) - 1/m))));
-fprintf('theta: mean against the dense mean             %.2f Monte Carlo standard errors\n', ...
+fprintf('theta: largest mean gap to the dense mean      %.2f Monte Carlo standard errors\n', ...
     max(abs(mean(D(free,:),2) - mu_c(free))./sqrt(dv(free)/ndraws)));
 fprintf('theta: covariance against the dense covariance %.1f%% of its largest entry\n', ...
     100*max(max(abs(cov(D') - Sig_c)))/max(max(abs(Sig_c))));
@@ -220,7 +221,7 @@ fprintf('%6s %10.3f %27.3f\n', 'sum', sum(mean(Wbar,1)), mean(sum(W_true,2)));
 
 function [X, VX] = midas_regressors(T, m, K, V)
 % the K+1 high-frequency observations of each low-frequency period, from an AR(1) as in
-% the Monte Carlo design of the paper, and their projection on the basis
+% the Monte Carlo design of Chan, Poon and Zhu (2026), and their projection on the basis
 xhf = filter(1, [1 -.7], randn(T*m + K, 1));
 X = zeros(T, K+1);
 for t = 1:T

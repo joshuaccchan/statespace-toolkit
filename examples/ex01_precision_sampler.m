@@ -2,8 +2,7 @@
 %
 % y_t = tau_t + eps_t, eps_t ~ N(0, sig2), and tau_t = tau_{t-1} + eta_t,
 % eta_t ~ N(0, omega2), with tau_1 ~ N(tau0, omega2). Given y and the parameters, the
-% trend tau = (tau_1, ..., tau_T)' is N(tauhat, K^{-1}) with K = H'*H/omega2 + I/sig2
-% tridiagonal, where H = ssm.diffmat(T) is the T x T first-difference matrix.
+% trend tau = (tau_1, ..., tau_T)' is N(tauhat, K^{-1}) with K tridiagonal.
 % ssm.simulate_states draws the whole path at once from the Cholesky factor of K,
 % without forming K^{-1}: the precision sampler of Chan and Jeliazkov (2009).
 %
@@ -12,12 +11,12 @@
 % Kalman smoother to rounding, and 10,000 draws match them within Monte Carlo error.
 %
 % Section 2 uses the sampler in estimation. A Gibbs sampler estimates the trend of US CPI
-% inflation, 1948M1-2019M12, drawing tau by ssm.simulate_states in each sweep and sig2,
-% omega2 and tau0 from their conditional distributions.
+% inflation, 1948M1-2019M12, with sig2, omega2 and tau0 unknown.
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and
-% Applications, Chapman & Hall/CRC, Section 9.1.1.
+% Applications, Chapman & Hall/CRC, Section 9.1.1, where eps_t is AR(1) with
+% coefficient rho; this example is the case rho = 0.
 % Chan, J.C.C. and Jeliazkov, I. (2009). Efficient Simulation and Integrated
 % Likelihood Estimation in State Space Models, International Journal of
 % Mathematical Modelling and Numerical Optimisation, 1(1/2): 101-120.
@@ -90,7 +89,7 @@ fprintf('   posterior means:        sig2 = %.2f,  omega2 = %.2f,  tau0 = %.2f\n'
 fprintf('   posterior 95%% CI lower: sig2 = %.2f,  omega2 = %.2f,  tau0 = %.2f\n', theta_CI(1,:));
 fprintf('   posterior 95%% CI upper: sig2 = %.2f,  omega2 = %.2f,  tau0 = %.2f\n', theta_CI(2,:));
 
-%% Figures
+%% Figure: the generated trend and the trend of US CPI inflation
 tid = 1948 + (0:T-1)'/12;                            % monthly, 1948M1-2019M12
 figure('Name', 'ex01 precision sampler');
 subplot(2,1,1); hold on

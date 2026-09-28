@@ -4,29 +4,37 @@
 % is AR(2), c_t = phi_1*c_{t-1} + phi_2*c_{t-2} + u_t^c with u_t^c ~ N(0, sigc2) and
 % c_0 = c_{-1} = 0. Trend growth is a random walk,
 % tau_t - tau_{t-1} = tau_{t-1} - tau_{t-2} + u_t^tau with u_t^tau ~ N(0, sigtau2),
-% and tau_0 and tau_{-1} are unknown. Given y and the parameters, the trend has the
-% banded precision K = H2'*H2/sigtau2 + Hphi'*Hphi/sigc2, where
-% H2 = ssm.lagpolymat(T, [2 -1]) is the second-difference matrix and
-% Hphi = ssm.lagpolymat(T, phi), and ssm.simulate_states draws the whole path at once.
+% and tau_0 and tau_{-1} are unknown. ssm.lagpolymat builds the second-difference and
+% AR(2) matrices, both banded, so the precision of the trend given y and the parameters
+% is banded and ssm.simulate_states draws the whole path at once: the precision sampler
+% of Chan and Jeliazkov (2009).
 %
 % The example estimates the output gap and trend growth of US real GDP, 1947Q1-2019Q4,
-% with the sampler of the book's chapter09/UC_output_gap.m and the means and draws of tau,
-% phi and (tau_0, tau_{-1}) by ssm.simulate_states. The AR coefficients
-% are drawn from their Gaussian full conditional and kept when stationary, and sigtau2,
-% under a uniform prior on (0, 0.01), by griddy Gibbs. The specification is similar to
-% Grant and Chan (2017), with the AR(2) cycle of Morley, Nelson and Zivot (2003). For
-% output gaps from published models, re-estimated every quarter, see
+% with the sampler of chapter09/UC_output_gap.m in the code of the book Bayesian
+% Macroeconometrics (Chan, forthcoming). ssm.simulate_states computes the means and
+% draws of tau, phi and (tau_0, tau_{-1}). The AR coefficients are drawn from their
+% Gaussian full conditional without the stationarity restriction, and a nonstationary
+% draw leaves phi at its previous value. sigtau2, under a uniform prior on (0, 0.01), is
+% drawn by the Griddy-Gibbs sampler of Ritter and Tanner (1992). The specification is
+% similar to Grant and Chan (2017), with the AR(2) cycle of Morley, Nelson and
+% Zivot (2003). For output gaps from published models, re-estimated every quarter, see
 % trend-cycle-toolkit (github.com/joshuaccchan/trend-cycle-toolkit).
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and
 % Applications, Chapman & Hall/CRC, Section 9.1.3.
+% Chan, J.C.C. and Jeliazkov, I. (2009). Efficient Simulation and Integrated
+% Likelihood Estimation in State Space Models, International Journal of
+% Mathematical Modelling and Numerical Optimisation, 1(1/2): 101-120.
 % Grant, A.L. and Chan, J.C.C. (2017). Reconciling Output Gaps: Unobserved Components
 % Model and Hodrick-Prescott Filter, Journal of Economic Dynamics and Control, 75:
 % 114-121.
 % Morley, J.C., Nelson, C.R. and Zivot, E. (2003). Why Are the Beveridge-Nelson and
 % Unobserved-Components Decompositions of GDP So Different?, Review of Economics and
 % Statistics, 85(2): 235-243.
+% Ritter, C. and Tanner, M.A. (1992). Facilitating the Gibbs Sampler: The Gibbs Stopper
+% and the Griddy-Gibbs Sampler, Journal of the American Statistical Association,
+% 87(419): 861-868.
 
 run(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'setup.m'))
 fprintf('\n=== ex04: the output gap, a local linear trend with an AR(2) cycle ===\n');
@@ -126,7 +134,7 @@ fprintf(['   2019Q4: output gap %.2f, 90%% band [%.2f, %.2f]; annualized trend g
     '%.2f, 90%% band [%.2f, %.2f]\n'], ...
     y(T) - tau_mean(T), gap_q(T,:), mu_mean(T), mu_q(T,:));
 
-%% Figures: the output gap and trend growth, NBER recessions shaded
+%% Figure: the output gap and trend growth, NBER recessions shaded
 tt = (1947:.25:2019.75)';
 figure('Name', 'ex04 output gap');
 subplot(2,1,1); hold on

@@ -11,10 +11,12 @@
 %   (ym | yo, alpha, theta) ~ N(ymhat, K^{-1}),   K = Gm'*Sigma^{-1}*Gm,
 %   K*ymhat = Gm'*Sigma^{-1}*(W*alpha + X*beta - Go*yo),
 %
-% which ssm.simulate_states draws without forming K^{-1}.
+% which ssm.simulate_states draws without forming K^{-1}: the precision sampler of Chan
+% and Jeliazkov (2009).
 %
 % Section 1 prints what ssm.select_obs returns for the first illustration in Section 2.1
-% of the paper: two periods of three variables, with y_{3,1}, y_{1,2} and y_{3,2} missing.
+% of Chan, Poon and Zhu (2023): two periods of three variables, with y_{3,1}, y_{1,2} and
+% y_{3,2} missing.
 %
 % Section 2 checks that the missing values are drawn from the right distribution. It
 % removes values from a generated VAR(1) in three patterns at once, a series that starts
@@ -29,13 +31,16 @@
 %   z = (y_t + 2*y_{t-1} + 3*y_{t-2} + 2*y_{t-3} + y_{t-4})/3,
 %
 % at the last month of each quarter after the first, which stacks into the hard
-% constraint M*ym = z. One update of an unconstrained draw u imposes it exactly,
-% ym = u + K^{-1}*M'*(M*K^{-1}*M')^{-1}*(z - M*u), reusing the Cholesky factor
-% ssm.simulate_states returns. The draws are compared with the values removed, before and
-% after the update, and with the conditional normal of ym given yo and z, from dense
-% algebra on the joint normal of (y, z).
+% constraint M*ym = z. One update of an unconstrained draw u imposes it exactly
+% (Algorithm 2 of Chan, Poon and Zhu, 2023; Algorithm 2.6 of Rue and Held, 2005), reusing
+% the Cholesky factor ssm.simulate_states returns. The draws are compared with the values
+% removed, before and after the update, and with the conditional normal of ym given yo and
+% z, from dense algebra on the joint normal of (y, z).
 %
 % See:
+% Chan, J.C.C. and Jeliazkov, I. (2009). Efficient Simulation and Integrated
+% Likelihood Estimation in State Space Models, International Journal of
+% Mathematical Modelling and Numerical Optimisation, 1(1/2): 101-120.
 % Chan, J.C.C., Poon, A. and Zhu, D. (2023). High-Dimensional Conditionally Gaussian
 % State Space Models with Missing Data, Journal of Econometrics, 236(1): 105468,
 % Section 2 and Algorithm 2.
@@ -48,7 +53,7 @@
 run(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'setup.m'))
 fprintf('\n=== ex05: missing data and mixed frequencies ===\n');
 
-%% Section 1: what ssm.select_obs returns, on the first illustration of the paper
+%% Section 1: ssm.select_obs on the first illustration of Chan, Poon and Zhu (2023)
 Ytrue = [1 2 3; 4 5 6];                          % each value is its place in the stacked y
 Y = Ytrue;
 Y(1,3) = NaN; Y(2,1) = NaN; Y(2,3) = NaN;        % y_{3,1}, y_{1,2} and y_{3,2}
@@ -90,12 +95,12 @@ for t = 1:T
 end
 
 Y = Ytrue;
-Y(1:24,4) = NaN;                                 % a series that starts two years late
+Y(1:24,4) = NaN;                                 % a series that starts 24 periods late
 Y(91:93,2) = NaN;                                % a hole
 Y(T,1) = NaN; Y(T-1:T,3) = NaN; Y(T-2:T,4) = NaN;   % the ragged edge at the end
 
 [So, Sm, yo] = ssm.select_obs(Y);
-L = sparse(2:T,1:T-1,1,T,T);                     % the lag operator on the stacked path
+L = sparse(2:T,1:T-1,1,T,T);                     % the T x T lag matrix on the time index
 H = speye(T*n) - kron(L, Phi);                   % H*y = e, with y_0 = 0
 iSig = kron(speye(T), inv(Sig));
 Gm = H*Sm; Go = H*So;

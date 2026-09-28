@@ -1,13 +1,15 @@
 %% ex02 - Two models of US PCE inflation compared by marginal likelihood
 %
 % The data are quarterly US PCE inflation, 1960Q1-2024Q4. M1 is the local level model
-% of ex01, y_t = tau_t + eps_t with eps_t ~ N(0, sig2). M2 adds an AR(1) transitory
-% component, eps_t = rho*eps_{t-1} + u_t with u_t ~ N(0, sig2), eps_0 = 0 and
-% rho ~ U(-1, 1). In both, tau_t = tau_{t-1} + eta_t, eta_t ~ N(0, omega2), with
-% tau_1 ~ N(tau0, omega2). Given theta = (rho, sig2, omega2, tau0), each is a linear
-% Gaussian state space model with banded precision matrices, and ssm.intlike returns the
-% integrated likelihood p(y | theta), with the T = 260 states integrated out: the method
-% of Chan and Jeliazkov (2009).
+% of ex01, y_t = tau_t + eps_t with eps_t ~ N(0, sig2). M2, the model of chapter09/UC_AR.m
+% in the code of the book Bayesian Macroeconometrics (Chan, forthcoming), lets the
+% transitory component follow an AR(1): eps_t = rho*eps_{t-1} + u_t with
+% u_t ~ N(0, sig2), eps_0 = 0 and rho ~ U(-1, 1). In both, tau_t = tau_{t-1} + eta_t,
+% eta_t ~ N(0, omega2), with tau_1 ~ N(tau0, omega2). Given
+% theta = (rho, sig2, omega2, tau0), each is a linear Gaussian state space model with
+% banded precision matrices, and ssm.intlike returns the integrated log likelihood
+% log p(y | theta), with the T = 260 states integrated out: the method of Chan and
+% Jeliazkov (2009).
 %
 % The marginal likelihood p(y) is then an integral over theta alone, three parameters
 % in M1 and four in M2. It is estimated by importance sampling on phi = (atanh rho,
@@ -22,10 +24,10 @@
 % Section 2 checks ssm.intlike: at each posterior mean, it equals the log likelihood from
 % the Kalman filter to rounding.
 %
-% Section 3 compares the two models by marginal likelihood. It estimates log p(y) by
-% importance sampling and checks the estimates by quadrature: with tau0 moved into the
-% states, ssm.intlike integrates it out as well, leaving two parameters in M1 and three in
-% M2, few enough for a grid. The two agree to within 0.01.
+% Section 3 compares the two models by marginal likelihood: the log Bayes factor of M2
+% against M1 is 3.66. Quadrature checks the importance sampling estimates: with tau0 moved
+% into the states, ssm.intlike integrates it out as well, leaving two parameters in M1 and
+% three in M2, few enough for a grid. The two methods agree to within 0.01.
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and
@@ -56,14 +58,14 @@ rng(42);
 rng(42);
 [theta2, tau2] = gibbs_uc(y, pri, nsim, burnin, true);
 th1 = mean(theta1)'; th2 = mean(theta2)';
-fprintf('\nPosterior means, %d draws after %d burn-in\n', nsim, burnin);
+fprintf('\n1. Posterior means, %d draws after %d burn-in\n', nsim, burnin);
 fprintf('   M1 local level:          sig2 = %.2f, omega2 = %.2f, tau0 = %.2f\n', th1(2:4));
 fprintf('   M2 AR(1) transitory:     rho = %.2f, sig2 = %.2f, omega2 = %.2f, tau0 = %.2f\n', th2);
 
 %% 2. The integrated likelihood against the Kalman filter
 il = [loglike(y, HH, th1); loglike(y, HH, th2)];
 kf = [kalman_loglik(y, th1); kalman_loglik(y, th2)];
-fprintf('\nlog p(y | theta) at the posterior mean\n');
+fprintf('\n2. log p(y | theta) at the posterior mean\n');
 fprintf('   %-4s %14s %14s %12s\n', '', 'ssm.intlike', 'Kalman filter', 'difference');
 fprintf('   %-4s %14.4f %14.4f %12.1e\n', 'M1', il(1), kf(1), il(1) - kf(1));
 fprintf('   %-4s %14.4f %14.4f %12.1e\n', 'M2', il(2), kf(2), il(2) - kf(2));
@@ -78,7 +80,7 @@ rng(42);
 npts = 17;
 q1 = quad_logml(y, pri, phi1, false, npts);
 q2 = quad_logml(y, pri, phi2, true, npts);
-fprintf('\nlog p(y)\n');
+fprintf('\n3. log p(y)\n');
 fprintf('   %-4s %26s %13s\n', '', 'importance sampling (NSE)', 'quadrature');
 fprintf('   %-4s %18.2f (%.3f) %13.2f\n', 'M1', lml1, nse1, q1);
 fprintf('   %-4s %18.2f (%.3f) %13.2f\n', 'M2', lml2, nse2, q2);
@@ -166,7 +168,7 @@ lk = logprior(th, pri, has_rho) + log(th(2)) + log(th(3));
 if has_rho
     lk = lk + log(1 - th(1)^2);
 end
-if lk > -Inf                                               % |rho| = 1 after rounding
+if lk > -Inf                                  % lk = -Inf when |rho| = 1 after rounding
     lk = lk + loglike(y, HH, th);
 end
 end
@@ -194,7 +196,7 @@ phi = m + C*z;
 lconst = gammaln((nu+k)/2) - gammaln(nu/2) - k/2*log(nu*pi) - sum(log(diag(C)));
 logw = zeros(R,1);
 for r = 1:R
-    logg = lconst - (nu+k)/2*log(1 + z(:,r)'*z(:,r)/nu);  % t density of phi(:,r)
+    logg = lconst - (nu+k)/2*log(1 + z(:,r)'*z(:,r)/nu);  % log t density of phi(:,r)
     logw(r) = logkernel(phi(:,r)) - logg;
 end
 lml = logmeanexp(logw);
