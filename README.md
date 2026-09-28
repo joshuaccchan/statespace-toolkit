@@ -6,9 +6,11 @@ A MATLAB library for Bayesian state space models: unobserved components, time-va
 stochastic volatility and dynamic factor models, with samplers that draw the whole state path at
 once. The library under `core/` holds their building blocks, from the precision sampler and the
 integrated likelihood to the draw of missing data and an accept-reject Metropolis-Hastings step
-for states whose conditional distribution is not Gaussian. Ten [examples](examples/) use them,
-all but ex05 in complete samplers. The repository also archives fourteen replication packages from
-[joshuachan.org](https://joshuachan.org/code.html) exactly as published.
+for states whose conditional distribution is not Gaussian. Ten [examples](examples/) range from a
+local level model of US inflation to stochastic volatility in mean and TVP-MIDAS, and cover model
+comparison by marginal likelihood, the output gap, missing and mixed-frequency data, a dynamic
+factor model of FRED-MD and heavy-tailed returns on silver. The repository also archives fourteen
+replication packages from [joshuachan.org](https://joshuachan.org/code.html) exactly as published.
 
 ```matlab
 run setup.m                 % adds core/ to the path
@@ -28,15 +30,12 @@ Applications* (Chapman & Hall/CRC, forthcoming): see the
 R and Python for all fourteen chapters. The missing-data draw of ex05 comes from Chan, Poon and
 Zhu (2023), and the TVP-MIDAS model of ex10 from Chan, Poon and Zhu (2026).
 
-The ten scripts in [`examples/`](examples/) each run in under a minute. Start with ex01; ex02
-compares the local level model of ex01 with one that adds an AR(1) transitory component. ex04
-rewrites the book's `chapter09/UC_output_gap.m` with the library functions. ex07 follows the
-book's Section 10.1.1 on the auxiliary mixture sampler for stochastic volatility, and ex08 fits
-the stochastic volatility models of Chan and Hsiao (2014), with MA(1) and Student-t errors, to
-daily returns on silver. ex09 estimates a simpler version of the model of Chan (2017) with the
-sampler of the paper's `UC_SVM.m`, in `replications/chan2017_jbes_svm`. ex10 imposes its linear
-restriction by the same update of an unconstrained draw that ex05 uses for the quarterly
-aggregation.
+The ten scripts in [`examples/`](examples/) each run in under a minute. Start with ex01.
+ex01-ex06 are linear Gaussian models. ex07-ex09 add stochastic volatility: ex07 and ex08 draw the
+log-volatility by the auxiliary mixture sampler, and ex09, in which the volatility also enters the
+mean, by accept-reject Metropolis-Hastings. ex10 combines the two groups: it imposes the linear
+restriction on its time-varying weights by the update that ex05 uses for the quarterly
+aggregation, and draws its volatility as ex07 does.
 
 | Script | What it shows | Data |
 |---|---|---|
