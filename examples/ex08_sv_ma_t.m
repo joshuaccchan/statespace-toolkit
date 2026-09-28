@@ -12,36 +12,35 @@
 % without their constant mean; SV-MA is the MA(1) case of the moving average stochastic
 % volatility model of Chan (2013).
 %
-% Stacked over t, y = H_psi*e, where H_psi is lower bidiagonal with ones on the
-% diagonal and psi below it. So e = H_psi^{-1}*y is one call to filter, and the
-% likelihood given h, lam and psi is exact. Given psi and lam, e_t^2/(lam_t*exp(h_t)) is
-% chi^2_1, so log(e_t^2/lam_t) is h_t plus a log chi^2_1 error; the code adds c = 1e-4
-% inside the log to avoid log 0. The auxiliary mixture sampler of Kim, Shephard and Chib
-% (1998) approximates the log chi^2_1 density by a seven-component Gaussian mixture, and
-% ssm.ksc_ar1_mean draws the component indicators and then h, by the precision sampler
-% of Chan and Jeliazkov (2009). mu_h and sigma2_h have standard full conditionals, and
-% phi_h is drawn by an independence-chain Metropolis-Hastings step. psi and nu are also
-% drawn by independence-chain Metropolis-Hastings steps, each with a normal proposal
-% whose mean is the mode of the conditional density and whose variance is the inverse of
-% the negative Hessian there, both from ssm.mode_newton. lam_t is drawn from its
-% inverse-gamma full conditional. The blocks for psi, lam and nu do not condition on the
-% component indicators, so they come after h and before the next draw of the
-% indicators, the order of Del Negro and Primiceri (2015).
+% Stacked over t, y = H_psi*e, with H_psi lower bidiagonal: ones on the diagonal and psi
+% below it. So e = H_psi^{-1}*y is one call to filter, and the likelihood given h, lam
+% and psi is exact.
 %
-% The sampler is that of MASVt.m in replications/chan_hsiao2014_wiley_sv, with the mean
-% removed and the proposal for psi that Chan and Hsiao (2014) describe; MASVt.m finds
-% the mode by fminsearch and fixes the standard deviation of the proposal at 0.05.
-% Candidates for nu below 0, outside its U(0, 50) prior, are rejected. The data are the
-% package's daily returns on the silver spot price, January 2005 to December 2012, in
-% percent, and the priors are the package's. The example reports the posterior of each
-% model's parameters and plots the standard deviation of e_t under each model:
-% exp(h_t/2), times sqrt(nu/(nu - 2)) under SV-MA-t.
+% Each sweep of the sampler takes five steps; SV skips steps 3-5, and SV-MA steps 4-5.
 %
-% On these data both extensions matter. Under SV-MA-t the 90% interval of psi is about
-% (-0.12, -0.05), nu is about 7, and sigma2_h is about half its value under SV: with
-% Student-t errors the largest returns come from the tails of e_t, so the volatility path
-% is smoother. The estimates are close to those Chan and Hsiao (2014) report for SV-MA-t
-% with a constant mean.
+%   1. h, by ssm.ksc_ar1_mean. Given psi and lam, log(e_t^2/lam_t) is h_t plus a
+%      log chi^2_1 error, which the auxiliary mixture sampler of Kim, Shephard and Chib
+%      (1998) approximates by a seven-component Gaussian mixture. The function draws the
+%      component indicators and then h, by the precision sampler of Chan and Jeliazkov
+%      (2009).
+%   2. sigma2_h and mu_h from their full conditionals, and phi_h by an independence-chain
+%      Metropolis-Hastings (MH) step.
+%   3. psi by an independence-chain MH step with a normal proposal: its mean is the mode
+%      of the conditional density and its variance the inverse of the negative Hessian
+%      there, both from ssm.mode_newton.
+%   4. lam_t from its inverse-gamma full conditional.
+%   5. nu by an MH step of the same form as step 3.
+%
+% Steps 3-5 do not condition on the component indicators, so they come after h and
+% before the next draw of the indicators, the order of Del Negro and Primiceri (2015);
+% see Section 10.1.1 of the book Bayesian Macroeconometrics (Chan, forthcoming).
+%
+% On the daily silver returns of Chan and Hsiao (2014), January 2005 to December 2012,
+% both extensions matter. Under SV-MA-t the 90% interval of psi is about (-0.12, -0.05),
+% nu is about 7, and sigma2_h is about half its value under SV: with Student-t errors the
+% largest returns come from the tails of e_t, so the volatility path is smoother. The
+% estimates are close to those Chan and Hsiao (2014) report for SV-MA-t with a constant
+% mean.
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and
@@ -70,7 +69,7 @@ y = readmatrix(fullfile(fileparts(mfilename('fullpath')), 'data', 'silver.csv'))
 T = length(y);
 nsim = 5000; burnin = 1000;
 
-% the priors of MASVt.m
+% the priors of MASVt.m, in replications/chan_hsiao2014_wiley_sv
 pri.muh0 = 0; pri.Vmuh = 5;                % mu_h ~ N(0, 5)
 pri.phih0 = .95; pri.Vphih = 1;            % phi_h ~ N(0.95, 1) on (-1, 1)
 pri.nuh = 10; pri.Sh = .02*(pri.nuh - 1);  % sigma2_h ~ IG(10, 0.18), mean 0.02

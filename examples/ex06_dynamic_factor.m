@@ -10,11 +10,10 @@
 %
 % The example extracts a business-cycle indicator, the factor, from FRED-MD: 92 monthly US
 % series from March 1959 to November 2025, each transformed as McCracken and Ng (2016)
-% recommend and standardized, with industrial production first. The sampler is that of
-% chapter11/DFM.m in the code of the book Bayesian Macroeconometrics (Chan, forthcoming),
-% written here for one factor, and the estimates reproduce those the book reports: a
-% posterior mean of phi of about 0.27, with a 95% credible interval of (0.20, 0.33), and
-% a factor near -16.5 in April 2020.
+% recommend and standardized, with industrial production first. The estimates reproduce
+% those reported in the book Bayesian Macroeconometrics (Chan, forthcoming): a posterior
+% mean of phi of about 0.27, with a 95% credible interval of (0.20, 0.33), and a factor
+% near -16.5 in April 2020.
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and
@@ -54,7 +53,7 @@ varnames = varnames(idx);
 Y = (data - mean(data,1)) ./ std(data,0,1);
 [T,n] = size(Y);
 
-% prior hyperparameters
+% the priors of chapter11/DFM.m, in the code of the book
 a0 = 0; Va = 1;                                            % a_i ~ N(a0, Va), i > 1
 phi0 = 0; Vphi = 1;                                        % phi ~ N(phi0, Vphi) on (-1, 1)
 nusig2 = 3; Ssig2 = (nusig2-1)*ones(n,1);                  % sig2_i ~ IG(nusig2, Ssig2_i)

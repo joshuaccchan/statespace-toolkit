@@ -9,19 +9,16 @@
 % Jeliazkov (2009).
 %
 % Section 1 estimates the time-varying parameter Phillips curve of Section 9.3.2 of the
-% book Bayesian Macroeconometrics (Chan, forthcoming), with the priors and sampler of its
-% chapter09/linreg_tvp.m: US PCE inflation on the output gap and lagged inflation,
-% 1960Q2-2019Q4, with x_t = (1, gap_t, y_{t-1})', and beta and beta0 drawn by
-% ssm.simulate_states.
+% book Bayesian Macroeconometrics (Chan, forthcoming): US PCE inflation on the output gap
+% and lagged inflation, 1960Q2-2019Q4, with x_t = (1, gap_t, y_{t-1})'.
 %
 % Section 2 compares the speed of the precision sampler with that of the Kalman filter
 % with backward sampling of Carter and Kohn (1994) and Fruhwirth-Schnatter (1994), on
-% generated data with k = 1, 2, 5 and 10 coefficients and T = 1,000 and 5,000. It times
-% one draw of the path by ssm.simulate_states, with K formed each time as in a Gibbs
-% sampler, against one draw by the Carter-Kohn sampler, written with k x k matrix
-% operations, and for k = 1 also with scalar arithmetic. Both Carter-Kohn samplers are
-% first checked against betahat and diag(K^{-1}). Which sampler is faster depends on k
-% and on how each is coded; the printed times are for the machine that runs the example.
+% generated data with k = 1, 2, 5 and 10 coefficients and T = 1,000 and 5,000. The
+% Carter-Kohn sampler is written with k x k matrix operations, and for k = 1 also with
+% scalar arithmetic. Both Carter-Kohn samplers are first checked against betahat and
+% diag(K^{-1}). Which sampler is faster depends on k and on how each is coded; the
+% printed times are for the machine that runs the example.
 %
 % See:
 % Carter, C.K. and Kohn, R. (1994). On Gibbs Sampling for State Space Models,
@@ -51,7 +48,7 @@ T = length(y);
 X = [ones(T,1), g, ylag];
 k = size(X,2);
 
-% prior hyperparameters
+% prior hyperparameters, as in chapter09/linreg_tvp.m in the book's code
 beta00 = zeros(k,1);
 iVbeta0 = 1/100*eye(k);
 nu_sig = 3;  S_sig = 1;                                    % IG prior for sigma^2

@@ -15,24 +15,19 @@
 % log(exp(h_t)*e_t^2 + c).
 %
 % Section 1 compares three densities for e*_t: the exact log chi^2_1, a single Gaussian
-% with the same mean (-1.2704) and variance (4.9348), and the seven-component mixture.
+% with the same mean and variance, and the seven-component mixture.
 %
 % Section 2 runs the collapsed Gibbs sampler of Del Negro and Primiceri (2015), in the
 % four-block form of Section 10.1.1 of the book Bayesian Macroeconometrics (Chan,
 % forthcoming), on 1,000 periods generated from the model. The blocks are sigma2_h, h_0,
-% s and h, and one call to ssm.ksc_rw_h0 draws s and then h. The chain starts from the
-% posterior mean of h under the single-Gaussian approximation. The section checks that
+% s and h, and one call to ssm.ksc_rw_h0 draws s and then h. The section checks that
 % the posterior recovers the path of h and the parameters that generated the data.
 %
 % Section 3 reweights the draws, which come from the posterior of the mixture model, to
-% the exact posterior, as Kim, Shephard and Chib (1998) propose, with weights
-% proportional to p(y*|h) under the exact model over p(y*|h) under the mixture. The
-% section reports how much the weights vary and how far they move the posterior means:
-% the parameters barely move, and h_t moves most near returns close to zero, where
-% log(y_t^2) - h_t falls in the left tail of log chi^2_1 and the mixture fits worst.
-%
-% The priors and the start are those of the book's application to YEN/USD returns,
-% chapter10/SVRW_YEN.m in the book's code repository.
+% the exact posterior, as Kim, Shephard and Chib (1998) propose. The reweighting barely
+% moves the posterior means of the parameters; the posterior mean of h_t moves most near
+% returns close to zero, where log(y_t^2) - h_t falls in the left tail of log chi^2_1 and
+% the mixture fits worst.
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and
@@ -88,6 +83,7 @@ box off; xlim([-12 4]); ylim([-12 0]); title('log density');
 rng(42);
 T = 1000;
 h0_true = log(.5^2);                       % a daily standard deviation of 0.5 percent
+% the priors of chapter10/SVRW_YEN.m in the book's code repository
 a0 = 0; b0 = 100; nu_h = 3; S_h = .2^2*(nu_h - 1);
 sig2h_true = S_h/(nu_h - 1);               % the prior mean, 0.04
 h_true = h0_true + cumsum(sqrt(sig2h_true)*randn(T,1));
@@ -97,6 +93,7 @@ ystar = log(y.^2 + c);
 
 nsim = 10000; burnin = 1000;
 H = ssm.diffmat(T);
+% the start of SVRW_YEN.m
 sig2h = .05;
 h0 = log(var(y));
 h = sv_gaussian_approx(ystar, h0, sig2h, H, m_eps, v_eps);

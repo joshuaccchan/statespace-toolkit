@@ -24,20 +24,15 @@
 % beta_t from theta_t needs a normalization, and Chan, Poon and Zhu (2026) impose the T
 % restrictions theta_t'*V*1 = 1, which make the draw of theta Gaussian truncated to a
 % hyperplane. Updating an unconstrained draw imposes them (Algorithm 2.6 of Rue and
-% Held, 2005), with the restriction matrix M = I_T kron (1'*V'), reusing the Cholesky
-% factor ssm.simulate_states returns; ex05 uses the same update for a mixed-frequency
-% aggregation constraint. Under the Fourier basis the cosine and sine terms sum to zero
-% over a full period, so the restriction fixes the first coefficient at 1/m.
+% Held, 2005); ex05 uses the same update for a mixed-frequency aggregation constraint.
+% Under the Fourier basis the cosine and sine terms sum to zero over a full period, so
+% the restriction fixes the first coefficient at 1/m.
 %
 % Section 1 checks the two conditional draws against dense algebra: the posterior mean of
 % b, and the restriction, the mean and the covariance of the draws of theta.
 %
 % Section 2 checks that the whole sampler recovers the paths and variances that generated
-% the data, on 200 periods generated from the model itself with the innovation variances
-% set at their prior means. The Monte Carlo experiments of Chan, Poon and Zhu (2026)
-% generate the data from beta density and exponential Almon weighting functions, which
-% are nonlinear in their parameters, to measure how well the linear parameterization
-% approximates them.
+% the data, with the innovation variances set at their prior means.
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and

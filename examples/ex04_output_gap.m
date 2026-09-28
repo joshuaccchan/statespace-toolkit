@@ -10,15 +10,13 @@
 % of Chan and Jeliazkov (2009).
 %
 % The example estimates the output gap and trend growth of US real GDP, 1947Q1-2019Q4,
-% with the sampler of chapter09/UC_output_gap.m in the code of the book Bayesian
-% Macroeconometrics (Chan, forthcoming). ssm.simulate_states computes the means and
-% draws of tau, phi and (tau_0, tau_{-1}). The AR coefficients are drawn from their
-% Gaussian full conditional without the stationarity restriction, and a nonstationary
-% draw leaves phi at its previous value. sigtau2, under a uniform prior on (0, 0.01), is
-% drawn by the Griddy-Gibbs sampler of Ritter and Tanner (1992). The specification is
-% similar to Grant and Chan (2017), with the AR(2) cycle of Morley, Nelson and
-% Zivot (2003). For output gaps from published models, re-estimated every quarter, see
-% trend-cycle-toolkit (github.com/joshuaccchan/trend-cycle-toolkit).
+% as in Section 9.1.3 of the book Bayesian Macroeconometrics (Chan, forthcoming). The AR
+% coefficients are drawn from their Gaussian full conditional without the stationarity
+% restriction, and a nonstationary draw leaves phi at its previous value. sigtau2, under a
+% uniform prior on (0, 0.01), is drawn by the Griddy-Gibbs sampler of Ritter and Tanner
+% (1992). The specification is similar to Grant and Chan (2017), with the AR(2) cycle of
+% Morley, Nelson and Zivot (2003). For output gaps from published models, re-estimated
+% every quarter, see trend-cycle-toolkit (github.com/joshuaccchan/trend-cycle-toolkit).
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and
@@ -47,7 +45,7 @@ data = 100*log(data_raw);
 y = data;
 T = length(y);
 
-% prior hyperparameters
+% prior hyperparameters, as in chapter09/UC_output_gap.m in the book's code
 a0 = [750;750]; B0 = 100*eye(2);                           % (tau_0, tau_{-1}) ~ N(a0, B0)
 phi0 = [1.3 -.7]'; iVphi = speye(2);                       % phi ~ N(phi0, I), stationary
 nu_sigc2 = 3; S_sigc2 = 1*(nu_sigc2-1);                    % sigc2 ~ IG(nu_sigc2, S_sigc2)

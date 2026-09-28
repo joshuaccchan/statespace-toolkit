@@ -6,23 +6,19 @@
 % h_1 ~ N(mu, sig2/(1-phi^2)), and gam_t = (alpha_t, tau_t)' is a random walk,
 % gam_t = gam_{t-1} + w_t, w_t ~ N(0, Omega), with Omega a full 2 x 2 matrix. ex09 is a
 % simpler version of the model of Chan (2017), whose state equation for h also has the
-% term beta*y_{t-1}. The sampler is that of the paper's UC_SVM.m, in
-% replications/chan2017_jbes_svm, without the draw of beta. The path of gam is drawn by
-% ssm.simulate_states, the precision sampler of Chan and Jeliazkov (2009), and h by
-% ssm.armh, the accept-reject Metropolis-Hastings step of Chan (2017), whose Gaussian
-% proposal is centered at the mode of the conditional density of h. A Metropolis-Hastings
-% step with the t proposal of Chan (2017) draws (mu, phi) jointly.
+% term beta*y_{t-1}. The path of gam is drawn by ssm.simulate_states, the precision
+% sampler of Chan and Jeliazkov (2009), and h by ssm.armh, the accept-reject
+% Metropolis-Hastings step of Chan (2017), whose Gaussian proposal is centered at the mode
+% of the conditional density of h. A Metropolis-Hastings step with the t proposal of
+% Chan (2017) draws (mu, phi) jointly. For a textbook discussion, see Sections 6.2.3,
+% 10.3.3 and 10.3.4 of the book Bayesian Macroeconometrics (Chan, forthcoming).
 %
-% Section 1 estimates the model on US CPI inflation, from 20,000 draws after 5,000 of
-% burn-in, and reports the acceptance rates of h and of (mu, phi). The chain starts where
-% UC_SVM.m starts, and the first candidate for h is accepted outright, as in UC_SVM.m:
-% from a start far from the target, the chain can reject every candidate.
+% Section 1 estimates the model. The first candidate for h is accepted outright, since
+% from a start far from the target the chain can reject every candidate.
 %
 % Section 2 shows how the acceptance rate depends on c_reject, the envelope constant as a
 % multiple of the ratio of the target to the proposal density at the mode. Section 1 uses
-% the default, 3, as UC_SVM.m does. For c_reject = 0.5, 1, 3 and 10, Section 2 takes
-% 1,000 draws of h from the target density of the last draw of h in the chain and reports
-% the MH acceptance rate and the number of candidates per draw.
+% the default, 3.
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and
@@ -46,7 +42,7 @@ tid = 1948 + (0:T-1)'/4;                                   % quarterly, 1948Q1-2
 rng(1);
 nloop = 25000; burnin = 5000;
 
-% prior, as in UC_SVM.m
+% prior, as in UC_SVM.m, in replications/chan2017_jbes_svm
 phi0 = .97; Vphi = .1^2;
 mu0 = 0; Vmu = 10;
 Vgam = 10*eye(2); invVgam = Vgam\speye(2);
@@ -78,7 +74,7 @@ for loop = 1:nloop
     alp = gam(1:2:end);
     tau = gam(2:2:end);
 
-    % sample h by accept-reject MH
+    % sample h by accept-reject MH; c_reject (default 3) and ForceAccept as in UC_SVM.m
     HinvSH = Hphi'*sparse(1:T,1:T,[(1-phi^2)/sig2; 1/sig2*ones(T-1,1)])*Hphi;
     deltah = Hphi\[mu; mu*(1-phi)*ones(T-1,1)];
     s2 = (y-tau).^2;

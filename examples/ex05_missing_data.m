@@ -15,8 +15,7 @@
 % and Jeliazkov (2009).
 %
 % Section 1 prints what ssm.select_obs returns for the first illustration in Section 2.1
-% of Chan, Poon and Zhu (2023): two periods of three variables, with y_{3,1}, y_{1,2} and
-% y_{3,2} missing.
+% of Chan, Poon and Zhu (2023).
 %
 % Section 2 checks that the missing values are drawn from the right distribution. It
 % removes values from a generated VAR(1) in three patterns at once, a series that starts

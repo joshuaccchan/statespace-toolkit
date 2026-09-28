@@ -1,8 +1,8 @@
 %% ex02 - Two models of US PCE inflation compared by marginal likelihood
 %
 % The data are quarterly US PCE inflation, 1960Q1-2024Q4. M1 is the local level model
-% of ex01, y_t = tau_t + eps_t with eps_t ~ N(0, sig2). M2, the model of chapter09/UC_AR.m
-% in the code of the book Bayesian Macroeconometrics (Chan, forthcoming), lets the
+% of ex01, y_t = tau_t + eps_t with eps_t ~ N(0, sig2). M2, the model of Section 9.1.1
+% of the book Bayesian Macroeconometrics (Chan, forthcoming), lets the
 % transitory component follow an AR(1): eps_t = rho*eps_{t-1} + u_t with
 % u_t ~ N(0, sig2), eps_0 = 0 and rho ~ U(-1, 1). In both, tau_t = tau_{t-1} + eta_t,
 % eta_t ~ N(0, omega2), with tau_1 ~ N(tau0, omega2). Given
@@ -102,8 +102,8 @@ drawnow
 fprintf('\nex02 done.\n');
 
 function [store_theta, tau_mean] = gibbs_uc(y, pri, nsim, burnin, sample_rho)
-% The Gibbs sampler of the book's UC_AR.m; with sample_rho false, rho stays at 0 and
-% the sampler is that of M1. tau_mean is the posterior mean of the trend.
+% The Gibbs sampler of chapter09/UC_AR.m in the book's code; with sample_rho false, rho
+% stays at 0 and the sampler is that of M1. tau_mean is the posterior mean of the trend.
 T = length(y);
 H = ssm.diffmat(T); HH = H'*H; HHiota = HH*ones(T,1);
 sig2 = 1; omega2 = .1; tau0 = 5; rho = 0;
