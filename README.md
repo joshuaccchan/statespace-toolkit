@@ -19,7 +19,8 @@ ex01_precision_sampler      % the precision sampler on a local level model
 ```
 
 The code needs MATLAB with the Statistics and Machine Learning Toolbox. `setup.m` also checks for
-the Optimization Toolbox, which four of the archived packages use.
+the Optimization Toolbox, which four of the archived packages use. The library and the examples
+are tested on MATLAB R2025b, on Windows and, in the repository's continuous integration, on Linux.
 
 ## Learn the Methods
 
@@ -167,28 +168,8 @@ Grant and Chan (2017, JMCB); Grant and Chan (2017, JEDC); and Chan, Clark and Ko
 
 ## Citation
 
-Cite the paper behind each method you use. The table in
-[Which Model Do I Want?](#which-model-do-i-want) and [`provenance.md`](provenance.md) give the
-paper for each package. The header of each function and example lists the works it draws on. For
-the library:
-
-- `ssm.simulate_states` and `ssm.intlike`: Chan, J.C.C. and Jeliazkov, I. (2009). Efficient
-  Simulation and Integrated Likelihood Estimation in State Space Models, *International Journal of
-  Mathematical Modelling and Numerical Optimisation*, 1(1/2): 101-120.
-- `ssm.armh`: Chan, J.C.C. (2017). The Stochastic Volatility in Mean Model with Time-Varying
-  Parameters: An Application to Inflation Modeling, *Journal of Business and Economic
-  Statistics*, 35(1): 17-28.
-- `ssm.select_obs`: Chan, J.C.C., Poon, A. and Zhu, D. (2023). High-Dimensional Conditionally
-  Gaussian State Space Models with Missing Data, *Journal of Econometrics*, 236(1): 105468.
-- `ssm.ksc_rw_h0`, `ssm.ksc_ar1_mean` and `ssm.ksc_rw_diffuse`: Kim, S., Shephard, N. and Chib, S.
-  (1998). Stochastic Volatility: Likelihood Inference and Comparison with ARCH Models, *Review of
-  Economic Studies*, 65(3): 361-393.
-- `ssm.ksc_rw_noncentered`: Chan, J.C.C. (2018). Specification Tests for Time-Varying Parameter
-  Models with Stochastic Volatility, *Econometric Reviews*, 37(8): 807-823.
-- The other functions: Chan, J.C.C. (forthcoming). *Bayesian Macroeconometrics: Methods and
-  Applications*, Chapman & Hall/CRC.
-
-To cite the toolkit itself:
+Cite the paper behind each method you use: [`CITING.md`](CITING.md) maps every replication
+package, library function and example to its paper, with BibTeX. To cite the toolkit itself:
 
 > Chan, J. C. C. (2026). *statespace-toolkit: MATLAB code for Bayesian state space models*. Zenodo. https://doi.org/10.5281/zenodo.22884655
 

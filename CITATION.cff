@@ -2,7 +2,7 @@ cff-version: 1.2.0
 title: "statespace-toolkit: MATLAB code for Bayesian state space models"
 message: >-
   If you use this software, please cite both the paper whose method you use
-  (see the Citation section of README.md) and this software record.
+  (see CITING.md) and this software record.
 type: software
 authors:
   - family-names: Chan
