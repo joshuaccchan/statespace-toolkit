@@ -2,15 +2,12 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22884655.svg)](https://doi.org/10.5281/zenodo.22884655)
 
-A MATLAB library for Bayesian state space models: unobserved components, time-varying parameter,
-stochastic volatility and dynamic factor models, with samplers that draw the whole state path at
-once. The library under `core/` holds their building blocks, from the precision sampler and the
-integrated likelihood to the draw of missing data and an accept-reject Metropolis-Hastings step
-for states whose conditional distribution is not Gaussian. Ten [examples](examples/) range from a
-local level model of US inflation to stochastic volatility in mean and TVP-MIDAS, and cover model
-comparison by marginal likelihood, the output gap, missing and mixed-frequency data, a dynamic
-factor model of FRED-MD and heavy-tailed returns on silver. The repository also archives fourteen
-replication packages from [joshuachan.org](https://joshuachan.org/code.html) exactly as published.
+A MATLAB library for Bayesian state space models: estimate latent trends, track time-varying
+relationships, model stochastic volatility, and handle missing or mixed-frequency data. The library
+builds on the precision sampler of Chan and Jeliazkov (2009), which draws the entire state path
+jointly, with reusable routines for integrated likelihood evaluation and stochastic volatility
+sampling. Worked [examples](examples/) cover unobserved components, time-varying parameter,
+stochastic volatility and dynamic factor models.
 
 ```matlab
 run setup.m                 % adds core/ to the path
