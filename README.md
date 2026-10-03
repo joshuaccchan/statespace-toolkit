@@ -51,6 +51,17 @@ aggregation, and draws its volatility as ex07 does.
 [`examples/data/README.md`](examples/data/README.md) gives the source of every data file and the
 rows each example reads.
 
+The [tutorials](tutorials/) answer one empirical question each with published models, on the
+data in [`examples/data/`](examples/data/), and can be read without MATLAB. Each comes with
+a script that runs the same analysis on your own series.
+
+- [Which Unobserved Components Model Should I Use for Inflation?](tutorials/uc_specification/)
+  Six unobserved components models of US CPI inflation and an AR(4), compared by their forecasts
+  of average inflation over the next year from 100 origins. Every model with stochastic volatility
+  beats the AR(4), and UC with constant variances ties it; adding stochastic volatility to the
+  gap of UC raises its log predictive likelihood by 16.3, and adding it to the trend as well
+  does not help.
+
 ## Reproduce a Paper
 
 Each package is kept byte for byte as published under `replications/<paper>/legacy/`, with a
@@ -89,19 +100,19 @@ sampler from them.
 
 | Function | Does | Shown in |
 |---|---|---|
-| `ssm.simulate_states` | Draws a state path from its posterior, given the banded precision matrix of the states: the precision sampler of Chan and Jeliazkov (2009) | ex01-ex06, ex09, ex10 |
-| `ssm.intlike` | Computes the log likelihood of a linear Gaussian state space model, with the states integrated out | ex02 |
+| `ssm.simulate_states` | Draws a state path from its posterior, given the banded precision matrix of the states: the precision sampler of Chan and Jeliazkov (2009) | ex01-ex06, ex09, ex10, the tutorial |
+| `ssm.intlike` | Computes the log likelihood of a linear Gaussian state space model, with the states integrated out | ex02, the tutorial |
 | `ssm.select_obs` | Splits the stacked data into observed and missing values, keeping the precision matrix of the missing values banded | ex05 |
-| `ssm.diffmat` | Builds the first-difference matrix of a state equation, I - aL | ex01-ex03, ex06, ex07, ex09, ex10 |
+| `ssm.diffmat` | Builds the first-difference matrix of a state equation, I - aL | ex01-ex03, ex06, ex07, ex09, ex10, the tutorial |
 | `ssm.lagpolymat` | Builds the matrix of a lag polynomial, such as second differences or an AR(2) | ex04 |
-| `ssm.surform` | Builds the design matrix of a regression whose coefficients vary over time | ex03, ex09, ex10 |
+| `ssm.surform` | Builds the design matrix of a regression whose coefficients vary over time | ex03, ex09, ex10, the tutorial |
 | `ssm.mode_newton` | Finds the mode of a concave log density by Newton-Raphson, with a banded Hessian | ex08, and through `ssm.armh` |
 | `ssm.armh` | Takes the accept-reject Metropolis-Hastings step of Chan (2017), for states whose conditional distribution is not Gaussian | ex09 |
-| `ssm.ksc_rw_h0` | Draws the log-volatility path of a random walk by the auxiliary mixture sampler of Kim, Shephard and Chib (1998) | ex07, ex10 |
-| `ssm.ksc_ar1_mean` | Draws the log-volatility path of a stationary AR(1) by the same sampler | ex08 |
-| `ssm.ksc_rw_diffuse` | Draws the log-volatility path of a random walk whose first value has a normal prior with mean zero, by the same sampler | not yet in an example |
+| `ssm.ksc_rw_h0` | Draws the log-volatility path of a random walk by the auxiliary mixture sampler of Kim, Shephard and Chib (1998) | ex07, ex10, the tutorial |
+| `ssm.ksc_ar1_mean` | Draws the log-volatility path of a stationary AR(1) by the same sampler | ex08, the tutorial |
+| `ssm.ksc_rw_diffuse` | Draws the log-volatility path of a random walk whose first value has a normal prior with mean zero, by the same sampler | the tutorial |
 | `ssm.ksc_rw_noncentered` | Draws a random-walk log-volatility in the noncentered form of Chan (2018), and returns the conditional mean and variance of its scale, which the Savage-Dickey ratio of that paper uses | not yet in an example |
-| `ssm.tnormrnd` | Draws from a truncated normal distribution | ex02 |
+| `ssm.tnormrnd` | Draws from a truncated normal distribution | ex02, the tutorial |
 | `ssm.shaded_band` | Shades credible bands in figures | ex01, ex03, ex04, ex07-ex09 |
 
 Seven of these functions, `ssm.diffmat`, `ssm.ksc_ar1_mean`, `ssm.ksc_rw_diffuse`,
@@ -140,8 +151,8 @@ scripts write out, and `ssm.select_obs` against the worked illustrations of Chan
 Files from other repositories that the tests run are held verbatim in
 [`tests/fixtures/`](tests/fixtures/), with their md5s. On every push to `main` and every pull
 request, CI checks the archived packages against their `as-published` tags and the fixtures
-against their md5s, and runs the unit suite, `setup.m` and the examples. To run the tests
-locally:
+against their md5s, and runs the unit suite, `setup.m`, the examples and the tutorial's
+`your_data.m`. To run the tests locally:
 
 ```matlab
 run tests/unit/run_unit_tests.m

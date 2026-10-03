@@ -1,10 +1,12 @@
-% run_examples - run setup.m, then every script in examples/, each in its own
-% workspace; error if any of them fails.
+% run_examples - run setup.m, then every script in examples/ and the own-data
+% script of each tutorial (tutorials/*/your_data.m), each in its own workspace;
+% error if any of them fails.
 % Usage (from repo root or anywhere):  matlab -batch "run('tests/run_examples.m')"
 %
 % Checks that setup.m puts the +ssm package on the path, as the README quick start
-% assumes, and that every example runs to the end without an error. Examples are
-% found by name (examples/ex*.m), so a new one is covered as soon as it is added.
+% assumes, and that every example runs to the end without an error. Scripts are
+% found by name (examples/ex*.m, tutorials/*/your_data.m), so a new one is covered
+% as soon as it is added.
 
 function run_examples
 
@@ -33,13 +35,21 @@ names = sort(erase({ex.name}, '.m'));
 if isempty(names)
     error('no examples found in %s', exdir);
 end
+files = fullfile(exdir, strcat(names, '.m'));
+n_ex = numel(names);
+tut = dir(fullfile(root, 'tutorials', '*', 'your_data.m'));
+for ii = 1:numel(tut)
+    [~, folder] = fileparts(tut(ii).folder);
+    names{end+1} = ['tutorials/' folder '/your_data']; %#ok<AGROW>
+    files{end+1} = fullfile(tut(ii).folder, tut(ii).name); %#ok<AGROW>
+end
 
 failed = {};
 for ii = 1:numel(names)
     fprintf('\n---- %s ----\n', names{ii});
     t0 = tic;
     try
-        run_one(fullfile(exdir, [names{ii} '.m']));
+        run_one(files{ii});
         fprintf('PASS  %s (%.0f s)\n', names{ii}, toc(t0));
     catch err
         failed{end+1} = names{ii}; %#ok<AGROW>
@@ -49,13 +59,14 @@ for ii = 1:numel(names)
 end
 
 if ~isempty(failed)
-    error('%d of %d examples failed: %s', numel(failed), numel(names), strjoin(failed, ', '));
+    error('%d of %d scripts failed: %s', numel(failed), numel(names), strjoin(failed, ', '));
 end
-fprintf('\nAll %d examples ran.\n', numel(names));
+n_tut = numel(names) - n_ex;
+fprintf('\nAll %d examples and %d tutorial script%s ran.\n', n_ex, n_tut, repmat('s', 1, n_tut ~= 1));
 end
 
 function run_one(file)
-% Each example runs in this function's workspace, so no example can see or clear
+% Each script runs in this function's workspace, so no script can see or clear
 % the variables of another, or those of the loop above.
 run(file);
 end

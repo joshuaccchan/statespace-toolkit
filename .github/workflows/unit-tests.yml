@@ -1,6 +1,6 @@
 # Runs on pushes to main and on pull requests, in two steps: the unit suite
-# (tests/unit/run_unit_tests.m), then setup.m and every example
-# (tests/run_examples.m). The second step runs even if the first fails.
+# (tests/unit/run_unit_tests.m), then setup.m, every example and each tutorial's
+# your_data.m (tests/run_examples.m). The second step runs even if the first fails.
 #
 # MATLAB is licensed automatically because the repository is public; a private
 # fork needs an MLM_LICENSE_TOKEN secret.
@@ -39,7 +39,7 @@ jobs:
         with:
           command: run('tests/unit/run_unit_tests.m')
 
-      - name: Run setup.m and the examples
+      - name: Run setup.m, the examples and the tutorial scripts
         if: ${{ !cancelled() }}
         uses: matlab-actions/run-command@v3
         with:
