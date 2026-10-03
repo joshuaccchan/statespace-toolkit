@@ -24,16 +24,17 @@ the two volatilities of UCSV.
 
 Every model with stochastic volatility forecasts better than the AR(4), and UC, the one model
 with constant variances, forecasts about as well as the AR(4). The model of Chan, Clark and Koop
-(2018), which also uses the SPF's 10-year inflation expectation, forecasts best on both criteria:
-its root mean squared forecast error is 16 percent below the AR(4)'s, and its log predictive
-likelihood is 29.1 above it, with UC-MA of Chan (2013) close behind at 28.5.
+(2018), which also uses the SPF's 10-year inflation expectation, has the lowest root mean squared
+forecast error, 16 percent below the AR(4)'s. On the log predictive likelihood, it and UC-MA of
+Chan (2013) lead the AR(4) by 29.1 and 28.5.
 
-Stochastic volatility helps in the gap. Adding it to the gap of UC raises the log predictive
-likelihood by 16.3 and lowers the root mean squared forecast error from 1.95 to 1.82. Adding it
-to the trend as well, which gives UCSV of Stock and Watson (2007), lowers the log predictive
-likelihood by 1.9 and leaves the root mean squared forecast error at 1.83. Among the models with
-stochastic volatility, the root mean squared forecast error ranks them in the same order as the
-average change in their forecasts from one quarter to the next.
+Under these specifications and priors, stochastic volatility helps in the gap and not in the
+trend. Adding it to the gap of UC raises the log predictive likelihood by 16.3 and lowers the root
+mean squared forecast error from 1.95 to 1.82. Adding it to the trend as well, which gives UCSV of
+Stock and Watson (2007), lowers the log predictive likelihood by 1.9 and leaves the root mean
+squared forecast error at 1.83. In these 100 forecasts, the root mean squared forecast error
+ranks the models with stochastic volatility in the same order as the average change in their
+forecasts from one quarter to the next.
 
 ## Try It Now
 
@@ -41,7 +42,7 @@ Two commands, from the root of the repository:
 
 | Command | What it produces | Time |
 |---|---|---|
-| `run tutorials/uc_specification/your_data.m` | the comparison on the same data over the last six origins, with short chains, and the exported report | about a minute |
+| `run tutorials/uc_specification/your_data.m` | the comparison on the same data over the last six origins, with short chains, each model's forecast of the next four quarters, and the exported report | about a minute |
 | `run tutorials/uc_specification/build.m` | every number and figure on this page | 151 minutes |
 
 The short run checks that the workflow runs end to end; its six forecasts are far too few for the
@@ -144,18 +145,27 @@ forecast from one origin to the next.*
 | AR-trend-bound | 1.70 | 0.87 | -183.2 | 25.5 | 0.38 |
 | CCK | 1.64 | 0.84 | -179.7 | 29.1 | 0.20 |
 
-The root mean squared forecast error (RMSFE) scores the point forecast, the mean of the
-predictive distribution. The log predictive likelihood scores the whole distribution: it is the
-log of the predictive density at the outcome, summed over the 100 forecasts. Both follow the
-forecasting code of Chan, Koop and Potter (2016) and Chan, Clark and Koop (2018).
+The root mean squared forecast error (RMSFE) scores the point forecast, the mean of the predictive
+distribution. The log predictive likelihood scores the whole distribution: it is the log of the
+predictive density at the outcome, summed over the 100 forecasts. Both follow the forecasting code
+of Chan, Koop and Potter (2016) and Chan, Clark and Koop (2018). CCK also uses the SPF's long-run
+expectation and is estimated from 1992Q1, where the other models use the inflation series from
+1948Q1, so the table compares complete forecasting specifications and does not isolate what the
+survey contributes.
+
+The 90% predictive intervals of the AR(4) contain 90 of the 100 outcomes and are 6.3 wide on
+average. Those of the models with stochastic volatility are narrower, 4.3 to 5.1 on average, and
+contain 81 to 87 of the outcomes; CCK's are the narrowest and contain the fewest.
 
 ### Does Stochastic Volatility Help?
 
 UC, UC-SVgap and UCSV add stochastic volatility one equation at a time, so Table 1 answers the
 question for each equation. Stochastic volatility in the gap raises the log predictive likelihood
 of UC by 16.3 and lowers its RMSFE from 1.95 to 1.82; stochastic volatility in the trend as well
-lowers the log predictive likelihood by 1.9 and raises the RMSFE to 1.83. UC itself ties the AR(4)
-on the RMSFE and is 0.5 below it on the log predictive likelihood.
+lowers the log predictive likelihood by 1.9 and raises the RMSFE to 1.83. UCSV also starts its
+trend differently, from $`N(\tau_0, \mathrm{e}^{g_1})`$ where UC-SVgap has $`N(0, 5)`$, so the
+comparison is between these two specifications and their priors. UC itself ties the AR(4) on the
+RMSFE and is 0.5 below it on the log predictive likelihood.
 
 The last column of Table 1 measures how much each forecast moves from one origin to the next. In
 these three models the forecast of average inflation over the next year is the current trend, so
@@ -169,13 +179,13 @@ than UC-SVgap on both criteria.
 
 ### Which Unobserved Components Model Forecasts Best?
 
-The three models with the smoothest trends forecast best, and on the RMSFE their order is the
-order of the average change in their forecasts. CCK ties its trend to the SPF's long-run
-expectation and has the smoothest forecasts, the lowest RMSFE and the highest log predictive
-likelihood, 0.5 above UC-MA's. UC-MA has the same prior for its constant trend variance as UC and
+UC-MA, AR-trend-bound and CCK forecast best, and in these 100 forecasts their order on the RMSFE
+is the order of the average change in their forecasts. CCK ties its trend to the SPF's long-run
+expectation and has the smoothest forecasts and the lowest RMSFE; its log predictive likelihood
+and UC-MA's differ by 0.5. UC-MA has the same prior for its constant trend variance as UC and
 UC-SVgap, and its gap adds a moving average term and a stationary log-volatility; its MA
-coefficient is positive, with posterior mean 0.445 and 90% interval (0.337, 0.547).
-AR-trend-bound bounds its trend between 0 and 5 percent.
+coefficient is positive, with posterior mean 0.445 and 90% interval (0.337, 0.547). AR-trend-bound
+bounds its trend between 0 and 5 percent.
 
 ![Cumulative differences in log predictive score against AR(4)](fig_score.png)
 
@@ -231,12 +241,15 @@ percent for the trend, $`\rho_t`$ and $`h_t`$ in the archived sampler of AR-tren
 
 The script [`your_data.m`](your_data.m) runs the same comparison on a quarterly inflation series.
 Its settings block sets the file, the column, the date column, the file and column of a long-run
-expectation for CCK (or none, which leaves CCK out), the number of origins, the draws per model,
-the seed and where the report goes. The series should be an inflation rate in annualized percent,
-the scale the priors are set for. AR-trend-bound keeps the bounds of the US application, 0 and 5
-percent, which its archived code fixes, so for a series whose trend may leave that band, drop it
-from `names` in the script. The script drops rows missing at either end of the sample, and stops
-on a missing value inside it, on unevenly spaced dates and on a constant series.
+expectation for CCK (or none, which leaves CCK out), the models to compare, the number of origins,
+the draws per model, the seed, whether each model also forecasts the four quarters after the last
+one, and where the report goes. The series should be an inflation rate in annualized percent, the
+scale the priors are set for, with one value per quarter. AR-trend-bound keeps the bounds of the
+US application, 0 and 5 percent, which its archived code fixes, so for a series whose trend may
+leave that band, delete its row from `models` in the script. The script drops rows missing at
+either end of the sample, and stops on a missing value inside it, on dates that are not one
+quarter apart, on a constant series, and on a new series while the expectation file is still the
+US one.
 
 Each forecast comes from one call,
 
@@ -246,15 +259,15 @@ r = fc_origin(repo, y, z, t, 'UC-SVgap', struct('nsim', 20000, 'burnin', 5000), 
 
 which estimates the model on `y(1:t)` and returns the point forecasts and log predictive
 likelihoods of the next quarter and of the average over the next four, and the 90% predictive
-interval of that average. It and the samplers are in
-[`private/`](private/), so scripts in this folder can call them; `uc_model` holds the
-specifications and priors of the unobserved components models, and a new specification is a new
-entry in it.
+interval of that average; with `t = numel(y)` it forecasts from the last quarter, and the scores
+are `NaN`. It and the samplers are in [`private/`](private/), so scripts in this folder can call
+them; `uc_model` holds the specifications and priors of the unobserved components models, and a
+new specification is a new entry in it.
 
 The script writes what it computed to `outdir`, which defaults to `tempdir` so that a run leaves
-the repository unchanged. `uc_specification_report.csv` holds one row per model, and
-`uc_specification_report.mat` holds that table with the settings behind it. Setting
-`outdir = ''` turns the export off.
+the repository unchanged. `uc_specification_report.csv` holds one row per model, with its scores
+and its forecast from the last quarter with the 90% interval, and `uc_specification_report.mat`
+holds that table with the settings behind it. Setting `outdir = ''` turns the export off.
 
 ## Reproducing the Results
 
@@ -311,9 +324,9 @@ Stock, J. H. and Watson, M. W. (2007). Why Has U.S. Inflation Become Harder to F
 *Journal of Money, Credit and Banking*, 39(s1): 3-33.
 [doi:10.1111/j.1538-4616.2007.00014.x](https://doi.org/10.1111/j.1538-4616.2007.00014.x)
 
-To cite the toolkit itself: Chan, J. C. C. (2026). *statespace-toolkit: MATLAB code for Bayesian
-state space models*. Zenodo.
-[doi:10.5281/zenodo.22884655](https://doi.org/10.5281/zenodo.22884655)
+[`CITING.md`](../../CITING.md) lists the paper to cite for each model and method. To cite the
+toolkit itself: Chan, J. C. C. (2026). *statespace-toolkit: MATLAB code for Bayesian state space
+models*. Zenodo. [doi:10.5281/zenodo.22884655](https://doi.org/10.5281/zenodo.22884655)
 
 The BibTeX entries are:
 

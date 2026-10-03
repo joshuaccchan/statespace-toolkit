@@ -70,6 +70,7 @@ for loop = 1:nsim + burnin
                 + .5*(pc - pm)^2/Dp - .5*(psi - pm)^2/Dp;
             if log(ua) < la, psi = pc; acc.psi = acc.psi + 1; end
         end
+        u = filter(1, [1 psi], x);                      % the errors under the retained psi
     end
 
     if loop > burnin

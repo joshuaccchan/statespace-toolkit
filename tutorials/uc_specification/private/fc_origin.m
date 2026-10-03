@@ -22,7 +22,8 @@ switch name
         f = uc_forecast(uc_model(name), out);
 end
 r = nan(1, 6);
-r(1) = mean(f.m1); r(2) = score(y(t+1), f.m1, f.v1);
+r(1) = mean(f.m1);
+if t + 1 <= numel(y), r(2) = score(y(t+1), f.m1, f.v1); end
 r(3) = mean(f.m4);
 if t + 4 <= numel(y), r(4) = score(mean(y(t+1:t+4)), f.m4, f.v4); end
 r(5) = mixquantile(.05, f.m4, f.v4); r(6) = mixquantile(.95, f.m4, f.v4);

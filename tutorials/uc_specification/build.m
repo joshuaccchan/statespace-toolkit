@@ -36,7 +36,8 @@ ckp = struct('nloop', 35000, 'burnin', 5000);   % whole sample, the archived run
 fc = repmat({struct('nsim', 20000, 'burnin', 5000)}, 1, 7);   % each origin
 fc{5} = struct('nsim', 10000, 'burnin', 1000);  % CCK
 first_target = 2000;                            % 2000Q1
-ver = 2;                                        % 2: the common priors; in every cache key
+ver = [2 3 2 2 2 2 2];                          % cache version by model, in every key:
+                                                % 2 the common priors, 3 UC-MA's u_T fix
 
 data = readtable(fullfile(repo, 'examples', 'data', 'USCPI_quarterly.csv'));
 y = data.inflation; T = numel(y);
@@ -123,18 +124,25 @@ if ~exist(rdir, 'dir'), mkdir(rdir); end
 ch = cell(1, 7);
 for k = isuc
     m = uc_model(names{k});
-    ch{k} = cached(fullfile(rdir, [strrep(names{k}, '-', '_') '_chain.mat']), [nsim burnin thin seed + k ver], ...
+    ch{k} = cached(fullfile(rdir, [strrep(names{k}, '-', '_') '_chain.mat']), [nsim burnin thin seed + k ver(k)], ...
         @() run_chain(y, m, nsim, burnin, thin, seed + k));
     fprintf('%-14s %d draws after %d burn-in\n', labels{k}, nsim, burnin);
 end
+% UC-MA forecasts from u_T: it must be the error of the stored tau under the stored psi
+i = thin:thin:nsim; ps = tanh(ch{2}.phi(i, end)); e = zeros(numel(i), 1);
+for j = 1:numel(i)
+    u = filter(1, [1 ps(j)], y - ch{2}.tau(j,:)');
+    e(j) = abs(u(T) - ch{2}.last(i(j), 4));
+end
+assert(max(e) < 1e-8, 'build: UC-MA''s u_T does not match its tau and psi');
 fprintf('UC-MA acceptance: psi %.2f, AR coefficient of the log-volatility %.2f\n', ...
     ch{2}.acc.psi, ch{2}.acc.gap_phi);
-ch{4} = cached(fullfile(rdir, 'ARbound_chain.mat'), [ckp.nloop ckp.burnin thin seed + 4 ver], ...
+ch{4} = cached(fullfile(rdir, 'ARbound_chain.mat'), [ckp.nloop ckp.burnin thin seed + 4 ver(4)], ...
     @() ckp_run(repo, y, ckp.nloop, ckp.burnin, thin, seed + 4));
 ch{4}.phi = log(ch{4}.sig);
 fprintf('%-14s %d draws after %d burn-in; acceptance of tau, rho, h %s\n', labels{4}, ...
     ckp.nloop - ckp.burnin, ckp.burnin, mat2str(ch{4}.acc, 2));
-ch{5} = cached(fullfile(rdir, 'CCK_chain.mat'), [nsim burnin seed + 5 ver], ...
+ch{5} = cached(fullfile(rdir, 'CCK_chain.mat'), [nsim burnin seed + 5 ver(5)], ...
     @() run_cck(y(i0+1:T), y(i0), z(i0+1:T), nsim, burnin, seed + 5));
 fprintf('%-14s %d draws after %d burn-in, 1992Q1-2025Q3; acceptance of the blocks of b, psi, sigb2 %s\n', ...
     labels{5}, nsim, burnin, mat2str(ch{5}.acc, 2));
@@ -157,7 +165,7 @@ for k = 1:7
     for i = 1:no
         t = orig(i); sd = seed + 1000*k + t;
         sc{k}(i,:) = cached(fullfile(rdir, sprintf('fc_%s_%d.mat', strrep(names{k}, '-', '_'), t)), ...
-            [fc{k}.nsim fc{k}.burnin sd ver], @() fc_origin(repo, y, z, t, names{k}, fc{k}, sd));
+            [fc{k}.nsim fc{k}.burnin sd ver(k)], @() fc_origin(repo, y, z, t, names{k}, fc{k}, sd));
     end
     fprintf('%-14s %d origins, %s to %s, %d draws after %d, %.1f minutes\n', labels{k}, no, ...
         qlab(orig(1)), qlab(orig(end)), fc{k}.nsim, fc{k}.burnin, toc(t1)/60);
@@ -179,9 +187,10 @@ fprintf('\nMean absolute change in the point forecast from one origin to the nex
 for k = order
     fprintf('%-14s %.3f\n', labels{k}, mean(abs(diff(sc{k}(:,3)))));
 end
-fprintf('\nShare of the outcomes inside the 90%% predictive interval:\n');
+fprintf('\n90%% predictive interval: share of the outcomes inside it, average width\n');
 for k = order
-    fprintf('%-14s %.2f\n', labels{k}, mean(y4 >= sc{k}(:,5) & y4 <= sc{k}(:,6)));
+    fprintf('%-14s %.2f %.2f\n', labels{k}, mean(y4 >= sc{k}(:,5) & y4 <= sc{k}(:,6)), ...
+        mean(sc{k}(:,6) - sc{k}(:,5)));
 end
 
 % every forecast, for reuse: forecasts.csv next to this file
