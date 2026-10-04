@@ -64,9 +64,9 @@ Inflation $`y_t`$ is annualized quarterly CPI inflation. The benchmark is an AR(
 
 $$y_t = \beta_1 + \beta_2 y_{t-1} + \cdots + \beta_5 y_{t-4} + \epsilon_t, \qquad \epsilon_t \sim N(0, \sigma^2),$$
 
-with the independent normal and inverse-gamma prior $`\beta \sim N(0, 100 I)`$ and
-$`\sigma^2 \sim IG(4, 1)`$, where $`IG(\nu, S)`$ has density proportional to
-$`x^{-(\nu+1)}\mathrm{e}^{-S/x}`$.
+with the independent normal and inverse-gamma prior
+$`\boldsymbol{\beta} \sim N(\mathbf{0}, 100\mathbf{I})`$ and $`\sigma^2 \sim IG(4, 1)`$, where
+$`IG(\nu, S)`$ has density proportional to $`x^{-(\nu+1)}\mathrm{e}^{-S/x}`$.
 
 Four of the trend models share one form. Inflation is a trend plus a gap,
 
