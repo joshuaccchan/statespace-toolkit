@@ -13,7 +13,7 @@ To credit the software as well, cite the toolkit record at the end.
 | The precision sampler: a state path drawn in one block from its banded precision matrix | `ssm.simulate_states`; ex01-ex06, ex09, ex10 | [Chan and Jeliazkov (2009)](#chan-and-jeliazkov-2009) |
 | The integrated likelihood, with the states integrated out | `ssm.intlike`; ex02 | [Chan and Jeliazkov (2009)](#chan-and-jeliazkov-2009) |
 | Marginal likelihoods by importance sampling, with the importance density from the cross-entropy method | ex02; `replications/chan_eisenstat2015_er_mlce` | [Chan and Eisenstat (2015)](#chan-and-eisenstat-2015) |
-| Missing data and mixed frequencies: the missing values drawn in one block, and draws conditioned on linear restrictions | `ssm.select_obs`; ex05, ex10 | [Chan, Poon and Zhu (2023)](#chan-poon-and-zhu-2023); [Mariano and Murasawa (2003)](#mariano-and-murasawa-2003) for the quarterly aggregation of monthly values; [Rue and Held (2005)](#rue-and-held-2005) for the update that imposes linear restrictions |
+| Missing data and mixed frequencies: the missing values drawn in one block, and draws conditioned on linear restrictions | `ssm.select_obs`, `ssm.restrict`; ex05, ex10 | [Chan, Poon and Zhu (2023)](#chan-poon-and-zhu-2023); [Mariano and Murasawa (2003)](#mariano-and-murasawa-2003) for the quarterly aggregation of monthly values; [Rue and Held (2005)](#rue-and-held-2005) for the update that imposes linear restrictions |
 | Stochastic volatility by the auxiliary mixture sampler | `ssm.ksc_rw_h0`, `ssm.ksc_ar1_mean`, `ssm.ksc_rw_diffuse`; ex07, ex08, ex10 | [Kim, Shephard and Chib (1998)](#kim-shephard-and-chib-1998); [Del Negro and Primiceri (2015)](#del-negro-and-primiceri-2015) for the order of the blocks |
 | Stochastic volatility in a noncentered parameterization, and tests of whether a model needs its time variation or its stochastic volatility | `ssm.ksc_rw_noncentered`; `replications/chan2018_er_spectest` | [Chan (2018)](#chan-2018) |
 | The accept-reject Metropolis-Hastings step for states whose conditional distribution is not Gaussian; stochastic volatility in mean | `ssm.armh`; ex09; `replications/chan2017_jbes_svm` | [Chan (2017)](#chan-2017) |
@@ -657,8 +657,8 @@ Rue, H. and Held, L. (2005). *Gaussian Markov Random Fields: Theory and Applicat
 Hall/CRC, Boca Raton.
 [Book](https://doi.org/10.1201/9780203492024)
 
-Algorithm 2.6 conditions a Gaussian draw on linear equality restrictions, the update that ex05
-and ex10 use.
+Algorithm 2.6 conditions a Gaussian draw on linear equality restrictions, the update of
+`ssm.restrict`, which ex05 and ex10 use.
 
 ```bibtex
 @book{RH05,

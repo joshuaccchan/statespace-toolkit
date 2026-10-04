@@ -23,8 +23,8 @@
 % Section 9.3 of the book Bayesian Macroeconometrics (Chan, forthcoming). Separating
 % beta_t from theta_t needs a normalization, and Chan, Poon and Zhu (2026) impose the T
 % restrictions theta_t'*V*1 = 1, which make the draw of theta Gaussian truncated to a
-% hyperplane. Updating an unconstrained draw imposes them (Algorithm 2.6 of Rue and
-% Held, 2005); ex05 uses the same update for a mixed-frequency aggregation constraint.
+% hyperplane. ssm.restrict imposes them on an unconstrained draw (Algorithm 2.6 of Rue
+% and Held, 2005), as it imposes the mixed-frequency aggregation constraint of ex05.
 % Under the Fourier basis the cosine and sine terms sum to zero over a full period, so
 % the restriction fixes the first coefficient at 1/m.
 %
@@ -67,7 +67,7 @@ T = 30;
 [~, VX] = midas_regressors(T, m, K, V);
 H1 = kron(ssm.diffmat(T), speye(pb));
 H2 = kron(ssm.diffmat(T), speye(q));
-M = kron(speye(T), vsum'); Mt = full(M');
+M = kron(speye(T), vsum');
 g = .2*randn(T,1); iSig = sparse(1:T, 1:T, exp(-g));
 om2 = [1e-3; 1e-3]; xi2 = [1e-4; 2e-4; 3e-4];
 Th = repmat([1/m 0 0], T, 1) + [zeros(T,1), .02*randn(T,2)];
@@ -84,13 +84,8 @@ S2 = sparse(1:T*q, 1:T*q, [1/Vth*ones(1,q), repmat(1./xi2', 1, T-1)]);
 Kth = H2'*S2*H2 + X2'*iSig*X2;  cth = X2'*iSig*y;
 
 ndraws = 20000;
-[~, ~, C] = ssm.simulate_states(Kth, cth);
-U = C'\(C\Mt);  MU = M*U;
-D = zeros(T*q, ndraws);
-for i = 1:ndraws
-    tht = ssm.simulate_states(Kth, cth);
-    D(:,i) = tht + U*(MU\(ones(T,1) - M*tht));
-end
+[tht, ~, C] = ssm.simulate_states(Kth, cth, ndraws);
+D = ssm.restrict(tht, C, M, ones(T,1));
 
 % the dense moments of theta, unconstrained (mu, Sig) and on the hyperplane (mu_c, Sig_c)
 Sig = inv(full(Kth));  mu = Sig*cth;
@@ -137,7 +132,7 @@ W_true = Th_true*V;                              % row t: the weights B(0:K; the
 
 H1 = kron(ssm.diffmat(T), speye(pb));
 H2 = kron(ssm.diffmat(T), speye(q));
-M = kron(speye(T), vsum'); Mt = full(M');
+M = kron(speye(T), vsum');
 om2 = om2_true; xi2 = xi2_true*ones(q,1); sig2g = sig2g_true;
 Th = repmat(Th_true(1,:), T, 1); Bc = zeros(T, pb); Bc(:,2) = 1; g = zeros(T,1);
 store_B = zeros(nsim, T, pb);
@@ -163,8 +158,7 @@ for loop = 1:nsim + burnin
     S2 = sparse(1:T*q, 1:T*q, [1/Vth*ones(1,q), repmat(1./xi2', 1, T-1)]);
     Kth = H2'*S2*H2 + X2'*iSig*X2;
     [thtilde, ~, C] = ssm.simulate_states(Kth, X2'*iSig*(y - Bc(:,1)));
-    U = C'\(C\Mt);
-    theta = thtilde + U*((M*U)\(ones(T,1) - M*thtilde));
+    theta = ssm.restrict(thtilde, C, M, ones(T,1));
     Th = reshape(theta, q, T)';
 
     % the log-volatility

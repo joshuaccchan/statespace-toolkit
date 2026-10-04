@@ -30,7 +30,7 @@
 %   z = (y_t + 2*y_{t-1} + 3*y_{t-2} + 2*y_{t-3} + y_{t-4})/3,
 %
 % at the last month of each quarter after the first, which stacks into the hard
-% constraint M*ym = z. One update of an unconstrained draw u imposes it exactly
+% constraint M*ym = z. ssm.restrict imposes it exactly on an unconstrained draw u
 % (Algorithm 2 of Chan, Poon and Zhu, 2023; Algorithm 2.6 of Rue and Held, 2005), reusing
 % the Cholesky factor ssm.simulate_states returns. The draws are compared with the values
 % removed, before and after the update, and with the conditional normal of ym given yo and
@@ -179,10 +179,8 @@ Gm = H*Sm; Go = H*So;
 K = Gm'*iSig*Gm;
 ndraws = 20000;
 [u, uhat, C] = ssm.simulate_states(K, -Gm'*iSig*(Go*yo), ndraws);
-U = C'\(C\full(M'));                             % K^{-1}*M', by the factor already formed
-MU = M*U;
-ym = u + U*(MU\(z - M*u));
-ymhat = uhat + U*(MU\(z - M*uhat));              % the same update, applied to the mean
+[ym, U, MU] = ssm.restrict(u, C, M, z);          % U = K^{-1}*M', from the factor C
+ymhat = ssm.restrict(uhat, C, M, z);             % the same update, applied to the mean
 
 % the known answer: condition the joint normal of (y, z), z = M*Sm'*y, with dense algebra
 V = inv(full(H'*iSig*H));

@@ -18,8 +18,8 @@
 %   alpha    : n x ndraws matrix of draws
 %   alphahat : n x 1 mean, K\c
 %   C        : lower Cholesky factor of K, so that a caller needing a further solve
-%              with K, such as conditioning the draw on a linear restriction, does not
-%              factorize it a second time
+%              with K, such as ssm.restrict, which conditions the draw on a linear
+%              restriction, does not factorize it a second time
 %
 % See:
 % Chan, J.C.C. (forthcoming). Bayesian Macroeconometrics: Methods and

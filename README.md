@@ -32,7 +32,7 @@ The ten scripts in [`examples/`](examples/) each run in under a minute. Start wi
 ex01-ex06 are linear Gaussian models. ex07-ex09 add stochastic volatility: ex07 and ex08 draw the
 log-volatility by the auxiliary mixture sampler, and ex09, in which the volatility also enters the
 mean, by accept-reject Metropolis-Hastings. ex10 combines the two groups: it imposes the linear
-restriction on its time-varying weights by the update that ex05 uses for the quarterly
+restriction on its time-varying weights with `ssm.restrict`, which ex05 uses for the quarterly
 aggregation, and draws its volatility as ex07 does.
 
 | Script | What it shows | Data |
@@ -103,6 +103,7 @@ sampler from them.
 | `ssm.simulate_states` | Draws a state path from its posterior, given the banded precision matrix of the states: the precision sampler of Chan and Jeliazkov (2009) | ex01-ex06, ex09, ex10, the tutorial |
 | `ssm.intlike` | Computes the log likelihood of a linear Gaussian state space model, with the states integrated out | ex02, the tutorial |
 | `ssm.select_obs` | Splits the stacked data into observed and missing values, keeping the precision matrix of the missing values banded | ex05 |
+| `ssm.restrict` | Conditions draws from a Gaussian on linear restrictions M*x = z, reusing the Cholesky factor that `ssm.simulate_states` returns | ex05, ex10 |
 | `ssm.diffmat` | Builds the first-difference matrix of a state equation, I - aL | ex01-ex03, ex06, ex07, ex09, ex10, the tutorial |
 | `ssm.lagpolymat` | Builds the matrix of a lag polynomial, such as second differences or an AR(2) | ex04 |
 | `ssm.surform` | Builds the design matrix of a regression whose coefficients vary over time | ex03, ex09, ex10, the tutorial |
@@ -146,7 +147,8 @@ run whole.
 `ssm.intlike` is checked against a Kalman filter and against two archived functions that compute
 it, `intlike_UC0.m` and `intlike_tvpvar.m`. `ssm.diffmat` and `ssm.lagpolymat` are checked against the matrices the published
 scripts write out, and `ssm.select_obs` against the worked illustrations of Chan, Poon and Zhu
-(2023).
+(2023). `ssm.restrict` must equal, bit for bit, the update that ex05 and ex10 wrote out before
+it existed, and its conditional mean and covariance must equal those from dense algebra.
 
 Files from other repositories that the tests run are held verbatim in
 [`tests/fixtures/`](tests/fixtures/), with their md5s. On every push to `main` and every pull
