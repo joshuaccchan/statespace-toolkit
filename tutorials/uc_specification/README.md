@@ -19,8 +19,10 @@ with a weight between 0.1 and 0.3 at the end of the sample, so the forecasts dep
 each model's estimate of the current trend, which itself is never observed.
 
 The models use the same priors for the parameters they share, and each is re-estimated at each of
-100 quarterly forecast origins from 1999Q4 to 2024Q3. One of them, UC-SVgap, we add to separate
-the two volatilities of UCSV.
+100 quarterly forecast origins from 1999Q4 to 2024Q3. Among them is UCSV, the unobserved
+components model with stochastic volatility of Stock and Watson (2007), in which the variances of
+both the trend and the gap change over time. We add UC-SVgap, which has stochastic volatility in
+the gap alone, to separate the two volatilities.
 
 Every model with stochastic volatility forecasts better than the AR(4), and UC, the one model
 with constant variances, forecasts about as well as the AR(4). The model of Chan, Clark and Koop
@@ -30,11 +32,11 @@ Chan (2013) lead the AR(4) by 29.1 and 28.5.
 
 Under these specifications and priors, stochastic volatility helps in the gap and not in the
 trend. Adding it to the gap of UC raises the log predictive likelihood by 16.3 and lowers the root
-mean squared forecast error from 1.95 to 1.82. Adding it to the trend as well, which gives UCSV of
-Stock and Watson (2007), lowers the log predictive likelihood by 1.9 and leaves the root mean
-squared forecast error at 1.83. In these 100 forecasts, the root mean squared forecast error
-ranks the models with stochastic volatility in the same order as the average change in their
-forecasts from one quarter to the next.
+mean squared forecast error from 1.95 to 1.82. Adding it to the trend as well, which gives UCSV,
+lowers the log predictive likelihood by 1.9 and leaves the root mean squared forecast error at
+1.83. In these 100 forecasts, the root mean squared forecast error ranks the models with
+stochastic volatility in the same order as the average change in their forecasts from one quarter
+to the next.
 
 ## Try It Now
 
@@ -62,9 +64,9 @@ Inflation $`y_t`$ is annualized quarterly CPI inflation. The benchmark is an AR(
 
 $$y_t = \beta_1 + \beta_2 y_{t-1} + \cdots + \beta_5 y_{t-4} + \epsilon_t, \qquad \epsilon_t \sim N(0, \sigma^2),$$
 
-with the independent normal and inverse-gamma prior of the book's AR example (Chan, forthcoming,
-Section 2.3.2), $`\beta \sim N(0, 100 I)`$ and $`\sigma^2 \sim IG(4, 1)`$, where
-$`IG(\nu, S)`$ has density proportional to $`x^{-(\nu+1)}\mathrm{e}^{-S/x}`$.
+with the independent normal and inverse-gamma prior $`\beta \sim N(0, 100 I)`$ and
+$`\sigma^2 \sim IG(4, 1)`$, where $`IG(\nu, S)`$ has density proportional to
+$`x^{-(\nu+1)}\mathrm{e}^{-S/x}`$.
 
 Four of the trend models share one form. Inflation is a trend plus a gap,
 
@@ -82,16 +84,9 @@ trend, is constant, a random walk or a stationary AR(1) process:
 | UCSV | random-walk log-volatility | random-walk log-volatility | Stock and Watson (2007) |
 | UC-MA | MA(1), AR(1) log-volatility | constant variance | Chan (2013) |
 
-The six unobserved components models use the same priors for the parameters they share, those of
-Chan (2013) and Chan, Koop and Potter (2013). A constant trend variance is $`IG(10, 0.18)`$, with
-mean 0.02. Every log-volatility has innovation variance $`IG(10, 0.45)`$, with mean 0.05, and a
-random-walk log-volatility starts from a level with prior $`N(0, 5)`$. The trend starts from
-$`\tau_1 \sim N(0, 5)`$; in UCSV,
-$`\tau_1 \sim N(\tau_0, \mathrm{e}^{g_1})`$ with $`\tau_0 \sim N(0, 5)`$. The constant variance
-of the gap in UC is $`IG(3, 2)`$. In UC-MA the log-volatility of the gap is an AR(1) process
-started from its stationary distribution, with mean $`N(0, 5)`$ and coefficient
-$`N(0.9, 1)`$ on $`(-1, 1)`$, and $`\psi \sim N(0, 1)`$ on $`(-1, 1)`$. UC-SVgap is UCSV with
-the stochastic volatility of the trend switched off, the restriction that Chan (2018) tests.
+In UC-MA the log-volatility of the gap is an AR(1) process started from its stationary
+distribution. UC-SVgap is UCSV with the stochastic volatility of the trend switched off, the
+restriction that Chan (2018) tests.
 
 AR-trend-bound (Chan, Koop and Potter, 2013) has an autoregressive gap with a time-varying
 coefficient,
@@ -99,10 +94,9 @@ coefficient,
 $$y_t - \tau_t = \rho_t (y_{t-1} - \tau_{t-1}) + \mathrm{e}^{h_t/2}\epsilon_t, \qquad \epsilon_t \sim N(0, 1),$$
 
 where $`\tau_t`$ and $`\rho_t`$ are random walks whose innovations are truncated so that
-$`0 < \tau_t < 5`$ and $`0 < \rho_t < 1`$, and $`h_t`$ is a random walk. Their innovation
-variances have priors $`IG(10, 0.18)`$, $`IG(10, 0.009)`$ and $`IG(10, 0.45)`$, and
-$`\rho_1 \sim N(0, 1)`$ on $`(0, 1)`$. It runs through the archived code of the paper, which fixes
-the bounds at 0 and 5 and takes the first quarter as the gap before the sample.
+$`0 < \tau_t < 5`$ and $`0 < \rho_t < 1`$, and $`h_t`$ is a random walk. It runs through the
+archived code of the paper, which fixes the bounds at 0 and 5 and takes the first quarter as the
+gap before the sample.
 
 CCK is M1 of Chan, Clark and Koop (2018). Its gap is autoregressive as in AR-trend-bound, with the
 coefficient $`b_t`$ a random walk on $`(0, 1)`$; the trend $`\pi^*_t`$ is a random walk; both
@@ -111,14 +105,25 @@ trend with a time-varying intercept and slope,
 
 $$z_t = d_{0t} + d_{1t}\pi^*_t + w_t + \psi w_{t-1}, \qquad w_t \sim N(0, \sigma_w^2),$$
 
-where $`(d_{0t}, d_{1t})`$ follow stationary AR(1) processes with means near 0 and 1. The priors
-of the log-volatilities and of $`\pi^*_1`$ are the common ones above, $`b_t`$ has the priors of
-$`\rho_t`$ in AR-trend-bound, and the other priors are those of the paper's forecasting code. For
-$`z_t`$ we use the median 10-year CPI inflation forecast of the Survey of Professional
-Forecasters, which starts in 1991Q4, so CCK is estimated from 1992Q1 with 1991Q4 as its presample.
-Its sampler is written for this toolkit from the library functions: $`\psi`$ is drawn by an
-independence Metropolis-Hastings step at the mode of its conditional density, found by Newton
-steps, and $`b_t`$ in blocks of five.
+where $`(d_{0t}, d_{1t})`$ follow stationary AR(1) processes with means near 0 and 1. For $`z_t`$
+we use the median 10-year CPI inflation forecast of the Survey of Professional Forecasters, which
+starts in 1991Q4, so CCK is estimated from 1992Q1 with 1991Q4 as its presample. Its sampler is
+written for this toolkit from the library functions: $`\psi`$ is drawn by an independence
+Metropolis-Hastings step at the mode of its conditional density, found by Newton steps, and
+$`b_t`$ in blocks of five.
+
+The six unobserved components models use the same priors for the parameters they share, those of
+Chan (2013) and Chan, Koop and Potter (2013). A constant variance of the trend innovations, in UC,
+UC-SVgap, UC-MA and AR-trend-bound, is $`IG(10, 0.18)`$, with mean 0.02. Every log-volatility has
+innovation variance $`IG(10, 0.45)`$, with mean 0.05, and a random-walk log-volatility starts from
+a level with prior $`N(0, 5)`$. The trend starts from $`\tau_1 \sim N(0, 5)`$, and
+$`\pi^*_1 \sim N(0, 5)`$ in CCK; in UCSV, $`\tau_1 \sim N(\tau_0, \mathrm{e}^{g_1})`$ with
+$`\tau_0 \sim N(0, 5)`$. The autoregressive coefficient of the gap, $`\rho_t`$ in AR-trend-bound
+and $`b_t`$ in CCK, starts from $`N(0, 1)`$ on $`(0, 1)`$, and the variance of its innovations is
+$`IG(10, 0.009)`$. The remaining priors belong to one model each. The constant variance of the gap
+in UC is $`IG(3, 2)`$. In UC-MA, the mean of the gap's log-volatility is $`N(0, 5)`$, its AR
+coefficient is $`N(0.9, 1)`$ on $`(-1, 1)`$, and $`\psi \sim N(0, 1)`$ on $`(-1, 1)`$. The priors
+of CCK's expectation equation are those of the paper's forecasting code.
 
 ## Results for US CPI Inflation
 
@@ -162,30 +167,27 @@ contain 81 to 87 of the outcomes; CCK's are the narrowest and contain the fewest
 UC, UC-SVgap and UCSV add stochastic volatility one equation at a time, so Table 1 answers the
 question for each equation. Stochastic volatility in the gap raises the log predictive likelihood
 of UC by 16.3 and lowers its RMSFE from 1.95 to 1.82; stochastic volatility in the trend as well
-lowers the log predictive likelihood by 1.9 and raises the RMSFE to 1.83. UCSV also starts its
-trend differently, from $`N(\tau_0, \mathrm{e}^{g_1})`$ where UC-SVgap has $`N(0, 5)`$, so the
-comparison is between these two specifications and their priors. UC itself ties the AR(4) on the
-RMSFE and is 0.5 below it on the log predictive likelihood.
+lowers the log predictive likelihood by 1.9 and raises the RMSFE to 1.83. UC itself ties the AR(4)
+on the RMSFE and is 0.5 below it on the log predictive likelihood.
 
 The last column of Table 1 measures how much each forecast moves from one origin to the next. In
-these three models the forecast of average inflation over the next year is the current trend, so
-the column measures how much the estimated trend moves. With constant variances, UC attributes a
-fixed share of every surprise to the trend, so its trend follows the large quarterly swings in CPI
-inflation, such as the fall in 2008Q4 (Figure 1), and its forecast changes by 0.69 on average,
-against 0.96 for the AR(4). Stochastic volatility in the gap lets the model attribute the
-surprises of a volatile period to the gap, and the average change falls to 0.44. With stochastic
-volatility in the trend as well, the average change is 0.46, and UCSV forecasts slightly worse
-than UC-SVgap on both criteria.
+UC, UC-SVgap and UCSV the forecast of average inflation over the next year is the current trend,
+so for them the column measures how much the estimated trend moves. With constant variances, UC
+attributes a fixed share of every surprise to the trend, so its trend follows the large quarterly
+swings in CPI inflation, such as the fall in 2008Q4 (Figure 1), and its forecast changes by 0.69
+on average, against 0.96 for the AR(4). Stochastic volatility in the gap lets the model attribute
+the surprises of a volatile period to the gap, and the average change falls to 0.44. With
+stochastic volatility in the trend as well, the average change is 0.46, and UCSV forecasts
+slightly worse than UC-SVgap on both criteria.
 
 ### Which Unobserved Components Model Forecasts Best?
 
-UC-MA, AR-trend-bound and CCK forecast best, and in these 100 forecasts their order on the RMSFE
-is the order of the average change in their forecasts. CCK ties its trend to the SPF's long-run
-expectation and has the smoothest forecasts and the lowest RMSFE; its log predictive likelihood
-and UC-MA's differ by 0.5. UC-MA has the same prior for its constant trend variance as UC and
-UC-SVgap, and its gap adds a moving average term and a stationary log-volatility; its MA
-coefficient is positive, with posterior mean 0.445 and 90% interval (0.337, 0.547). AR-trend-bound
-bounds its trend between 0 and 5 percent.
+UC-MA, AR-trend-bound and CCK forecast best. Their forecasts also change the least from one
+quarter to the next. CCK ties its trend to the SPF's long-run expectation and has the smoothest
+forecasts and the lowest RMSFE; its log predictive likelihood and UC-MA's differ by 0.5. UC-MA has
+the same prior for its constant trend variance as UC and UC-SVgap, and its gap adds a moving
+average term and a stationary log-volatility; its MA coefficient is positive, with posterior mean
+0.445 and 90% interval (0.337, 0.547). AR-trend-bound bounds its trend between 0 and 5 percent.
 
 ![Cumulative differences in log predictive score against AR(4)](fig_score.png)
 
