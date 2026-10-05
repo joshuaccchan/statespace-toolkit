@@ -15,9 +15,12 @@
 % Section 2 compares the speed of the precision sampler with that of the Kalman filter
 % with backward sampling of Carter and Kohn (1994) and Fruhwirth-Schnatter (1994), on
 % generated data with k = 1, 2, 5 and 10 coefficients and T = 1,000 and 5,000. The
-% Carter-Kohn sampler is written with k x k matrix operations, and for k = 1 also with
-% scalar arithmetic. Both Carter-Kohn samplers are first checked against betahat and
-% diag(K^{-1}). Which sampler is faster depends on k and on how each is coded; the
+% Carter-Kohn sampler is written with k x k matrix operations. For k = 1 both samplers are
+% also specialized to the one coefficient, with scalars in place of k x k matrices and the
+% precision sampler's tridiagonal K factored by recursion, so that the two are compared
+% on equal terms. The Carter-Kohn samplers are first checked against betahat and
+% diag(K^{-1}), and the specialized precision sampler against the draws of
+% ssm.simulate_states. Which sampler is faster depends on k and on how each is coded; the
 % printed times are for the machine that runs the example.
 %
 % See:
@@ -128,16 +131,23 @@ for kc = [1 2]
     v = diag(inv(full(Kc)));                               % dense inverse, for this check only
     z = (mean(draws,2) - bhat)./sqrt(v/ndraws);
     vr = var(draws,0,2)./v;
-    code = {'scalar', 'matrix'};
+    code = {'specialized', 'matrix'};
     fprintf(['   k = %d, %s code: largest |z| of the means %.2f, ' ...
         'variance ratios %.3f to %.3f\n'], kc, code{kc}, max(abs(z)), min(vr), max(vr));
 end
+% The precision sampler specialized to k = 1 gives the draw of ssm.simulate_states
+[yc, Xc, sig2c, omega2c] = generate_tvp(200, 1);
+Kc = tvp_posterior(yc, Xc, sig2c, omega2c, 0);
+rng(2, 'twister'); bs = precision_scalar(yc, Xc, sig2c, omega2c, 0);
+rng(2, 'twister'); bp = ssm.simulate_states(Kc, Xc.*yc/sig2c);
+fprintf(['   k = 1, the specialized precision sampler: the draw of ssm.simulate_states ' ...
+    'to %.1e with the same random numbers\n'], max(abs(bs - bp)));
 
 % Then the timing: median of 10 runs after one warm-up run
 nrep = 11;
 fprintf('\n   ms per draw of the whole path, median of %d runs\n', nrep - 1);
 fprintf('   %4s %6s %16s %12s\n', 'k', 'T', 'simulate_states', 'Carter-Kohn');
-tscalar = zeros(1,2);
+tscalar = zeros(1,2); tpscalar = zeros(1,2);
 Ts = [1000 5000];
 for kt = [1 2 5 10]
     for iT = 1:2
@@ -146,7 +156,7 @@ for kt = [1 2 5 10]
         b0 = zeros(kt,1);
         Ht = ssm.diffmat(Tt); HHt = Ht'*Ht;
         Zt = ssm.surform(Xt); ZZt = Zt'*Zt; Zyt = Zt'*yt;
-        tp = zeros(nrep,1); tk = zeros(nrep,1); ts = zeros(nrep,1);
+        tp = zeros(nrep,1); tk = zeros(nrep,1); ts = zeros(nrep,1); tq = zeros(nrep,1);
         for r = 1:nrep
             % the timing includes forming K, as in a Gibbs sampler
             tic;
@@ -162,17 +172,21 @@ for kt = [1 2 5 10]
                 tic;
                 [~] = carter_kohn_scalar(yt, Xt, sig2t, omega2t, 0);
                 ts(r) = toc;
+                tic;
+                [~] = precision_scalar(yt, Xt, sig2t, omega2t, 0);
+                tq(r) = toc;
             end
         end
         fprintf('   %4d %6d %16.2f %12.2f\n', kt, Tt, 1e3*median(tp(2:end)), ...
             1e3*median(tk(2:end)));
         if kt == 1
             tscalar(iT) = 1e3*median(ts(2:end));
+            tpscalar(iT) = 1e3*median(tq(2:end));
         end
     end
 end
-fprintf(['   k = 1, Carter-Kohn in scalar arithmetic: %.2f ms at T = 1000, ' ...
-    '%.2f ms at T = 5000\n'], tscalar);
+fprintf(['   k = 1, specialized code, ms at T = 1000 and 5000: precision sampler ' ...
+    '%.2f and %.2f, Carter-Kohn %.2f and %.2f\n'], tpscalar, tscalar);
 
 %% Figure: the coefficient paths of the Phillips curve
 tid = 1960.25 + (0:T-1)'/4;                                % quarterly, 1960Q2-2019Q4
@@ -239,7 +253,8 @@ end
 end
 
 function b = carter_kohn_scalar(y, x, sig2, omega2, beta0)
-% The same sampler for k = 1, in scalar arithmetic; x is the T x 1 regressor
+% The same sampler specialized to k = 1, with scalars in place of matrices; x is the
+% T x 1 regressor
 T = numel(y);
 a = zeros(T,1); p = zeros(T,1);
 ap = beta0; pp = omega2;
@@ -256,5 +271,29 @@ b(T) = a(T) + sqrt(p(T))*z(T);
 for t = T-1:-1:1
     j = p(t)/(p(t) + omega2);
     b(t) = a(t) + j*(b(t+1) - a(t)) + sqrt(p(t) - j*p(t))*z(t);
+end
+end
+
+function b = precision_scalar(y, x, sig2, omega2, beta0)
+% The precision sampler specialized to k = 1; x is the T x 1 regressor. K is
+% tridiagonal, so its Cholesky factor K = C*C' is lower bidiagonal, with diagonal l and
+% subdiagonal m found by recursion; C*u = c and C'*b = u + z are then solved by
+% substitution, as in Algorithm 1 of Chan and Jeliazkov (2009)
+T = numel(y);
+d = x.^2/sig2 + 2/omega2; d(T) = x(T)^2/sig2 + 1/omega2;     % the diagonal of K
+e = -1/omega2;                                               % its off-diagonal
+c = x.*y/sig2; c(1) = c(1) + beta0/omega2;
+l = zeros(T,1); m = zeros(T,1); u = zeros(T,1);
+l(1) = sqrt(d(1)); u(1) = c(1)/l(1);
+for t = 2:T
+    m(t) = e/l(t-1);                                         % C(t,t-1)
+    l(t) = sqrt(d(t) - m(t)^2);                              % C(t,t)
+    u(t) = (c(t) - m(t)*u(t-1))/l(t);
+end
+w = u + randn(T,1);
+b = zeros(T,1);
+b(T) = w(T)/l(T);
+for t = T-1:-1:1
+    b(t) = (w(t) - m(t+1)*b(t+1))/l(t);
 end
 end
