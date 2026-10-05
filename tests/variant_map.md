@@ -12,8 +12,10 @@ functions compared draw for draw under a fixed seed.
 
 Each twin is its bvar-toolkit original from the function line on, byte for byte, checked
 by `tests/unit/test_twins.m` against the copies in `tests/fixtures/bvar-toolkit/` (bvar-toolkit
-commit `b8f7021`, and `8d5c6c7` for `ksc_rw_h0`, `ksc_ar1_mean` and `ksc_rw_diffuse`). Only the headers differ,
-apart from `ssm.diffmat`'s error identifiers. Both libraries use the lower Cholesky factor throughout;
+commit `b8f7021`, `8d5c6c7` for `ksc_rw_h0`, `ksc_ar1_mean` and `ksc_rw_diffuse`, and `478dea5` for
+the four MCMC diagnostics). Only the headers differ, apart from the error identifiers of
+`ssm.diffmat`, `ssm.specvar0` and `ssm.geweke` and the calls to `ssm.specvar0` in the
+diagnostics that use it. Both libraries use the lower Cholesky factor throughout;
 bvar-toolkit switched `ksc_rw_h0` to it in `d3b9494`, with bitwise the same draws. In
 `fa17f41` it made `ksc_rw_h0` compute the mean with that factor, as `(Ch')\(Ch\b)`, which
 changes the draws in the last bits, and `ssm.ksc_rw_h0` followed. `e412336` corrected the
@@ -28,6 +30,10 @@ comment on the draw of h in both.
 | `ssm.ksc_ar1_mean` | `bvar.sv.ksc_ar1_mean` (fixture at bvar-toolkit `8d5c6c7`) | chan2013_joe_masv `SV.m`, the same draw with the arguments in another order and the prior mean formed in another order of operations | unit (`test_ksc_ar1_mean`), 22 September 2026: draw for draw against the twin; against `SV.m`, the same mixture indicators and random number stream, and the path to rounding |
 | `ssm.ksc_rw_diffuse` | `bvar.sv.ksc_rw_diffuse` (fixture at bvar-toolkit `8d5c6c7`) | chan_clark_koop2018_jmcb_trendie `SVRW.m` with `h0 = 0`, the same draw with the mean solved by backslash. Never merge with `ssm.ksc_rw_h0`, which has another initial condition | unit (`test_ksc_rw_diffuse`), 22 September 2026: draw for draw against the twin; against `SVRW.m`, the same random number stream and the path to rounding |
 | `ssm.diffmat` | `bvar.util.diffmat`, with error identifiers `ssm:diffmat:*` | new in bvar-toolkit; reproduces the inline spellings in chan2013_joe_masv `UC_MA.m` and `SV.m` and chan_grant2016_eneco_garchsv `loglike_garch_ma.m` | unit (`test_diffmat`) |
+| `ssm.specvar0` | `bvar.diag.specvar0`, with error identifier `ssm:specvar0:*` (fixture at bvar-toolkit `478dea5`) | none | unit (`test_twins`) |
+| `ssm.inefficiency_factor` | `bvar.diag.inefficiency_factor`, calling `ssm.specvar0` (fixture at bvar-toolkit `478dea5`) | none | unit (`test_twins`) |
+| `ssm.mcse` | `bvar.diag.mcse`, calling `ssm.specvar0` (fixture at bvar-toolkit `478dea5`) | none | unit (`test_twins`) |
+| `ssm.geweke` | `bvar.diag.geweke`, calling `ssm.specvar0`, with error identifiers `ssm:geweke:*` (fixture at bvar-toolkit `478dea5`) | none | unit (`test_twins`) |
 
 ## Written Here
 

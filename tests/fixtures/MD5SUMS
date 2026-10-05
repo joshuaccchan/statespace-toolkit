@@ -1,4 +1,8 @@
 cac48b95633f873a3429dc9d12ec18ce *bayesian-macroeconometrics/code/matlab/chapter10/sample_SVM_h_ARMH.m
+045f9490a4565ecd92367e3c68446826 *bvar-toolkit/core/+bvar/+diag/geweke.m
+09080538f9817941b49422ac0703db50 *bvar-toolkit/core/+bvar/+diag/inefficiency_factor.m
+111bff465c809529defdfa5c3e7b296b *bvar-toolkit/core/+bvar/+diag/mcse.m
+3c0e947c9c6c67a28c9df7d283a75b1a *bvar-toolkit/core/+bvar/+diag/specvar0.m
 964d785066931701a2a3ead09caf571a *bvar-toolkit/core/+bvar/+sv/ksc_ar1_mean.m
 61894c2b811539a49a48eb0227b329d8 *bvar-toolkit/core/+bvar/+sv/ksc_rw_diffuse.m
 1f7c2a18310b0ca71781cce26c873e30 *bvar-toolkit/core/+bvar/+sv/ksc_rw_h0.m

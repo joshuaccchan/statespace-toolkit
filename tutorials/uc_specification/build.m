@@ -150,9 +150,9 @@ ps = tanh(ch{2}.phi(:, end)); q = quantile(ps, [.05 .95]);
 fprintf('UC-MA, MA coefficient psi: posterior mean %.3f, 90%% interval (%.3f, %.3f)\n', mean(ps), q);
 fprintf('Inefficiency factors (Bartlett, 100 lags) of the free parameters:\n');
 for k = [isuc 4]
-    fprintf('%-14s %s\n', labels{k}, mat2str(ineff(ch{k}.phi, 100), 3));
+    fprintf('%-14s %s\n', labels{k}, mat2str(ssm.inefficiency_factor(ch{k}.phi, 100), 3));
 end
-fprintf('%-14s %s\n', labels{5}, mat2str(ineff(ch{5}.theta, 100), 3));
+fprintf('%-14s %s\n', labels{5}, mat2str(ssm.inefficiency_factor(ch{5}.theta, 100), 3));
 
 %% Part 2: the recursive forecasts
 fprintf('\n=== Part 2: recursive forecasts ===\n');

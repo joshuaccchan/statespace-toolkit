@@ -115,12 +115,17 @@ sampler from them.
 | `ssm.ksc_rw_noncentered` | Draws a random-walk log-volatility in the noncentered form of Chan (2018), and returns the conditional mean and variance of its scale, which the Savage-Dickey ratio of that paper uses | not yet in an example |
 | `ssm.tnormrnd` | Draws from a truncated normal distribution | ex02, the tutorial |
 | `ssm.shaded_band` | Shades credible bands in figures | ex01, ex03, ex04, ex07-ex09 |
+| `ssm.inefficiency_factor` | Computes the inefficiency factor of MCMC draws, the number of draws that carry the information of one independent draw | the tutorial |
+| `ssm.mcse` | Computes the Monte Carlo standard error of a posterior mean estimated from MCMC draws | not yet in an example |
+| `ssm.geweke` | Computes the convergence diagnostic of Geweke (1992), which compares the means of an early and a late segment of a chain | not yet in an example |
+| `ssm.specvar0` | Estimates the long-run variance of the mean of MCMC draws, for the three diagnostics above | through the diagnostics |
 
-Seven of these functions, `ssm.diffmat`, `ssm.ksc_ar1_mean`, `ssm.ksc_rw_diffuse`,
-`ssm.ksc_rw_h0`, `ssm.shaded_band`, `ssm.surform` and `ssm.tnormrnd`, have the same code as their
-counterparts in
-[bvar-toolkit](https://github.com/joshuaccchan/bvar-toolkit), apart from the error identifiers of
-`ssm.diffmat`. A unit test checks each against a pinned copy of the bvar-toolkit original.
+Eleven of these functions, `ssm.diffmat`, `ssm.geweke`, `ssm.inefficiency_factor`,
+`ssm.ksc_ar1_mean`, `ssm.ksc_rw_diffuse`, `ssm.ksc_rw_h0`, `ssm.mcse`, `ssm.shaded_band`,
+`ssm.specvar0`, `ssm.surform` and `ssm.tnormrnd`, have the same code as their counterparts in
+[bvar-toolkit](https://github.com/joshuaccchan/bvar-toolkit), apart from error identifiers and the
+diagnostics' calls to `ssm.specvar0`. A unit test checks each against a pinned copy of the
+bvar-toolkit original.
 `bvar.util.select_obs` in bvar-toolkit copies `ssm.select_obs`, apart from its error identifier. The
 Econometrics Toolbox has a class named `ssm`: calls such as `ssm.simulate_states` resolve to this
 package, and `ssm(...)` still constructs the toolbox's state space object.

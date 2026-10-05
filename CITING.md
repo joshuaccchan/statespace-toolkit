@@ -30,6 +30,7 @@ To credit the software as well, cite the toolkit record at the end.
 | The observed-data deviance information criterion for volatility models | `replications/chan_grant2016_jfec_dicsv` | [Chan and Grant (2016c)](#chan-and-grant-2016c) |
 | The Kalman filter with backward sampling | ex03 | [Carter and Kohn (1994)](#carter-and-kohn-1994); [Frühwirth-Schnatter (1994)](#frühwirth-schnatter-1994) |
 | FRED-MD data | ex06 | [McCracken and Ng (2016)](#mccracken-and-ng-2016) |
+| Diagnostics for MCMC output: inefficiency factors, Monte Carlo standard errors and the convergence diagnostic | `ssm.inefficiency_factor`, `ssm.mcse`, `ssm.geweke`, `ssm.specvar0` | [Geweke (1992)](#geweke-1992); [Newey and West (1987)](#newey-and-west-1987) for the long-run variance and [Newey and West (1994)](#newey-and-west-1994) for the default lag of `ssm.geweke` |
 | The other library functions: `ssm.diffmat`, `ssm.lagpolymat`, `ssm.surform`, `ssm.mode_newton`, `ssm.tnormrnd` and `ssm.shaded_band` | | [Chan (forthcoming)](#chan-forthcoming) |
 
 ## References
@@ -474,6 +475,31 @@ The Kalman filter with backward sampling, derived independently of Carter and Ko
 }
 ```
 
+### Geweke (1992)
+
+Geweke, J. (1992). Evaluating the Accuracy of Sampling-Based Approaches to the Calculation of
+Posterior Moments. In J. M. Bernardo, J. O. Berger, A. P. Dawid and A. F. M. Smith (Eds),
+*Bayesian Statistics 4*, 169-193. Oxford University Press.
+[Publisher version](https://doi.org/10.1093/oso/9780198522669.003.0010) ·
+[Working paper](https://doi.org/10.21034/sr.148)
+
+Numerical standard errors and relative numerical efficiency from the spectral density at
+frequency zero, and the convergence diagnostic that compares the means of an early and a late
+segment of a chain.
+
+```bibtex
+@incollection{Geweke92,
+  author    = {Geweke, J.},
+  title     = {Evaluating the Accuracy of Sampling-Based Approaches to the Calculation of Posterior Moments},
+  booktitle = {{B}ayesian Statistics 4},
+  editor    = {Bernardo, J. M. and Berger, J. O. and Dawid, A. P. and Smith, A. F. M.},
+  publisher = {Oxford University Press},
+  year      = {1992},
+  pages     = {169--193},
+  doi       = {10.1093/oso/9780198522669.003.0010}
+}
+```
+
 ### Ghysels, Sinko and Valkanov (2007)
 
 Ghysels, E., Sinko, A. and Valkanov, R. (2007). MIDAS Regressions: Further Results and New
@@ -627,6 +653,48 @@ The unobserved components model of output with an AR(2) cycle, the cycle that ex
   number  = {2},
   pages   = {235--243},
   doi     = {10.1162/003465303765299765}
+}
+```
+
+### Newey and West (1987)
+
+Newey, W. K. and West, K. D. (1987). A Simple, Positive Semi-Definite, Heteroskedasticity and
+Autocorrelation Consistent Covariance Matrix. *Econometrica* 55(3): 703-708.
+[Journal version](https://doi.org/10.2307/1913610)
+
+The Bartlett-window estimator of the long-run variance that `ssm.specvar0` computes.
+
+```bibtex
+@article{NW87,
+  author  = {Newey, W. K. and West, K. D.},
+  title   = {A Simple, Positive Semi-Definite, Heteroskedasticity and Autocorrelation Consistent Covariance Matrix},
+  journal = {Econometrica},
+  year    = {1987},
+  volume  = {55},
+  number  = {3},
+  pages   = {703--708},
+  doi     = {10.2307/1913610}
+}
+```
+
+### Newey and West (1994)
+
+Newey, W. K. and West, K. D. (1994). Automatic Lag Selection in Covariance Matrix Estimation.
+*Review of Economic Studies* 61(4): 631-653.
+[Journal version](https://doi.org/10.2307/2297912)
+
+The rule of thumb for the truncation lag that `ssm.geweke` uses by default.
+
+```bibtex
+@article{NW94,
+  author  = {Newey, W. K. and West, K. D.},
+  title   = {Automatic Lag Selection in Covariance Matrix Estimation},
+  journal = {Review of Economic Studies},
+  year    = {1994},
+  volume  = {61},
+  number  = {4},
+  pages   = {631--653},
+  doi     = {10.2307/2297912}
 }
 ```
 
