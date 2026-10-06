@@ -28,6 +28,15 @@ Applications* (Chapman & Hall/CRC, forthcoming): see the
 R and Python for all fourteen chapters. The missing-data draw of ex05 comes from Chan, Poon and
 Zhu (2023), and the TVP-MIDAS model of ex10 from Chan, Poon and Zhu (2026).
 
+The [how-to guides](guides/) show how to use the core functions, one step at a time, on small
+examples with generated data. The first series draws the states of the local level model with the
+precision sampler, estimates its parameters by Gibbs sampling, and integrates the states out of its
+likelihood:
+
+- [How to Draw the States of an Unobserved Components Model](guides/uc_states/)
+- [How to Estimate a State Space Model by Gibbs Sampling](guides/gibbs_sampler/)
+- [How to Compute the Integrated Likelihood of a State Space Model](guides/integrated_likelihood/)
+
 The ten scripts in [`examples/`](examples/) each run in under a minute. Start with ex01.
 ex01-ex06 are linear Gaussian models. ex07-ex09 add stochastic volatility: ex07 and ex08 draw the
 log-volatility by the auxiliary mixture sampler, and ex09, in which the volatility also enters the
@@ -115,8 +124,8 @@ sampler from them.
 | `ssm.ksc_rw_noncentered` | Draws a random-walk log-volatility in the noncentered form of Chan (2018), and returns the conditional mean and variance of its scale, which the Savage-Dickey ratio of that paper uses | not yet in an example |
 | `ssm.tnormrnd` | Draws from a truncated normal distribution | ex02, the tutorial |
 | `ssm.shaded_band` | Shades credible bands in figures | ex01, ex03, ex04, ex07-ex09 |
-| `ssm.inefficiency_factor` | Computes the inefficiency factor of MCMC draws, the number of draws that carry the information of one independent draw | the tutorial |
-| `ssm.mcse` | Computes the Monte Carlo standard error of a posterior mean estimated from MCMC draws | not yet in an example |
+| `ssm.inefficiency_factor` | Computes the inefficiency factor of MCMC draws, the number of draws that carry the information of one independent draw | the Gibbs sampling and integrated likelihood guides, the tutorial |
+| `ssm.mcse` | Computes the Monte Carlo standard error of a posterior mean estimated from MCMC draws | the Gibbs sampling and integrated likelihood guides |
 | `ssm.geweke` | Computes the convergence diagnostic of Geweke (1992), which compares the means of an early and a late segment of a chain | not yet in an example |
 | `ssm.specvar0` | Estimates the long-run variance of the mean of MCMC draws, for the three diagnostics above | through the diagnostics |
 
@@ -158,8 +167,8 @@ it existed, and its conditional mean and covariance must equal those from dense 
 Files from other repositories that the tests run are held verbatim in
 [`tests/fixtures/`](tests/fixtures/), with their md5s. On every push to `main` and every pull
 request, CI checks the archived packages against their `as-published` tags and the fixtures
-against their md5s, and runs the unit suite, `setup.m`, the examples and the tutorial's
-`your_data.m`. To run the tests locally:
+against their md5s, and runs the unit suite, `setup.m`, the examples, each tutorial's
+`your_data.m` and each guide's `guide.m`. To run the tests locally:
 
 ```matlab
 run tests/unit/run_unit_tests.m

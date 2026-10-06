@@ -30,7 +30,7 @@ To credit the software as well, cite the toolkit record at the end.
 | The observed-data deviance information criterion for volatility models | `replications/chan_grant2016_jfec_dicsv` | [Chan and Grant (2016c)](#chan-and-grant-2016c) |
 | The Kalman filter with backward sampling | ex03 | [Carter and Kohn (1994)](#carter-and-kohn-1994); [Frühwirth-Schnatter (1994)](#frühwirth-schnatter-1994) |
 | FRED-MD data | ex06 | [McCracken and Ng (2016)](#mccracken-and-ng-2016) |
-| Diagnostics for MCMC output: inefficiency factors, Monte Carlo standard errors and the convergence diagnostic | `ssm.inefficiency_factor`, `ssm.mcse`, `ssm.geweke`, `ssm.specvar0` | [Geweke (1992)](#geweke-1992); [Newey and West (1987)](#newey-and-west-1987) for the long-run variance and [Newey and West (1994)](#newey-and-west-1994) for the default lag of `ssm.geweke` |
+| Diagnostics for MCMC output: inefficiency factors, Monte Carlo standard errors and the convergence diagnostic | `ssm.inefficiency_factor`, `ssm.mcse`, `ssm.geweke`, `ssm.specvar0`; the Gibbs sampling and integrated likelihood guides, the UC tutorial | [Geweke (1992)](#geweke-1992); [Newey and West (1987)](#newey-and-west-1987) for the long-run variance and [Newey and West (1994)](#newey-and-west-1994) for the default lag of `ssm.geweke` |
 | The other library functions: `ssm.diffmat`, `ssm.lagpolymat`, `ssm.surform`, `ssm.mode_newton`, `ssm.tnormrnd` and `ssm.shaded_band` | | [Chan (forthcoming)](#chan-forthcoming) |
 
 ## References

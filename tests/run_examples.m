@@ -1,12 +1,13 @@
-% run_examples - run setup.m, then every script in examples/ and the own-data
-% script of each tutorial (tutorials/*/your_data.m), each in its own workspace;
-% error if any of them fails.
+% run_examples - run setup.m, then every script in examples/, the own-data
+% script of each tutorial (tutorials/*/your_data.m) and the script of each
+% how-to guide (guides/*/guide.m), each in its own workspace; error if any of
+% them fails.
 % Usage (from repo root or anywhere):  matlab -batch "run('tests/run_examples.m')"
 %
 % Checks that setup.m puts the +ssm package on the path, as the README quick start
 % assumes, and that every example runs to the end without an error. Scripts are
-% found by name (examples/ex*.m, tutorials/*/your_data.m), so a new one is covered
-% as soon as it is added.
+% found by name (examples/ex*.m, tutorials/*/your_data.m, guides/*/guide.m), so a
+% new one is covered as soon as it is added.
 
 function run_examples
 
@@ -43,6 +44,12 @@ for ii = 1:numel(tut)
     names{end+1} = ['tutorials/' folder '/your_data']; %#ok<AGROW>
     files{end+1} = fullfile(tut(ii).folder, tut(ii).name); %#ok<AGROW>
 end
+gd = dir(fullfile(root, 'guides', '*', 'guide.m'));
+for ii = 1:numel(gd)
+    [~, folder] = fileparts(gd(ii).folder);
+    names{end+1} = ['guides/' folder '/guide']; %#ok<AGROW>
+    files{end+1} = fullfile(gd(ii).folder, gd(ii).name); %#ok<AGROW>
+end
 
 failed = {};
 for ii = 1:numel(names)
@@ -61,8 +68,9 @@ end
 if ~isempty(failed)
     error('%d of %d scripts failed: %s', numel(failed), numel(names), strjoin(failed, ', '));
 end
-n_tut = numel(names) - n_ex;
-fprintf('\nAll %d examples and %d tutorial script%s ran.\n', n_ex, n_tut, repmat('s', 1, n_tut ~= 1));
+n_tut = numel(tut); n_gd = numel(gd);
+fprintf('\nAll %d examples, %d tutorial script%s and %d guide%s ran.\n', n_ex, n_tut, ...
+    repmat('s', 1, n_tut ~= 1), n_gd, repmat('s', 1, n_gd ~= 1));
 end
 
 function run_one(file)
