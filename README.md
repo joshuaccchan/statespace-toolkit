@@ -65,11 +65,9 @@ data in [`examples/data/`](examples/data/), and can be read without MATLAB. Each
 a script that runs the same analysis on your own series.
 
 - [Which Unobserved Components Model Should I Use for Inflation?](tutorials/uc_specification/)
-  Six unobserved components models of US CPI inflation and an AR(4), compared by their forecasts
-  of average inflation over the next year from 100 origins. Every model with stochastic volatility
-  beats the AR(4), and UC with constant variances ties it; adding stochastic volatility to the
-  gap of UC raises its log predictive likelihood by 16.3, and adding it to the trend as well
-  does not help.
+  One with stochastic volatility in the transitory component: such models beat an AR(4) in
+  forecasting average US CPI inflation over the next year, and stochastic volatility in the trend
+  as well does not help.
 
 ## Reproduce a Paper
 
