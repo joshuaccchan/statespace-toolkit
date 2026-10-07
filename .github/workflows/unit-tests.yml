@@ -22,7 +22,9 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    # Pinned: MATLAB R2025b supports Ubuntu 22.04 and 24.04, and ubuntu-latest moves to
+    # 26.04 from October 2026.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
 
