@@ -1,4 +1,4 @@
-# statespace-toolkit
+# statespace-toolkit <img src=".github/logo.png" align="right" height="139" alt="statespace-toolkit logo" />
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22884655.svg)](https://doi.org/10.5281/zenodo.22884655)
 
