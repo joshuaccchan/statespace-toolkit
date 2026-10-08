@@ -1,6 +1,6 @@
 # statespace-toolkit <img src=".github/logo.png" align="right" height="139" alt="statespace-toolkit logo" />
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22884655.svg)](https://doi.org/10.5281/zenodo.22884655)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22884655.svg)](https://doi.org/10.5281/zenodo.22884655) [![View on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/184886-statespace-toolkit-bayesian-state-space-models)
 
 A MATLAB library for Bayesian state space models: estimate latent trends, track time-varying
 relationships, model stochastic volatility, and handle missing or mixed-frequency data. The library
