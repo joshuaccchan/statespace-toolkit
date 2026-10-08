@@ -4,6 +4,10 @@
 # 14-day window means consecutive rows overlap by ~7 days - the series tracks
 # levels, not disjoint weekly sums.
 #
+# A second step appends the downloads and rating of the repo's MATLAB File Exchange listing to
+# .github/traffic/file_exchange.csv, read from the listing page; if the page cannot be read, it
+# only warns, so the traffic row is still committed.
+#
 # REQUIRES the TRAFFIC_PAT secret: a fine-grained personal access token with
 # Administration:read (and Metadata:read) on this repository. The default
 # GITHUB_TOKEN cannot read traffic endpoints.
@@ -39,10 +43,32 @@ jobs:
           s=$(gh api "repos/${GITHUB_REPOSITORY}")
           echo "$(date -u +%F),$(jq .count <<<"$v"),$(jq .uniques <<<"$v"),$(jq .count <<<"$c"),$(jq .uniques <<<"$c"),$(jq .stargazers_count <<<"$s"),$(jq .forks_count <<<"$s")" >> "$f"
           tail -2 "$f"
+      - name: Append File Exchange downloads
+        env:
+          FEX_URL: https://www.mathworks.com/matlabcentral/fileexchange/184886-statespace-toolkit-bayesian-state-space-models
+        run: |
+          f=.github/traffic/file_exchange.csv
+          [ -f "$f" ] || echo "date,downloads_all_time,downloads_30d,rating,ratings" > "$f"
+          page=$(curl -fsSL --max-time 60 "$FEX_URL" || true)
+          if row=$(printf '%s' "$page" | python3 -c '
+          import re, sys
+          s = sys.stdin.read()
+          a = re.search(r"All time:\s*([\d,]+)", s)
+          m = re.search(r"Last 30 days:\s*([\d,]+)", s)
+          r = re.search(r">([\d.]+)/5</span>\s*\((\d+)\)", s)
+          if not (a and m and r):
+              sys.exit(1)
+          print(",".join([a.group(1).replace(",", ""), m.group(1).replace(",", ""), r.group(1), r.group(2)]))
+          '); then
+            echo "$(date -u +%F),$row" >> "$f"
+            tail -2 "$f"
+          else
+            echo "::warning::Could not read the download counts from $FEX_URL"
+          fi
       - name: Commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .github/traffic/traffic.csv
+          git add .github/traffic/traffic.csv .github/traffic/file_exchange.csv
           git diff --cached --quiet || git commit -m "Traffic snapshot $(date -u +%F)"
           git push
