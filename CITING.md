@@ -12,6 +12,7 @@ To credit the software as well, cite the toolkit record at the end.
 |---|---|---|
 | The precision sampler: a state path drawn in one block from its banded precision matrix | `ssm.simulate_states`; ex01-ex06, ex09, ex10 | [Chan and Jeliazkov (2009)](#chan-and-jeliazkov-2009) |
 | The integrated likelihood, with the states integrated out | `ssm.intlike`; ex02 | [Chan and Jeliazkov (2009)](#chan-and-jeliazkov-2009) |
+| The integrated likelihood of a stochastic volatility model, with Gaussian or Student-t errors, by importance sampling | `ssm.intlike_sv`, `ssm.intlike_sv_t` | [Chan and Grant (2016b)](#chan-and-grant-2016b) |
 | Marginal likelihoods by importance sampling, with the importance density from the cross-entropy method | ex02; `replications/chan_eisenstat2015_er_mlce` | [Chan and Eisenstat (2015)](#chan-and-eisenstat-2015) |
 | Missing data and mixed frequencies: the missing values drawn in one block, and draws conditioned on linear restrictions | `ssm.select_obs`, `ssm.restrict`; ex05, ex10 | [Chan, Poon and Zhu (2023)](#chan-poon-and-zhu-2023); [Mariano and Murasawa (2003)](#mariano-and-murasawa-2003) for the quarterly aggregation of monthly values; [Rue and Held (2005)](#rue-and-held-2005) for the update that imposes linear restrictions |
 | Stochastic volatility by the auxiliary mixture sampler | `ssm.ksc_rw_h0`, `ssm.ksc_ar1_mean`, `ssm.ksc_rw_diffuse`; ex07, ex08, ex10 | [Kim, Shephard and Chib (1998)](#kim-shephard-and-chib-1998); [Del Negro and Primiceri (2015)](#del-negro-and-primiceri-2015) for the order of the blocks |

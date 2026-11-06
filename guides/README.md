@@ -25,6 +25,18 @@ The three guides use a regression whose coefficients follow random walks, on gen
 | [How to Estimate a TVP Regression by Gibbs Sampling](tvp_gibbs/) | Draw the variances and the initial coefficients along with the coefficients, and check the chain | `ssm.simulate_states`, `ssm.surform`, `ssm.inefficiency_factor` |
 | [How to Tell Whether a Coefficient Varies over Time](tvp_compare/) | Compare models whose coefficients vary or stay constant by their marginal likelihoods | `ssm.intlike`, `ssm.surform`, `ssm.diffmat` |
 
+## Stochastic Volatility
+
+The four guides use a stochastic volatility model whose log-volatility follows a stationary AR(1)
+process, on generated data in percent.
+
+| Guide | What it shows | Core functions |
+|---|---|---|
+| [How to Draw the Log-Volatilities of a Stochastic Volatility Model](sv_states/) | Draw the whole path of the log-volatilities by the auxiliary mixture sampler, and from their exact conditional distribution | `ssm.ksc_ar1_mean`, `ssm.simulate_states`, `ssm.armh` |
+| [How to Estimate a Stochastic Volatility Model by Gibbs Sampling](sv_gibbs/) | Draw the mean and the parameters of the log-volatility along with it, and check the chain | `ssm.ksc_ar1_mean`, `ssm.inefficiency_factor`, `ssm.geweke` |
+| [How to Add Student-t Errors to a Stochastic Volatility Model](sv_t/) | Give the errors heavy tails, so that outliers do not pass into the volatility | `ssm.ksc_ar1_mean`, `ssm.mode_newton` |
+| [How to Compare Stochastic Volatility Models by the Marginal Likelihood](sv_compare/) | Compare constant variance, stochastic volatility and Student-t errors by their marginal likelihoods | `ssm.intlike_sv`, `ssm.intlike_sv_t` |
+
 The [examples](../examples/) run the core functions on additional models, with real and generated
 data, and the [tutorials](../tutorials/) answer empirical questions with the models of published
 papers.
