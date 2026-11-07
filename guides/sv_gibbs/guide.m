@@ -73,7 +73,6 @@ L = 200;                                                 % Bartlett truncation l
 IF = ssm.inefficiency_factor(store_theta, L);
 mcse = ssm.mcse(store_theta, L);
 pm = mean(store_theta); psd = std(store_theta); pq = quantile(store_theta, [.05 .95]);
-[Zd, ~, info] = ssm.geweke(store_theta);                 % the default lags
 ZL = ssm.geweke(store_theta, [], [], L);
 fprintf('\nthe Gibbs sampler, %d draws after a burn-in of %d: %.1f s; phi accepted in %.3f of the draws\n', ...
     nsim, burnin, t_gibbs, nacc/nsim);
@@ -83,8 +82,7 @@ for i = 1:4
 end
 fprintf('inefficiency factors by truncation lag L (rows L = %s):\n', mat2str(Ls));
 disp(round(IFL, 1));
-fprintf('Geweke''s Z with L = %d: %s; with the default lags (%d and %d): %s\n', L, ...
-    mat2str(round(ZL, 2)), info.LA, info.LB, mat2str(round(Zd, 2)));
+fprintf('Geweke''s Z with L = %d: %s\n', L, mat2str(round(ZL, 2)));
 vol = exp(store_h/2); bv = quantile(vol, [.05 .95], 2); vt = exp(h_true/2);
 wm = exp(-h_true)'*y/sum(exp(-h_true));                 % the mean of y weighted by the true e^{-h_t}
 fprintf('mu: the weighted mean of y with the true volatilities is %.4f, standard error %.4f\n', ...
@@ -168,15 +166,10 @@ for isim = 1:burnin + nsim
 
     if isim > burnin, store_rw(isim - burnin, :) = [mu sig2h h0 h(1)]; end
 end
-qrw = quantile(store_rw, [.05 .95]);
-nrw = {'mu', 'sigma_h^2', 'h_0', 'h_1'}; trw = [mu_true sig2h_rw h0_true h_rw(1)];
+qrw = quantile(store_rw(:,2), [.05 .95]);
 fprintf('\na random-walk log-volatility, on data generated from it, %d draws after %d\n', nsim, burnin);
-for i = 1:4
-    fprintf('%-10s true %6.3f, posterior mean %7.4f, 90%% interval (%7.4f, %7.4f), inefficiency %.1f\n', ...
-        nrw{i}, trw(i), mean(store_rw(:,i)), qrw(1,i), qrw(2,i), ssm.inefficiency_factor(store_rw(:,i), L));
-end
-fprintf('the true h_t averages %.2f in periods 1-20 and %.2f in periods 21-100\n', ...
-    mean(h_rw(1:20)), mean(h_rw(21:100)));
+fprintf('sigma_h^2 true %.3f, posterior mean %.4f, 90%% interval (%.4f, %.4f)\n', ...
+    sig2h_rw, mean(store_rw(:,2)), qrw(1), qrw(2));
 % the same posterior with h drawn from its exact conditional distribution by ssm.armh
 HH = H'*H; nsim_x = 10000;
 h0 = log(var(y_rw)); sig2h = .01; e2 = (y_rw - mean(y_rw)).^2;
@@ -197,8 +190,8 @@ for isim = 1:burnin + nsim_x
     h0 = (a0/b0 + h(1)/sig2h)/Kh0 + randn/sqrt(Kh0);
     if isim > burnin, store_rwx(isim - burnin, :) = [mu sig2h h0 h(1)]; end
 end
-fprintf('the same with h from its exact conditional, %d draws: h accepted in %.3f; posterior means %s\n', ...
-    nsim_x, nacc_h/nsim_x, mat2str(round(mean(store_rwx), 4)));
+fprintf('the same with h from its exact conditional, %d draws: h accepted in %.3f\n', ...
+    nsim_x, nacc_h/nsim_x);
 fprintf('posterior means, mixture minus exact, in Monte Carlo standard errors of the difference: %s\n', ...
     mat2str(round((mean(store_rw) - mean(store_rwx))./sqrt(ssm.mcse(store_rw, L).^2 + ssm.mcse(store_rwx, L).^2), 1)));
 

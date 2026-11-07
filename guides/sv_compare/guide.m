@@ -43,7 +43,7 @@ lprior = @(mu, muh, phi, sig2h) lnorm(mu, pr.mu0, pr.Vmu) + lnorm(muh, pr.muh0, 
 nuof = @(z) 2 + (pr.nuub - 2)./(1 + exp(-z));          % nu = 2 + (nuub - 2)/(1 + e^{-z})
 ljnu = @(nu) log((nu - 2).*(pr.nuub - nu)/(pr.nuub - 2));  % log dnu/dz
 nsim = 5000; burnin = 500; R = 5000; Mh = 50;
-lml = zeros(3, 2); nse = lml; lbm = lml; ess = lml; post = cell(3, 2); hbar = cell(3, 2);
+lml = zeros(3, 2); nse = lml; post = cell(3, 2); hbar = cell(3, 2);
 lml_q = zeros(1, 2); lratio = lml_q;
 for d = 1:2
     y = Y{d};
@@ -51,7 +51,7 @@ for d = 1:2
     [lml_q(d), post{1,d}, lratio(d)] = cv_posterior(y, pr, nsim);
     lp_cv = @(z) sum(lnorm(y, z(1), exp(z(2)))) + lnorm(z(1), pr.mu0, pr.Vmu) ...
         + lnorm(z(2), pr.muh0, pr.Vmuh);
-    [lml(1,d), nse(1,d), lbm(1,d), ess(1,d)] = is_logml(lp_cv, post{1,d}, R);
+    [lml(1,d), nse(1,d)] = is_logml(lp_cv, post{1,d}, R);
 
     % SV: z = (mu, mu_h, atanh(phi), log sigma_h^2); the draws of guides/sv_gibbs
     [th, hbar{2,d}] = sv_gibbs(y, nsim, burnin, pr);
@@ -60,7 +60,7 @@ for d = 1:2
     lp_sv = @(z) ssm.intlike_sv((y - z(1)).^2, z(2), tanh(z(3)), exp(z(4)), hb, Mh) ...
         + lprior(z(1), z(2), tanh(z(3)), exp(z(4))) ...
         + log(1 - tanh(z(3))^2) + z(4);                % log Jacobian of (phi, sigma_h^2)
-    [lml(2,d), nse(2,d), lbm(2,d), ess(2,d)] = is_logml(lp_sv, post{2,d}, R);
+    [lml(2,d), nse(2,d)] = is_logml(lp_sv, post{2,d}, R);
 
     % SV-t: z adds log((nu - 2)/(nuub - nu)); the draws of guides/sv_t
     [th, hbar{3,d}] = svt_gibbs(y, nsim, burnin, pr);
@@ -69,7 +69,7 @@ for d = 1:2
     lp_svt = @(z) ssm.intlike_sv_t((y - z(1)).^2, z(2), tanh(z(3)), exp(z(4)), nuof(z(5)), hb, Mh) ...
         + lprior(z(1), z(2), tanh(z(3)), exp(z(4))) - log(pr.nuub - 2) ...  % nu ~ U(2, nuub)
         + log(1 - tanh(z(3))^2) + z(4) + ljnu(nuof(z(5)));
-    [lml(3,d), nse(3,d), lbm(3,d), ess(3,d)] = is_logml(lp_svt, post{3,d}, R);
+    [lml(3,d), nse(3,d)] = is_logml(lp_svt, post{3,d}, R);
 end
 
 %% 1. the results and the checks
@@ -87,10 +87,6 @@ for p = 1:3
 end
 fprintf('\nposterior means: SV data, SV-t: nu %.1f; SV-t data, SV-t: nu %.2f\n', ...
     mean(nuof(post{3,1}(:,5))), mean(nuof(post{3,2}(:,5))));
-fprintf('effective sample size of the importance weights, share of R:\n');
-for m = 1:3, fprintf('  %-18s %.2f %.2f\n', mnames{m}, ess(m,:)); end
-fprintf('the mean of the 20 batch estimates minus the estimate from all R draws: %s\n', ...
-    mat2str(round(lbm - lml, 4)));
 
 % the constant variance: quadrature against importance sampling
 for d = 1:2
@@ -352,12 +348,11 @@ mu = (pr.mu0/V + sum(y)./s)./Kmu + randn(nsim,1)./sqrt(Kmu);
 draws = [mu muh];
 end
 
-function [lml, nse, lbm, ess] = is_logml(lp, draws, R)
+function [lml, nse] = is_logml(lp, draws, R)
 % log p(y) by importance sampling, as in guides/tvp_compare: a t density with 5 degrees of
 % freedom at the mean and covariance of the posterior draws, the cross-entropy fit of a normal
 % density (Chan and Eisenstat, 2015), with heavier tails. lml is the log of the mean of all R
-% weights; nse comes from 20 batches; lbm is the mean of the 20 batch estimates, the estimator
-% of ml_sv.m; ess is the effective sample size of the weights, as a share of R.
+% weights; nse comes from 20 batches.
 nu = 5; d = size(draws, 2);
 m = mean(draws, 1)'; C = chol(cov(draws), 'lower');
 z = randn(d, R)./sqrt(chi2rnd(nu, 1, R)/nu);
@@ -373,8 +368,6 @@ for b = 1:20
     lb(b) = logmeanexp(wb(:,b));
 end
 nse = std(lb)/sqrt(20);
-lbm = mean(lb);
-w = exp(logw - max(logw)); ess = sum(w)^2/sum(w.^2)/R;
 end
 
 function [lml, se] = prior_is(s2, muh, phi, sig2h, nu, N, nb)

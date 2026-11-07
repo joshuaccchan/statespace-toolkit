@@ -96,9 +96,7 @@ s2 = (y - mu).^2;                                                  % (y_t - mu)^
 
 Here `hbar` is the posterior mean of $`\mathbf{h}`$ from the sampler. For SV-$`t`$, the function
 finds the mode by the EM algorithm, with the $`\lambda_t`$ as missing data. We use $`M = 50`$, as
-Chan and Grant (2016) do. The estimate of $`p(\mathbf{y} \mid \boldsymbol{\theta})`$ is unbiased,
-and Step 3 averages it, so the estimate of $`p(\mathbf{y})`$ stays unbiased whatever $`M`$. A
-small $`M`$ makes it noisier.
+Chan and Grant (2016) do.
 
 ## Step 2: Draw the Parameters
 
@@ -153,9 +151,7 @@ $`\mathbf{z}^{(r)}`$ from $`g`$ and weights $`w_r = f(\mathbf{z}^{(r)})/g(\mathb
 estimate is
 $`\log\hat{p}(\mathbf{y}) = \log\big(\frac{1}{R}\sum_r w_r\big)`$, the log of the mean of all
 the weights. The numerical standard error is the standard deviation of the estimates from 20
-batches of 250 draws, divided by $`\sqrt{20}`$. The code of Chan and Grant (2016) reports the mean
-of the 20 batch estimates instead. Here that mean lies below our estimate by at most 0.021, for SV
-on the SV-$`t`$ data, and by at most 0.003 for the other models.
+batches of 250 draws, divided by $`\sqrt{20}`$.
 
 ## Step 4: Compare the Models
 
@@ -175,12 +171,6 @@ data, SV-$`t`$ exceeds SV by 10.33 (numerical standard error 0.048), a Bayes fac
 31,000. Third, on the SV data, SV exceeds SV-$`t`$ by 1.01 (0.023), a Bayes factor of about 2.7.
 There the posterior of $`\nu`$ lies at large values, where the Student-$`t`$ errors are close to
 normal, so the Bayes factor favors neither model strongly.
-
-The estimate of SV on the SV-$`t`$ data is the least precise. Its effective sample size is 9
-percent of $`R`$, against at least 43 percent for the other models. Under SV, the outliers of
-these data require large values of $`h_t`$. The integrated likelihood of Step 1 is then noisier:
-over 20 calls at the posterior mean, its log has a standard deviation of 0.83, against 0.27 on the
-SV data. The noise spreads the weights.
 
 ## Step 5: Vary the Prior of the Degrees of Freedom
 

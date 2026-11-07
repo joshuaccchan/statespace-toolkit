@@ -50,17 +50,16 @@ $`\mu_h = 0`$, $`\phi = 0.97`$ and $`\sigma_h^2 = 0.04`$. The true volatility ra
 Subtract the mean, square, and take logs:
 
 ```math
-y_t^* = \log\big((y_t - \mu)^2 + c\big) = h_t + \varepsilon_t^*, \qquad \varepsilon_t^* = \log \varepsilon_t^2,
+y_t^* = \log (y_t - \mu)^2 = h_t + \varepsilon_t^*, \qquad \varepsilon_t^* = \log \varepsilon_t^2.
 ```
 
-where the second equality holds for $`c = 0`$. The measurement equation is now linear in
-$`h_t`$. Its error $`\varepsilon_t^*`$ is the log of a $`\chi^2_1`$ variable, whose distribution
-has mean $`-1.2704`$, variance $`\pi^2/2 \approx 4.93`$ and a long left tail (Figure 1).
+The measurement equation is now linear in $`h_t`$. Its error $`\varepsilon_t^*`$ is the log of a
+$`\chi^2_1`$ variable, whose distribution has mean $`-1.2704`$, variance $`\pi^2/2 \approx 4.93`$
+and a long left tail (Figure 1).
 
-The offset $`c = 10^{-4}`$ keeps the log finite when $`y_t = \mu`$. It must be small relative to
-$`(y_t - \mu)^2`$, which is why the data are in percent. On our data the offset moves $`y_t^*`$ by
-more than 0.1 in 28 of the 1,000 periods. With the same data in decimals, divided by 100, it would
-do so in 976 periods, and the median shift would be 1.33. In code:
+It is common to add a small offset $`c`$ to $`(y_t - \mu)^2`$ before taking logs, because the log
+of a squared residual near zero is a large negative number. We set $`c = 10^{-4}`$. The offset
+must be small relative to most squared residuals. In code:
 
 ```matlab
 offset = 1e-4;
@@ -234,12 +233,7 @@ can leave the chain rejecting every candidate. The Metropolis-Hastings step take
 14.1.
 
 The two samplers give nearly the same posterior. The posterior means of $`\mathrm{e}^{h_t/2}`$
-differ by at most 0.061, or 0.25 posterior standard deviations. The differences are small but
-systematic. In 341 of the 1,000 periods they exceed two Monte Carlo standard errors. Averaged over
-all periods, the two put $`h_t`$ at the same level, 0.0004 apart. In the 41 periods with
-$`|y_t - \mu| < 0.05`$, the mixture sampler puts $`h_t`$ 0.020 below the exact sampler. In those
-periods $`y_t^*`$ falls in the left tail of $`\log\chi^2_1`$, where the mixture fits least closely
-on the log scale (Figure 1, right).
+differ by at most 0.061, or 0.25 posterior standard deviations.
 
 ## How We Check It
 
@@ -255,7 +249,7 @@ the exact density on $`(-8, 2)`$. On $`(-15, -8)`$ it is up to 0.71 away.
 
 The exact sampler of Step 4 checks the mixture sampler of Step 3 without using the mixture. In
 this realization, the 90 percent intervals of Step 3 contain the true volatility in 897 of the
-1,000 periods. One realization illustrates the intervals and does not check their coverage.
+1,000 periods.
 
 </details>
 

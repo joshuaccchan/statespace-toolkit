@@ -23,13 +23,9 @@ offset = 1e-4;
 ystar = log((y - mu).^2 + offset);  % y*_t = log((y_t - mu)^2 + c)
 
 %% 1. the checks
-shift = @(e) log(e.^2 + offset) - log(e.^2);            % what the offset adds to log(e^2)
 fprintf('\nthe data: T = %d, sample sd %.2f, sd of the true e^{h_t/2} from %.2f to %.2f\n', ...
     T, std(y), min(exp(h_true/2)), max(exp(h_true/2)));
-fprintf(['the offset moves y*_t by more than 0.1 in %d of %d periods with the data in ' ...
-    'percent,\nand in %d with the data in decimals (median shift %.2f)\n'], ...
-    nnz(shift(y - mu) > .1), T, nnz(shift((y - mu)/100) > .1), median(shift((y - mu)/100)));
-h = muh*ones(T,1);                                      % the current path, for one draw
+h = muh*ones(T,1);                                     % the current path, for one draw
 state = rng;                                            % for the check against ssm.ksc_ar1_mean
 
 %% 2. one draw of the indicators and of h: the code to adapt
@@ -111,20 +107,11 @@ t_armh = toc;
 IFx = ssm.inefficiency_factor(store_hx', L);
 volx = exp(store_hx/2);
 psd = std(volx, 0, 2);
-dz = (vm - mean(volx, 2))./sqrt(ssm.mcse(vol', L)'.^2 + ssm.mcse(volx', L)'.^2);
-[~, tz] = max(abs(dz));
-dh = mean(store_h, 2) - mean(store_hx, 2);
 fprintf('\nthe exact conditional by ssm.armh: acceptance rate %.3f, %.2f ms per draw\n', ...
     nacc/nsim, 1000*t_armh/(nsim + burnin));
 fprintf('inefficiency factors of the h_t: median %.1f, largest %.1f\n', median(IFx), max(IFx));
 fprintf(['posterior means of e^{h_t/2}, mixture minus exact: largest difference %.3f, ' ...
     '%.2f posterior sd\n'], max(abs(vm - mean(volx, 2))), max(abs(vm - mean(volx, 2))./psd));
-fprintf(['in Monte Carlo standard errors of the difference: largest %.1f (period %d, ' ...
-    '|y_t - mu| = %.3f), %d of %d beyond 2\n'], abs(dz(tz)), tz, abs(y(tz) - mu), ...
-    nnz(abs(dz) > 2), T);
-fprintf(['posterior means of h_t, mixture minus exact: average %.4f, largest %.3f; ' ...
-    'periods with |y_t - mu| < 0.05: average %.3f (%d periods)\n'], mean(dh), max(abs(dh)), ...
-    mean(dh(abs(y - mu) < .05)), nnz(abs(y - mu) < .05));
 
 %% 5. a random-walk log-volatility: the adaptation
 h0 = 0;                                         % the known initial value

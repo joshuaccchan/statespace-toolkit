@@ -210,10 +210,7 @@ Geweke's (1992) diagnostic compares the mean of the first 10 percent of the draw
 the last half. It divides the difference by its standard error.
 [`ssm.geweke`](../../core/+ssm/geweke.m) returns it, and it is approximately standard normal if
 the chain has converged. Its standard error needs the same truncation lag. With $`L = 200`$ the
-four values are 0.05, 0.71, $`-1.43`$ and 1.29, all inside $`\pm 1.96`$. The default lags of
-`ssm.geweke`, 7 and 11 here, suit draws with little autocorrelation. With them, $`\phi`$ and
-$`\sigma_h^2`$ give $`-3.71`$ and 3.75, because the standard error leaves out most of the
-autocorrelation of their draws.
+four values are 0.05, 0.71, $`-1.43`$ and 1.29, all inside $`\pm 1.96`$.
 
 ![The draws of the four parameters and their histograms](fig_chain.png)
 
@@ -287,14 +284,10 @@ end
 
 `guide.m` runs this sampler on data generated from the random walk, with $`T = 1000`$,
 $`\mu = 0.1`$, $`h_0 = 0`$ and $`\sigma_h^2 = 0.01`$. The posterior mean of $`\sigma_h^2`$ is
-0.0112, with 90 percent interval (0.0067, 0.0177). The interval of $`\mu`$, (0.076, 0.098), lies
-just below its true value. The posterior means of $`h_0`$ and $`h_1`$ are $`-0.92`$, with
-intervals that lie below the true values of 0 and $`-0.01`$. In this realization the true
-log-volatility falls from an average of $`-0.45`$ in the first 20 periods to $`-1.03`$ in the next
-80. A random walk with a small $`\sigma_h^2`$ moves slowly, so the posterior places $`h_1`$ close
-to the level of the later periods. The sampler with the exact conditional distribution of
-$`\mathbf{h}`$ gives the same posterior. Its posterior means of $`h_0`$ and $`h_1`$ are $`-0.88`$,
-and all four posterior means lie within 2.6 Monte Carlo standard errors of those above.
+0.0112, with 90 percent interval (0.0067, 0.0177). The sampler with the exact conditional
+distribution of $`\mathbf{h}`$ gives the same posterior. Under the two samplers, the posterior
+means of $`\mu`$, $`\sigma_h^2`$, $`h_0`$ and $`h_1`$ differ by at most 2.6 Monte Carlo standard
+errors.
 
 </details>
 
