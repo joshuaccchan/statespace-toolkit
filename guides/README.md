@@ -27,15 +27,16 @@ The three guides use a regression whose coefficients follow random walks, on gen
 
 ## Stochastic Volatility
 
-The four guides use a stochastic volatility model whose log-volatility follows a stationary AR(1)
-process, on generated data in percent.
+The four guides use two stochastic volatility models, one with Gaussian errors and one with
+Student-t errors, on generated data. In both, the log-volatility follows a stationary AR(1)
+process.
 
 | Guide | What it shows | Core functions |
 |---|---|---|
 | [How to Draw the Log-Volatilities of a Stochastic Volatility Model](sv_states/) | Draw the whole path of the log-volatilities by the auxiliary mixture sampler, and from their exact conditional distribution | `ssm.ksc_ar1_mean`, `ssm.simulate_states`, `ssm.armh` |
 | [How to Estimate a Stochastic Volatility Model by Gibbs Sampling](sv_gibbs/) | Draw the mean and the parameters of the log-volatility along with it, and check the chain | `ssm.ksc_ar1_mean`, `ssm.inefficiency_factor`, `ssm.geweke` |
-| [How to Add Student-t Errors to a Stochastic Volatility Model](sv_t/) | Give the errors heavy tails, so that outliers do not pass into the volatility | `ssm.ksc_ar1_mean`, `ssm.mode_newton` |
-| [How to Compare Stochastic Volatility Models by the Marginal Likelihood](sv_compare/) | Compare constant variance, stochastic volatility and Student-t errors by their marginal likelihoods | `ssm.intlike_sv`, `ssm.intlike_sv_t` |
+| [How to Add Student-t Errors to a Stochastic Volatility Model](sv_t/) | Replace the Gaussian errors with Student-t errors, so that outliers have less effect on the estimated volatility | `ssm.ksc_ar1_mean`, `ssm.mode_newton` |
+| [How to Compare Stochastic Volatility Models by the Marginal Likelihood](sv_compare/) | Compare the two stochastic volatility models and a constant-variance model by their marginal likelihoods | `ssm.intlike_sv`, `ssm.intlike_sv_t` |
 
 The [examples](../examples/) run the core functions on additional models, with real and generated
 data, and the [tutorials](../tutorials/) answer empirical questions with the models of published
