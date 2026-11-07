@@ -5,6 +5,7 @@
 [`ssm.mcse`](../../core/+ssm/mcse.m), [`ssm.geweke`](../../core/+ssm/geweke.m) and
 [`ssm.armh`](../../core/+ssm/armh.m). Method:
 [Kim, Shephard and Chib (1998)](../../CITING.md#kim-shephard-and-chib-1998),
+[Del Negro and Primiceri (2015)](../../CITING.md#del-negro-and-primiceri-2015),
 [Chan and Grant (2016)](../../CITING.md#chan-and-grant-2016b),
 [Geweke (1992)](../../CITING.md#geweke-1992) and [Chan (2027)](../../CITING.md#chan-2027).*
 
@@ -28,12 +29,16 @@ It takes about 30 seconds on the machine that produced this page.
 
 The model is that of the first guide,
 
-$$y_t = \mu + \mathrm{e}^{h_t/2}\varepsilon_t, \qquad \varepsilon_t \sim \mathcal{N}(0, 1), \qquad\qquad h_t = \mu_h + \phi(h_{t-1} - \mu_h) + u_t, \qquad u_t \sim \mathcal{N}(0, \sigma_h^2),$$
+```math
+y_t = \mu + \mathrm{e}^{h_t/2}\varepsilon_t, \qquad \varepsilon_t \sim \mathcal{N}(0, 1), \qquad\qquad h_t = \mu_h + \phi(h_{t-1} - \mu_h) + u_t, \qquad u_t \sim \mathcal{N}(0, \sigma_h^2),
+```
 
 with $`h_1 \sim \mathcal{N}(\mu_h, \sigma_h^2/(1 - \phi^2))`$ and $`\mu`$, $`\mu_h`$, $`\phi`$ and
 $`\sigma_h^2`$ unknown. We follow Chan and Grant (2016) to set the priors:
 
-$$\mu \sim \mathcal{N}(0, 10), \qquad \mu_h \sim \mathcal{N}(1, 10), \qquad \phi \sim \mathcal{TN}_{(-1,1)}(0.97, 0.1^2), \qquad \sigma_h^2 \sim \mathcal{IG}(5, 0.16),$$
+```math
+\mu \sim \mathcal{N}(0, 10), \qquad \mu_h \sim \mathcal{N}(1, 10), \qquad \phi \sim \mathcal{TN}_{(-1,1)}(0.97, 0.1^2), \qquad \sigma_h^2 \sim \mathcal{IG}(5, 0.16),
+```
 
 where $`\mathcal{TN}_{(-1,1)}`$ is the normal distribution truncated to $`(-1, 1)`$ and
 $`\mathcal{IG}(\nu, S)`$ is the inverse-gamma distribution with shape $`\nu`$ and scale $`S`$.
@@ -62,8 +67,9 @@ Block 1 draws $`\mu`$ given $`\mathbf{h}`$ and not given the indicators. Given $
 observation $`y_t`$ is normal with mean $`\mu`$ and known variance $`\mathrm{e}^{h_t}`$, so the
 distribution of $`\mu`$ is normal. Given the indicators as well, $`\mu`$ enters through
 $`y_t^* = \log\big((y_t - \mu)^2 + c\big)`$, and its distribution has no standard form. Block 2
-then draws the indicators afresh, from the $`y_t^*`$ that the new $`\mu`$ gives. The parameters of
-the log-volatility enter only the state equation, so given $`\mathbf{h}`$ they do not depend on
+then draws the indicators afresh, from the $`y_t^*`$ that the new $`\mu`$ gives. Drawing the
+indicators immediately before $`\mathbf{h}`$ follows Del Negro and Primiceri (2015). The parameters
+of the log-volatility enter only the state equation, so given $`\mathbf{h}`$ they do not depend on
 $`\mathbf{y}`$ or on the indicators.
 
 ## Step 2: Derive the Conditional Distributions
@@ -71,25 +77,33 @@ $`\mathbf{y}`$ or on the indicators.
 **The mean.** Given $`\mathbf{h}`$, the model is a regression of $`y_t`$ on a constant with known
 variances $`\mathrm{e}^{h_t}`$. The normal prior is conjugate:
 
-$$(\mu \mid \mathbf{y}, \mathbf{h}) \sim \mathcal{N}\big(K_\mu^{-1}c_\mu,\; K_\mu^{-1}\big), \qquad K_\mu = \frac{1}{V_\mu} + \sum_{t=1}^{T}\mathrm{e}^{-h_t}, \qquad c_\mu = \frac{\mu_0}{V_\mu} + \sum_{t=1}^{T}\mathrm{e}^{-h_t}y_t.$$
+```math
+(\mu \mid \mathbf{y}, \mathbf{h}) \sim \mathcal{N}\big(K_\mu^{-1}c_\mu,\; K_\mu^{-1}\big), \qquad K_\mu = \frac{1}{V_\mu} + \sum_{t=1}^{T}\mathrm{e}^{-h_t}, \qquad c_\mu = \frac{\mu_0}{V_\mu} + \sum_{t=1}^{T}\mathrm{e}^{-h_t}y_t.
+```
 
 **The variance of the log-volatility.** Given $`\mathbf{h}`$, $`\mu_h`$ and $`\phi`$, the state
 errors are known: $`u_1 = \sqrt{1 - \phi^2}(h_1 - \mu_h)`$, scaled to variance $`\sigma_h^2`$, and
 $`u_t = h_t - \mu_h - \phi(h_{t-1} - \mu_h)`$ for $`t > 1`$. The inverse-gamma prior is conjugate:
 
-$$(\sigma_h^2 \mid \mathbf{h}, \mu_h, \phi) \sim \mathcal{IG}\Big(\nu_h + \frac{T}{2},\; S_h + \frac{1}{2}\sum_{t=1}^{T}u_t^2\Big).$$
+```math
+(\sigma_h^2 \mid \mathbf{h}, \mu_h, \phi) \sim \mathcal{IG}\Big(\nu_h + \frac{T}{2},\; S_h + \frac{1}{2}\sum_{t=1}^{T}u_t^2\Big).
+```
 
 **The persistence.** The state equations for $`t > 1`$ form a regression of $`h_t - \mu_h`$ on
 $`h_{t-1} - \mu_h`$ with coefficient $`\phi`$. Combined with the prior, they give the truncated
 normal density $`q(\phi)`$ of $`\mathcal{TN}_{(-1,1)}(\hat{\phi}, K_\phi^{-1})`$, with
 
-$$K_\phi = \frac{1}{V_\phi} + \frac{1}{\sigma_h^2}\sum_{t=2}^{T}(h_{t-1} - \mu_h)^2, \qquad \hat{\phi} = K_\phi^{-1}\Big(\frac{\phi_0}{V_\phi} + \frac{1}{\sigma_h^2}\sum_{t=2}^{T}(h_{t-1} - \mu_h)(h_t - \mu_h)\Big).$$
+```math
+K_\phi = \frac{1}{V_\phi} + \frac{1}{\sigma_h^2}\sum_{t=2}^{T}(h_{t-1} - \mu_h)^2, \qquad \hat{\phi} = K_\phi^{-1}\Big(\frac{\phi_0}{V_\phi} + \frac{1}{\sigma_h^2}\sum_{t=2}^{T}(h_{t-1} - \mu_h)(h_t - \mu_h)\Big).
+```
 
 The first state equation also depends on $`\phi`$, through the variance
 $`\sigma_h^2/(1 - \phi^2)`$ of $`h_1`$. The conditional density of $`\phi`$ is therefore
 proportional to $`g(\phi)q(\phi)`$ on $`(-1, 1)`$, with
 
-$$g(\phi) = \sqrt{1 - \phi^2}\,\exp\Big(-\frac{(1 - \phi^2)(h_1 - \mu_h)^2}{2\sigma_h^2}\Big).$$
+```math
+g(\phi) = \sqrt{1 - \phi^2}\,\exp\Big(-\frac{(1 - \phi^2)(h_1 - \mu_h)^2}{2\sigma_h^2}\Big).
+```
 
 An independence-chain Metropolis-Hastings step draws a candidate $`\phi^*`$ from $`q`$ and accepts
 it with probability $`\min\{1, g(\phi^*)/g(\phi)\}`$. The factor $`g`$ comes from one period only,
@@ -100,9 +114,13 @@ $`h_1 = \mu_h + \sqrt{\sigma_h^2/(1 - \phi^2)}\,e_1`$ with $`e_1 \sim \mathcal{N
 $`h_t - \phi h_{t-1} = (1 - \phi)\mu_h + u_t`$, the state equations form a regression in $`\mu_h`$
 with known variances. With the normal prior,
 
-$$(\mu_h \mid \mathbf{h}, \phi, \sigma_h^2) \sim \mathcal{N}\big(K_{\mu_h}^{-1}c_{\mu_h},\; K_{\mu_h}^{-1}\big), \qquad K_{\mu_h} = \frac{1}{V_{\mu_h}} + \frac{1 - \phi^2 + (T - 1)(1 - \phi)^2}{\sigma_h^2},$$
+```math
+(\mu_h \mid \mathbf{h}, \phi, \sigma_h^2) \sim \mathcal{N}\big(K_{\mu_h}^{-1}c_{\mu_h},\; K_{\mu_h}^{-1}\big), \qquad K_{\mu_h} = \frac{1}{V_{\mu_h}} + \frac{1 - \phi^2 + (T - 1)(1 - \phi)^2}{\sigma_h^2},
+```
 
-$$c_{\mu_h} = \frac{\mu_{h0}}{V_{\mu_h}} + \frac{1}{\sigma_h^2}\Big((1 - \phi^2)h_1 + (1 - \phi)\sum_{t=2}^{T}(h_t - \phi h_{t-1})\Big).$$
+```math
+c_{\mu_h} = \frac{\mu_{h0}}{V_{\mu_h}} + \frac{1}{\sigma_h^2}\Big((1 - \phi^2)h_1 + (1 - \phi)\sum_{t=2}^{T}(h_t - \phi h_{t-1})\Big).
+```
 
 ## Step 3: Write the Loop
 
@@ -243,7 +261,7 @@ mixture step uses the random-walk state equation of the Adapt It Yourself answer
 $`u_t = h_t - h_{t-1}`$ with the current $`h_0`$, and $`\sigma_h^2`$ keeps its inverse-gamma form.
 The initial value enters only the first state equation, $`h_1 = h_0 + u_1`$, so
 
-$$(h_0 \mid h_1, \sigma_h^2) \sim \mathcal{N}\big(K_{h_0}^{-1}c_{h_0},\; K_{h_0}^{-1}\big), \qquad K_{h_0} = \frac{1}{b_0} + \frac{1}{\sigma_h^2}, \qquad c_{h_0} = \frac{a_0}{b_0} + \frac{h_1}{\sigma_h^2}.$$
+$`\displaystyle (h_0 \mid h_1, \sigma_h^2) \sim \mathcal{N}\big(K_{h_0}^{-1}c_{h_0},\; K_{h_0}^{-1}\big), \qquad K_{h_0} = \frac{1}{b_0} + \frac{1}{\sigma_h^2}, \qquad c_{h_0} = \frac{a_0}{b_0} + \frac{h_1}{\sigma_h^2}.`$
 
 ```matlab
 a0 = 0; b0 = 10;          % h_0 ~ N(a0, b0)

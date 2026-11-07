@@ -11,11 +11,11 @@ In a stochastic volatility (SV) model, the variance of the data changes over tim
 logarithm, the log-volatility, is a state. The data depend on the state through its exponential,
 so the model is nonlinear, and the recipe of
 [How to Draw the States of an Unobserved Components Model](../uc_states/) does not apply directly.
-The auxiliary mixture sampler of Kim, Shephard and Chib (1998) makes the model linear and Gaussian
-in two steps. It takes logs of the squared data, and it approximates the distribution of the new
-error by a mixture of seven normal distributions. Given the mixture component of each period, the
-precision sampler then draws the whole path of the log-volatilities at once. In this guide the
-parameters are known;
+The auxiliary mixture sampler of Kim, Shephard and Chib (1998) approximates the model in two
+steps. It takes logs of the squared data, which makes the model linear. It then approximates the
+distribution of the new error by a mixture of seven normal distributions. Given the mixture
+component of each period, the model is linear and Gaussian, and the precision sampler draws the
+whole path of the log-volatilities at once. In this guide the parameters are known;
 [How to Estimate a Stochastic Volatility Model by Gibbs Sampling](../sv_gibbs/) draws them as well.
 
 To draw the figures first, run from the root of the repository:
@@ -30,7 +30,9 @@ It takes about 15 seconds on the machine that produced this page.
 
 The model is
 
-$$y_t = \mu + \mathrm{e}^{h_t/2}\varepsilon_t, \qquad \varepsilon_t \sim \mathcal{N}(0, 1), \qquad\qquad h_t = \mu_h + \phi(h_{t-1} - \mu_h) + u_t, \qquad u_t \sim \mathcal{N}(0, \sigma_h^2),$$
+```math
+y_t = \mu + \mathrm{e}^{h_t/2}\varepsilon_t, \qquad \varepsilon_t \sim \mathcal{N}(0, 1), \qquad\qquad h_t = \mu_h + \phi(h_{t-1} - \mu_h) + u_t, \qquad u_t \sim \mathcal{N}(0, \sigma_h^2),
+```
 
 for $`t = 1, \ldots, T`$, where $`|\phi| < 1`$ and the first log-volatility comes from the
 stationary distribution, $`h_1 \sim \mathcal{N}(\mu_h, \sigma_h^2/(1 - \phi^2))`$. The variance of
@@ -47,7 +49,9 @@ $`\mu_h = 0`$, $`\phi = 0.97`$ and $`\sigma_h^2 = 0.04`$. The true volatility ra
 
 Subtract the mean, square, and take logs:
 
-$$y_t^* = \log\big((y_t - \mu)^2 + c\big) = h_t + \varepsilon_t^*, \qquad \varepsilon_t^* = \log \varepsilon_t^2,$$
+```math
+y_t^* = \log\big((y_t - \mu)^2 + c\big) = h_t + \varepsilon_t^*, \qquad \varepsilon_t^* = \log \varepsilon_t^2,
+```
 
 where the second equality holds for $`c = 0`$. The measurement equation is now linear in
 $`h_t`$. Its error $`\varepsilon_t^*`$ is the log of a $`\chi^2_1`$ variable, whose distribution
@@ -68,7 +72,9 @@ ystar = log((y - mu).^2 + offset);  % y*_t = log((y_t - mu)^2 + c)
 Kim, Shephard and Chib (1998) approximate the density of $`\varepsilon_t^*`$ by a mixture of seven
 normal densities,
 
-$$f(\varepsilon_t^*) \approx \sum_{i=1}^{7} p_i\, f_{\mathcal{N}}(\varepsilon_t^*;\, \mu_i - 1.2704,\, \sigma_i^2),$$
+```math
+f(\varepsilon_t^*) \approx \sum_{i=1}^{7} p_i\, f_{\mathcal{N}}(\varepsilon_t^*;\, \mu_i - 1.2704,\, \sigma_i^2),
+```
 
 with the fixed weights $`p_i`$, means and variances below. The mixture follows the density closely
 (Figure 1, left). On the log scale, the two differ most in the far left tail (Figure 1, right).
@@ -89,7 +95,9 @@ period $`t`$, with $`\Pr(s_t = i) = p_i`$. Given $`s_t = i`$, the error $`\varep
 normal with mean $`\mu_i - 1.2704`$ and variance $`\sigma_i^2`$. Stacked over $`t`$, the
 measurement equation is then
 
-$$\mathbf{y}^* = \mathbf{h} + \mathbf{d}_{\mathbf{s}} + \mathbf{e}, \qquad \mathbf{e} \sim \mathcal{N}(\mathbf{0}, \boldsymbol{\Sigma}_{\mathbf{s}}),$$
+```math
+\mathbf{y}^* = \mathbf{h} + \mathbf{d}_{\mathbf{s}} + \mathbf{e}, \qquad \mathbf{e} \sim \mathcal{N}(\mathbf{0}, \boldsymbol{\Sigma}_{\mathbf{s}}),
+```
 
 with $`\mathbf{d}_{\mathbf{s}} = (\mu_{s_1} - 1.2704, \ldots, \mu_{s_T} - 1.2704)'`$ and
 $`\boldsymbol{\Sigma}_{\mathbf{s}} = \mathrm{diag}(\sigma_{s_1}^2, \ldots, \sigma_{s_T}^2)`$. Given
@@ -106,7 +114,9 @@ below it; `ssm.diffmat(T, phi)` returns it. The recipe of
 the two equations. With the prior precision
 $`\mathbf{P} = \mathbf{H}_\phi'\mathbf{S}^{-1}\mathbf{H}_\phi`$ of $`\mathbf{h}`$,
 
-$$\mathbf{K} = \mathbf{P} + \boldsymbol{\Sigma}_{\mathbf{s}}^{-1}, \qquad \mathbf{c} = \mathbf{P}\mu_h\mathbf{1} + \boldsymbol{\Sigma}_{\mathbf{s}}^{-1}(\mathbf{y}^* - \mathbf{d}_{\mathbf{s}}).$$
+```math
+\mathbf{K} = \mathbf{P} + \boldsymbol{\Sigma}_{\mathbf{s}}^{-1}, \qquad \mathbf{c} = \mathbf{P}\mu_h\mathbf{1} + \boldsymbol{\Sigma}_{\mathbf{s}}^{-1}(\mathbf{y}^* - \mathbf{d}_{\mathbf{s}}).
+```
 
 The indicators in turn depend on $`\mathbf{h}`$. Given $`\mathbf{h}`$, they are independent across
 periods, and $`s_t`$ takes the value $`i`$ with probability proportional to
@@ -133,7 +143,9 @@ The variable `offset` of Step 1 is the scalar $`c`$; the vector `c` here is $`\m
 $`\mathbf{K}`$ is tridiagonal. At this draw, with the indicators of the first four periods equal
 to 5, 5, 5 and 7, its top left corner is
 
-$$\begin{bmatrix} 26.56 & -24.25 & 0 & 0 \\ -24.25 & 50.08 & -24.25 & 0 \\ 0 & -24.25 & 50.08 & -24.25 \\ 0 & 0 & -24.25 & 49.31 \end{bmatrix}.$$
+```math
+\begin{bmatrix} 26.56 & -24.25 & 0 & 0 \\ -24.25 & 50.08 & -24.25 & 0 \\ 0 & -24.25 & 50.08 & -24.25 \\ 0 & 0 & -24.25 & 49.31 \end{bmatrix}.
+```
 
 $`\mathbf{P}`$ contributes $`1/\sigma_h^2 = 25`$ to the first and last diagonal entries,
 $`(1 + \phi^2)/\sigma_h^2 = 48.52`$ to the others and $`-\phi/\sigma_h^2 = -24.25`$ next to the
@@ -182,11 +194,15 @@ $`\mathrm{e}^{h_t/2}`$ and its posterior mean with 90 percent pointwise credible
 The draws of Step 3 come from the posterior of the mixture model, which approximates the SV model.
 The exact conditional density of $`\mathbf{h}`$ has the log
 
-$$\log p(\mathbf{h} \mid \mathbf{y}) = -\frac{1}{2}(\mathbf{h} - \mu_h\mathbf{1})'\mathbf{P}(\mathbf{h} - \mu_h\mathbf{1}) - \frac{1}{2}\sum_{t=1}^{T} h_t - \frac{1}{2}\sum_{t=1}^{T}(y_t - \mu)^2\mathrm{e}^{-h_t} + \text{const}.$$
+```math
+\log p(\mathbf{h} \mid \mathbf{y}) = -\frac{1}{2}(\mathbf{h} - \mu_h\mathbf{1})'\mathbf{P}(\mathbf{h} - \mu_h\mathbf{1}) - \frac{1}{2}\sum_{t=1}^{T} h_t - \frac{1}{2}\sum_{t=1}^{T}(y_t - \mu)^2\mathrm{e}^{-h_t} + \text{const}.
+```
 
 The last sum makes the density non-Gaussian. The density is concave, and its negative Hessian
 
-$$\mathbf{P} + \mathrm{diag}\Big(\frac{1}{2}(y_1 - \mu)^2\mathrm{e}^{-h_1}, \ldots, \frac{1}{2}(y_T - \mu)^2\mathrm{e}^{-h_T}\Big)$$
+```math
+\mathbf{P} + \mathrm{diag}\Big(\frac{1}{2}(y_1 - \mu)^2\mathrm{e}^{-h_1}, \ldots, \frac{1}{2}(y_T - \mu)^2\mathrm{e}^{-h_T}\Big)
+```
 
 is tridiagonal. The accept-reject Metropolis-Hastings step of Chan (2017) proposes from a Gaussian
 centered at the mode, whose precision is the negative Hessian there. It screens the candidates by
@@ -258,7 +274,7 @@ $`\mathbf{u} \sim \mathcal{N}(\mathbf{0}, \sigma_h^2\mathbf{I}_T)`$,
 $`\tilde{\mathbf{h}}_0 = (h_0, 0, \ldots, 0)'`$ and the first-difference matrix $`\mathbf{H}`$.
 So
 
-$$\mathbf{K} = \frac{1}{\sigma_h^2}\mathbf{H}'\mathbf{H} + \boldsymbol{\Sigma}_{\mathbf{s}}^{-1}, \qquad \mathbf{c} = \frac{1}{\sigma_h^2}\mathbf{H}'\tilde{\mathbf{h}}_0 + \boldsymbol{\Sigma}_{\mathbf{s}}^{-1}(\mathbf{y}^* - \mathbf{d}_{\mathbf{s}}).$$
+$`\displaystyle \mathbf{K} = \frac{1}{\sigma_h^2}\mathbf{H}'\mathbf{H} + \boldsymbol{\Sigma}_{\mathbf{s}}^{-1}, \qquad \mathbf{c} = \frac{1}{\sigma_h^2}\mathbf{H}'\tilde{\mathbf{h}}_0 + \boldsymbol{\Sigma}_{\mathbf{s}}^{-1}(\mathbf{y}^* - \mathbf{d}_{\mathbf{s}}).`$
 
 ```matlab
 H = ssm.diffmat(T);                             % first differences

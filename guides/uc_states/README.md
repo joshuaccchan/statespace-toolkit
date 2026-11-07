@@ -26,7 +26,9 @@ run guides/uc_states/guide.m
 
 The model decomposes $`y_t`$ into a trend and a transitory component,
 
-$$y_t = \tau_t + \varepsilon_t, \qquad \varepsilon_t \sim \mathcal{N}(0, \sigma^2), \qquad\qquad \tau_t = \tau_{t-1} + \eta_t, \qquad \eta_t \sim \mathcal{N}(0, \omega^2),$$
+```math
+y_t = \tau_t + \varepsilon_t, \qquad \varepsilon_t \sim \mathcal{N}(0, \sigma^2), \qquad\qquad \tau_t = \tau_{t-1} + \eta_t, \qquad \eta_t \sim \mathcal{N}(0, \omega^2),
+```
 
 where the trend starts from a known $`\tau_0`$. Section 9.1.1 of the book *Bayesian
 Macroeconometrics* (Chan, 2027) lets the transitory component follow an AR(1) process; we
@@ -43,7 +45,9 @@ $`\mathbf{H}\boldsymbol{\tau} = \tilde{\boldsymbol{\tau}}_0 + \boldsymbol{\eta}`
 $`\boldsymbol{\eta} \sim \mathcal{N}(\mathbf{0}, \omega^2 \mathbf{I}_T)`$,
 $`\tilde{\boldsymbol{\tau}}_0 = (\tau_0, 0, \ldots, 0)'`$ and the first-difference matrix
 
-$$\mathbf{H} = \begin{bmatrix} 1 & 0 & 0 & \cdots & 0 \\ -1 & 1 & 0 & \cdots & 0 \\ 0 & -1 & 1 & \cdots & 0 \\ \vdots & & \ddots & \ddots & \vdots \\ 0 & \cdots & 0 & -1 & 1 \end{bmatrix},$$
+```math
+\mathbf{H} = \begin{bmatrix} 1 & 0 & 0 & \cdots & 0 \\ -1 & 1 & 0 & \cdots & 0 \\ 0 & -1 & 1 & \cdots & 0 \\ \vdots & & \ddots & \ddots & \vdots \\ 0 & \cdots & 0 & -1 & 1 \end{bmatrix},
+```
 
 which [`ssm.diffmat`](../../core/+ssm/diffmat.m) returns as a sparse matrix.
 
@@ -52,16 +56,22 @@ which [`ssm.diffmat`](../../core/+ssm/diffmat.m) returns as a sparse matrix.
 The two stacked equations give the log density of $`\boldsymbol{\tau}`$ given $`\mathbf{y}`$, up
 to a constant:
 
-$$\log p(\boldsymbol{\tau} \mid \mathbf{y}) = -\frac{1}{2\sigma^2}(\mathbf{y} - \boldsymbol{\tau})'(\mathbf{y} - \boldsymbol{\tau}) - \frac{1}{2\omega^2}(\mathbf{H}\boldsymbol{\tau} - \tilde{\boldsymbol{\tau}}_0)'(\mathbf{H}\boldsymbol{\tau} - \tilde{\boldsymbol{\tau}}_0) + \text{const} = -\frac{1}{2}\left(\boldsymbol{\tau}'\mathbf{K}\boldsymbol{\tau} - 2\boldsymbol{\tau}'\mathbf{c}\right) + \text{const}.$$
+```math
+\log p(\boldsymbol{\tau} \mid \mathbf{y}) = -\frac{1}{2\sigma^2}(\mathbf{y} - \boldsymbol{\tau})'(\mathbf{y} - \boldsymbol{\tau}) - \frac{1}{2\omega^2}(\mathbf{H}\boldsymbol{\tau} - \tilde{\boldsymbol{\tau}}_0)'(\mathbf{H}\boldsymbol{\tau} - \tilde{\boldsymbol{\tau}}_0) + \text{const} = -\frac{1}{2}\left(\boldsymbol{\tau}'\mathbf{K}\boldsymbol{\tau} - 2\boldsymbol{\tau}'\mathbf{c}\right) + \text{const}.
+```
 
 Collecting the terms quadratic in $`\boldsymbol{\tau}`$ gives $`\mathbf{K}`$, and the terms linear
 in $`\boldsymbol{\tau}`$ give $`\mathbf{c}`$:
 
-$$\mathbf{K} = \frac{1}{\omega^2}\mathbf{H}'\mathbf{H} + \frac{1}{\sigma^2}\mathbf{I}_T, \qquad \mathbf{c} = \frac{1}{\omega^2}\mathbf{H}'\tilde{\boldsymbol{\tau}}_0 + \frac{1}{\sigma^2}\mathbf{y}.$$
+```math
+\mathbf{K} = \frac{1}{\omega^2}\mathbf{H}'\mathbf{H} + \frac{1}{\sigma^2}\mathbf{I}_T, \qquad \mathbf{c} = \frac{1}{\omega^2}\mathbf{H}'\tilde{\boldsymbol{\tau}}_0 + \frac{1}{\sigma^2}\mathbf{y}.
+```
 
 Since
 
-$$\boldsymbol{\tau}'\mathbf{K}\boldsymbol{\tau} - 2\boldsymbol{\tau}'\mathbf{c} = (\boldsymbol{\tau} - \mathbf{K}^{-1}\mathbf{c})'\mathbf{K}(\boldsymbol{\tau} - \mathbf{K}^{-1}\mathbf{c}) - \mathbf{c}'\mathbf{K}^{-1}\mathbf{c},$$
+```math
+\boldsymbol{\tau}'\mathbf{K}\boldsymbol{\tau} - 2\boldsymbol{\tau}'\mathbf{c} = (\boldsymbol{\tau} - \mathbf{K}^{-1}\mathbf{c})'\mathbf{K}(\boldsymbol{\tau} - \mathbf{K}^{-1}\mathbf{c}) - \mathbf{c}'\mathbf{K}^{-1}\mathbf{c},
+```
 
 the conditional distribution is $`\mathcal{N}(\hat{\boldsymbol{\tau}}, \mathbf{K}^{-1})`$ with
 $`\mathbf{K}\hat{\boldsymbol{\tau}} = \mathbf{c}`$. Section 9.1.1 of the book derives the same
@@ -90,7 +100,9 @@ c = H'*[tau0; zeros(T-1,1)]/omega2 + y/sig2;             % linear terms: K*tauha
 $`\mathbf{K}`$ is tridiagonal. With $`\sigma^2 = 1`$ and $`\omega^2 = 0.05`$ its top left corner
 is
 
-$$\begin{bmatrix} 41 & -20 & 0 & 0 \\ -20 & 41 & -20 & 0 \\ 0 & -20 & 41 & -20 \\ 0 & 0 & -20 & 41 \end{bmatrix},$$
+```math
+\begin{bmatrix} 41 & -20 & 0 & 0 \\ -20 & 41 & -20 & 0 \\ 0 & -20 & 41 & -20 \\ 0 & 0 & -20 & 41 \end{bmatrix},
+```
 
 while $`\mathbf{K}^{-1}`$, the covariance matrix, has no zero entries (Figure 1; Figure 9.1 of the
 book makes the same point for $`T = 500`$).
@@ -136,7 +148,9 @@ $`t = 1, \ldots, T`$, these equations stack into
 $`\mathbf{H}_\rho\boldsymbol{\varepsilon} = \mathbf{u}`$, with
 $`\mathbf{u} = (u_1, \ldots, u_T)'`$ and
 
-$$\mathbf{H}_\rho = \begin{bmatrix} 1 & 0 & 0 & \cdots & 0 \\ -\rho & 1 & 0 & \cdots & 0 \\ 0 & -\rho & 1 & \cdots & 0 \\ \vdots & & \ddots & \ddots & \vdots \\ 0 & \cdots & 0 & -\rho & 1 \end{bmatrix},$$
+```math
+\mathbf{H}_\rho = \begin{bmatrix} 1 & 0 & 0 & \cdots & 0 \\ -\rho & 1 & 0 & \cdots & 0 \\ 0 & -\rho & 1 & \cdots & 0 \\ \vdots & & \ddots & \ddots & \vdots \\ 0 & \cdots & 0 & -\rho & 1 \end{bmatrix},
+```
 
 the first-difference matrix $`\mathbf{H}`$ of Step 1 with $`-\rho`$ in place of $`-1`$ below the
 diagonal. Equivalently, $`\mathbf{H}_\rho = \mathbf{I}_T - \rho\mathbf{L}`$, where the lag matrix
@@ -151,7 +165,9 @@ with
 $`(\mathbf{A}, \mathbf{d}, \mathbf{S}) = (\mathbf{H}_\rho, \mathbf{H}_\rho\mathbf{y}, \sigma^2 \mathbf{I}_T)`$.
 Only the measurement contribution changes,
 
-$$\mathbf{K} = \frac{1}{\omega^2}\mathbf{H}'\mathbf{H} + \frac{1}{\sigma^2}\mathbf{H}_\rho'\mathbf{H}_\rho, \qquad \mathbf{c} = \frac{1}{\omega^2}\mathbf{H}'\tilde{\boldsymbol{\tau}}_0 + \frac{1}{\sigma^2}\mathbf{H}_\rho'\mathbf{H}_\rho\mathbf{y},$$
+```math
+\mathbf{K} = \frac{1}{\omega^2}\mathbf{H}'\mathbf{H} + \frac{1}{\sigma^2}\mathbf{H}_\rho'\mathbf{H}_\rho, \qquad \mathbf{c} = \frac{1}{\omega^2}\mathbf{H}'\tilde{\boldsymbol{\tau}}_0 + \frac{1}{\sigma^2}\mathbf{H}_\rho'\mathbf{H}_\rho\mathbf{y},
+```
 
 the expressions of Section 9.1.1 of the book, which writes
 $`\mathbf{H}'\tilde{\boldsymbol{\tau}}_0`$ as the equal $`\tau_0\mathbf{H}'\mathbf{H}\mathbf{1}`$.
@@ -185,7 +201,7 @@ $`\mathbf{V} = \omega^2(\mathbf{H}'\mathbf{H})^{-1}`$, and
 $`\mathbf{y} = \boldsymbol{\tau} + \boldsymbol{\varepsilon}`$, so its conditional distribution
 also has the covariance form
 
-$$\mathcal{N}\big(\tau_0\mathbf{1} + \mathbf{V}(\mathbf{V} + \boldsymbol{\Sigma})^{-1}(\mathbf{y} - \tau_0\mathbf{1}),\; \mathbf{V} - \mathbf{V}(\mathbf{V} + \boldsymbol{\Sigma})^{-1}\mathbf{V}\big),$$
+$`\displaystyle \mathcal{N}\big(\tau_0\mathbf{1} + \mathbf{V}(\mathbf{V} + \boldsymbol{\Sigma})^{-1}(\mathbf{y} - \tau_0\mathbf{1}),\; \mathbf{V} - \mathbf{V}(\mathbf{V} + \boldsymbol{\Sigma})^{-1}\mathbf{V}\big),`$
 
 where $`\boldsymbol{\Sigma}`$ is the covariance matrix of $`\boldsymbol{\varepsilon}`$. `guide.m`
 computes it with dense matrices and compares it with $`\mathbf{K}^{-1}\mathbf{c}`$ and
@@ -210,7 +226,7 @@ $`\sigma^2`$. How do $`\mathbf{K}`$ and $`\mathbf{c}`$ change?
 Only the measurement contribution changes: now
 $`\mathbf{S} = \mathrm{diag}(\sigma_1^2, \ldots, \sigma_T^2)`$, so that
 
-$$\mathbf{K} = \frac{1}{\omega^2}\mathbf{H}'\mathbf{H} + \mathrm{diag}\left(\frac{1}{\sigma_1^2}, \ldots, \frac{1}{\sigma_T^2}\right), \qquad \mathbf{c} = \frac{1}{\omega^2}\mathbf{H}'\tilde{\boldsymbol{\tau}}_0 + \left(\frac{y_1}{\sigma_1^2}, \ldots, \frac{y_T}{\sigma_T^2}\right)'.$$
+$`\displaystyle \mathbf{K} = \frac{1}{\omega^2}\mathbf{H}'\mathbf{H} + \mathrm{diag}\left(\frac{1}{\sigma_1^2}, \ldots, \frac{1}{\sigma_T^2}\right), \qquad \mathbf{c} = \frac{1}{\omega^2}\mathbf{H}'\tilde{\boldsymbol{\tau}}_0 + \left(\frac{y_1}{\sigma_1^2}, \ldots, \frac{y_T}{\sigma_T^2}\right)'.`$
 
 ```matlab
 K = H'*H/omega2 + spdiags(1./sig2t, 0, T, T);            % sig2t: the T variances

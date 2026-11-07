@@ -26,7 +26,9 @@ run guides/tvp_states/guide.m
 
 The model is
 
-$$y_t = \mathbf{x}_t'\boldsymbol{\beta}_t + \varepsilon_t, \qquad \varepsilon_t \sim \mathcal{N}(0, \sigma^2), \qquad\qquad \boldsymbol{\beta}_t = \boldsymbol{\beta}_{t-1} + \boldsymbol{\eta}_t, \qquad \boldsymbol{\eta}_t \sim \mathcal{N}(\mathbf{0}, \boldsymbol{\Omega}),$$
+```math
+y_t = \mathbf{x}_t'\boldsymbol{\beta}_t + \varepsilon_t, \qquad \varepsilon_t \sim \mathcal{N}(0, \sigma^2), \qquad\qquad \boldsymbol{\beta}_t = \boldsymbol{\beta}_{t-1} + \boldsymbol{\eta}_t, \qquad \boldsymbol{\eta}_t \sim \mathcal{N}(\mathbf{0}, \boldsymbol{\Omega}),
+```
 
 where $`\mathbf{x}_t`$ holds $`k`$ regressors,
 $`\boldsymbol{\Omega} = \mathrm{diag}(\omega_1^2, \ldots, \omega_k^2)`$, and the coefficients
@@ -44,7 +46,9 @@ equation becomes $`\mathbf{y} = \mathbf{Z}\boldsymbol{\beta} + \boldsymbol{\vare
 $`\boldsymbol{\varepsilon} \sim \mathcal{N}(\mathbf{0}, \sigma^2\mathbf{I}_T)`$ and the
 $`T \times kT`$ block-diagonal matrix
 
-$$\mathbf{Z} = \begin{bmatrix} \mathbf{x}_1' & \mathbf{0} & \cdots & \mathbf{0} \\ \mathbf{0} & \mathbf{x}_2' & \cdots & \mathbf{0} \\ \vdots & & \ddots & \vdots \\ \mathbf{0} & \mathbf{0} & \cdots & \mathbf{x}_T' \end{bmatrix},$$
+```math
+\mathbf{Z} = \begin{bmatrix} \mathbf{x}_1' & \mathbf{0} & \cdots & \mathbf{0} \\ \mathbf{0} & \mathbf{x}_2' & \cdots & \mathbf{0} \\ \vdots & & \ddots & \vdots \\ \mathbf{0} & \mathbf{0} & \cdots & \mathbf{x}_T' \end{bmatrix},
+```
 
 which [`ssm.surform`](../../core/+ssm/surform.m) returns as a sparse matrix. The state equation,
 written as $`\boldsymbol{\beta}_1 - \boldsymbol{\beta}_0 = \boldsymbol{\eta}_1`$ and
@@ -68,7 +72,9 @@ $`(\mathbf{A}, \mathbf{d}, \mathbf{S}) = (\mathbf{Z}, \mathbf{y}, \sigma^2\mathb
 state equation
 $`(\mathbf{H}, \tilde{\boldsymbol{\beta}}_0, \mathbf{I}_T \otimes \boldsymbol{\Omega})`$, so
 
-$$\mathbf{K} = \mathbf{H}'\mathbf{S}^{-1}\mathbf{H} + \frac{1}{\sigma^2}\mathbf{Z}'\mathbf{Z}, \qquad \mathbf{c} = \mathbf{H}'\mathbf{S}^{-1}\tilde{\boldsymbol{\beta}}_0 + \frac{1}{\sigma^2}\mathbf{Z}'\mathbf{y},$$
+```math
+\mathbf{K} = \mathbf{H}'\mathbf{S}^{-1}\mathbf{H} + \frac{1}{\sigma^2}\mathbf{Z}'\mathbf{Z}, \qquad \mathbf{c} = \mathbf{H}'\mathbf{S}^{-1}\tilde{\boldsymbol{\beta}}_0 + \frac{1}{\sigma^2}\mathbf{Z}'\mathbf{y},
+```
 
 with $`\mathbf{S}^{-1} = \mathbf{I}_T \otimes \boldsymbol{\Omega}^{-1}`$. In code, with each
 formula beside the line that computes it:
@@ -88,7 +94,9 @@ $`\boldsymbol{\Omega}^{-1}`$, and $`-\boldsymbol{\Omega}^{-1}`$ to each block ne
 diagonal. The measurement equation adds $`\mathbf{x}_t\mathbf{x}_t'/\sigma^2`$ to diagonal block
 $`t`$. On the generated data the top left corner of $`\mathbf{K}`$ is
 
-$$\begin{bmatrix} 401.00 & -0.65 & -200 & 0 \\ -0.65 & 100.42 & 0 & -50 \\ -200 & 0 & 401.00 & 1.18 \\ 0 & -50 & 1.18 & 101.40 \end{bmatrix},$$
+```math
+\begin{bmatrix} 401.00 & -0.65 & -200 & 0 \\ -0.65 & 100.42 & 0 & -50 \\ -200 & 0 & 401.00 & 1.18 \\ 0 & -50 & 1.18 & 101.40 \end{bmatrix},
+```
 
 where $`2/0.005 = 400`$, $`2/0.02 = 100`$, $`1/0.005 = 200`$ and $`1/0.02 = 50`$, and the rest
 comes from $`\mathbf{x}_1`$ and $`\mathbf{x}_2`$. Its lower bandwidth is $`k = 2`$, while
@@ -138,11 +146,15 @@ $`\mathbf{H}_{\boldsymbol{\Phi}}\boldsymbol{\beta} = \tilde{\boldsymbol{\beta}} 
 where $`\mathbf{H}_{\boldsymbol{\Phi}} = \mathbf{I}_{kT} - \mathbf{L} \otimes \boldsymbol{\Phi}`$,
 the lag matrix $`\mathbf{L}`$ has ones just below the diagonal and zeros elsewhere, and
 
-$$\tilde{\boldsymbol{\beta}} = \big((\mathbf{I}_k - \boldsymbol{\Phi})\boldsymbol{\mu} + \boldsymbol{\Phi}\boldsymbol{\beta}_0, \; (\mathbf{I}_k - \boldsymbol{\Phi})\boldsymbol{\mu}, \; \ldots, \; (\mathbf{I}_k - \boldsymbol{\Phi})\boldsymbol{\mu}\big)'.$$
+```math
+\tilde{\boldsymbol{\beta}} = \big((\mathbf{I}_k - \boldsymbol{\Phi})\boldsymbol{\mu} + \boldsymbol{\Phi}\boldsymbol{\beta}_0, \; (\mathbf{I}_k - \boldsymbol{\Phi})\boldsymbol{\mu}, \; \ldots, \; (\mathbf{I}_k - \boldsymbol{\Phi})\boldsymbol{\mu}\big)'.
+```
 
 Only the state equation changes, and the recipe gives
 
-$$\mathbf{K} = \mathbf{H}_{\boldsymbol{\Phi}}'\mathbf{S}^{-1}\mathbf{H}_{\boldsymbol{\Phi}} + \frac{1}{\sigma^2}\mathbf{Z}'\mathbf{Z}, \qquad \mathbf{c} = \mathbf{H}_{\boldsymbol{\Phi}}'\mathbf{S}^{-1}\tilde{\boldsymbol{\beta}} + \frac{1}{\sigma^2}\mathbf{Z}'\mathbf{y}.$$
+```math
+\mathbf{K} = \mathbf{H}_{\boldsymbol{\Phi}}'\mathbf{S}^{-1}\mathbf{H}_{\boldsymbol{\Phi}} + \frac{1}{\sigma^2}\mathbf{Z}'\mathbf{Z}, \qquad \mathbf{c} = \mathbf{H}_{\boldsymbol{\Phi}}'\mathbf{S}^{-1}\tilde{\boldsymbol{\beta}} + \frac{1}{\sigma^2}\mathbf{Z}'\mathbf{y}.
+```
 
 Since $`\mathbf{H}_T = \mathbf{I}_T - \mathbf{L}`$, the lag matrix is `speye(T) - ssm.diffmat(T)`.
 In code:
@@ -177,7 +189,7 @@ with $`\mathbf{V} = \mathbf{H}^{-1}\mathbf{S}(\mathbf{H}')^{-1}`$, and
 $`\mathbf{y} = \mathbf{Z}\boldsymbol{\beta} + \boldsymbol{\varepsilon}`$, so their conditional
 distribution also has the covariance form
 
-$$\mathcal{N}\big(\mathbf{m} + \mathbf{V}\mathbf{Z}'(\mathbf{Z}\mathbf{V}\mathbf{Z}' + \sigma^2\mathbf{I}_T)^{-1}(\mathbf{y} - \mathbf{Z}\mathbf{m}),\; \mathbf{V} - \mathbf{V}\mathbf{Z}'(\mathbf{Z}\mathbf{V}\mathbf{Z}' + \sigma^2\mathbf{I}_T)^{-1}\mathbf{Z}\mathbf{V}\big),$$
+$`\displaystyle \mathcal{N}\big(\mathbf{m} + \mathbf{V}\mathbf{Z}'(\mathbf{Z}\mathbf{V}\mathbf{Z}' + \sigma^2\mathbf{I}_T)^{-1}(\mathbf{y} - \mathbf{Z}\mathbf{m}),\; \mathbf{V} - \mathbf{V}\mathbf{Z}'(\mathbf{Z}\mathbf{V}\mathbf{Z}' + \sigma^2\mathbf{I}_T)^{-1}\mathbf{Z}\mathbf{V}\big),`$
 
 where $`\mathbf{m} = \mathbf{H}^{-1}\tilde{\boldsymbol{\beta}}_0`$ is the prior mean. `guide.m`
 computes it with dense matrices and compares it with $`\mathbf{K}^{-1}\mathbf{c}`$ and

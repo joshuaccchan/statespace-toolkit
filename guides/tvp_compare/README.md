@@ -63,7 +63,9 @@ the model. As in Step 3 of
 initial values move into the states. Let $`\boldsymbol{\gamma}_t`$ hold the coefficients that
 vary, in period $`t`$, and $`\boldsymbol{\delta}`$ those that are constant. The states are
 
-$$\boldsymbol{\alpha} = (\boldsymbol{\gamma}_0', \boldsymbol{\gamma}_1', \ldots, \boldsymbol{\gamma}_T', \boldsymbol{\delta}')'.$$
+```math
+\boldsymbol{\alpha} = (\boldsymbol{\gamma}_0', \boldsymbol{\gamma}_1', \ldots, \boldsymbol{\gamma}_T', \boldsymbol{\delta}')'.
+```
 
 The measurement equation is
 $`\mathbf{y} = \mathbf{Z}\boldsymbol{\alpha} + \boldsymbol{\varepsilon}`$. The first block of
@@ -75,7 +77,9 @@ constant.
 The prior of $`\boldsymbol{\alpha}`$ has mean $`\mathbf{b} = \mathbf{0}`$. Its precision matrix is
 linear in the inverse variances,
 
-$$\mathbf{P} = \mathbf{A}_0 + \sum_{i} \frac{1}{\omega_i^2}\mathbf{A}_i,$$
+```math
+\mathbf{P} = \mathbf{A}_0 + \sum_{i} \frac{1}{\omega_i^2}\mathbf{A}_i,
+```
 
 where the sum runs over the coefficients that vary. $`\mathbf{A}_0`$ comes from the priors of
 $`\boldsymbol{\gamma}_0`$ and $`\boldsymbol{\delta}`$, and $`\mathbf{A}_i/\omega_i^2`$ from the
@@ -134,7 +138,9 @@ Let $`\boldsymbol{\varphi}`$ hold the logs of the variances of a model: $`\log\s
 $`\log\omega_i^2`$ for each coefficient that varies. Up to a constant, its log posterior density
 is
 
-$$\log f(\boldsymbol{\varphi}) = \log p(\mathbf{y} \mid \boldsymbol{\theta}) + \log p(\boldsymbol{\theta}) + \sum_j \varphi_j,$$
+```math
+\log f(\boldsymbol{\varphi}) = \log p(\mathbf{y} \mid \boldsymbol{\theta}) + \log p(\boldsymbol{\theta}) + \sum_j \varphi_j,
+```
 
 where the last term is the log Jacobian of $`\boldsymbol{\theta} = \exp(\boldsymbol{\varphi})`$.
 In the code, `lp` evaluates $`\log f`$, and `logig` is the log density of the inverse-gamma
@@ -176,12 +182,16 @@ Each chain keeps 5,000 draws after a burn-in of 500. The acceptance rates lie be
 The marginal likelihood of a model averages the integrated likelihood over the prior of the
 variances:
 
-$$p(\mathbf{y}) = \int p(\mathbf{y} \mid \boldsymbol{\theta})\,p(\boldsymbol{\theta})\,d\boldsymbol{\theta} = \int f(\boldsymbol{\varphi})\,d\boldsymbol{\varphi}.$$
+```math
+p(\mathbf{y}) = \int p(\mathbf{y} \mid \boldsymbol{\theta})\,p(\boldsymbol{\theta})\,d\boldsymbol{\theta} = \int f(\boldsymbol{\varphi})\,d\boldsymbol{\varphi}.
+```
 
 Importance sampling draws $`\boldsymbol{\varphi}^{(1)}, \ldots, \boldsymbol{\varphi}^{(R)}`$ from
 a density $`g`$ and averages the weights $`f/g`$:
 
-$$\hat{p}(\mathbf{y}) = \frac{1}{R}\sum_{r=1}^{R} \frac{f(\boldsymbol{\varphi}^{(r)})}{g(\boldsymbol{\varphi}^{(r)})}.$$
+```math
+\hat{p}(\mathbf{y}) = \frac{1}{R}\sum_{r=1}^{R} \frac{f(\boldsymbol{\varphi}^{(r)})}{g(\boldsymbol{\varphi}^{(r)})}.
+```
 
 The estimate is precise when $`g`$ is close to the posterior. The cross-entropy method of Chan and
 Eisenstat (2015) chooses $`g`$ from a parametric family. It takes the member closest to the

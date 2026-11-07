@@ -56,7 +56,9 @@ Every model gains on the AR(2) over the sample, most in the fourth quarter of 20
 GDP growth $`y_t`$ is 400 times the log change of real GDP. The MIDAS regressions of Chan, Poon
 and Zhu (2026) take the form
 
-$$y_t = \alpha_t + \rho_t y_{t-1} + \sum_{m=1}^{3}\gamma_{mt}z_{mt} + \sum_{j=1}^{2}\beta_{jt}\,\boldsymbol{\theta}_{jt}'\mathbf{w}_{jt} + \varepsilon_t, \qquad \varepsilon_t \sim \mathcal{N}(0, \mathrm{e}^{g_t}),$$
+```math
+y_t = \alpha_t + \rho_t y_{t-1} + \sum_{m=1}^{3}\gamma_{mt}z_{mt} + \sum_{j=1}^{2}\beta_{jt}\,\boldsymbol{\theta}_{jt}'\mathbf{w}_{jt} + \varepsilon_t, \qquad \varepsilon_t \sim \mathcal{N}(0, \mathrm{e}^{g_t}),
+```
 
 where $`z_{1t}, z_{2t}, z_{3t}`$ are the three latest monthly values of industrial production
 growth available at the origin, each with its own coefficient. The index $`j`$ is 1 for the NFCI
@@ -67,14 +69,18 @@ months ending at the origin that are released by then. The position of observati
 window is $`s_{jtk} = (\text{origin} - \text{date})/(\text{window length})`$, from 0 at the origin
 to 1 at the start of the window. Its weight is
 
-$$B(s_{jtk}; \boldsymbol{\theta}_{jt}) = \frac{\boldsymbol{\theta}_{jt}'\mathbf{v}(s_{jtk})}{n_{jt}}, \qquad \mathbf{v}(s) = (1, \cos 2\pi s, \sin 2\pi s, \cos 4\pi s, \sin 4\pi s)',$$
+```math
+B(s_{jtk}; \boldsymbol{\theta}_{jt}) = \frac{\boldsymbol{\theta}_{jt}'\mathbf{v}(s_{jtk})}{n_{jt}}, \qquad \mathbf{v}(s) = (1, \cos 2\pi s, \sin 2\pi s, \cos 4\pi s, \sin 4\pi s)',
+```
 
 where $`\mathbf{v}(s)`$ is a Fourier basis, so the dates of the observations enter the weights.
 The weighting function, the weight as a function of the position $`s`$, is unknown, and the five
 basis functions approximate it. The weighted average is then linear in
 $`\boldsymbol{\theta}_{jt}`$:
 
-$$\sum_{k=1}^{n_{jt}} B(s_{jtk}; \boldsymbol{\theta}_{jt})\,x_{jtk} = \boldsymbol{\theta}_{jt}'\mathbf{w}_{jt}, \qquad \mathbf{w}_{jt} = \frac{1}{n_{jt}}\sum_{k=1}^{n_{jt}}\mathbf{v}(s_{jtk})\,x_{jtk}.$$
+```math
+\sum_{k=1}^{n_{jt}} B(s_{jtk}; \boldsymbol{\theta}_{jt})\,x_{jtk} = \boldsymbol{\theta}_{jt}'\mathbf{w}_{jt}, \qquad \mathbf{w}_{jt} = \frac{1}{n_{jt}}\sum_{k=1}^{n_{jt}}\mathbf{v}(s_{jtk})\,x_{jtk}.
+```
 
 The basis keeps five parameters per predictor, however many observations the window holds. The
 weights of each quarter sum to one: $`\mathbf{a}_{jt}'\boldsymbol{\theta}_{jt} = 1`$, where

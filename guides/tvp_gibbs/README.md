@@ -28,12 +28,16 @@ run guides/tvp_gibbs/guide.m
 
 The model is that of the first guide,
 
-$$y_t = \mathbf{x}_t'\boldsymbol{\beta}_t + \varepsilon_t, \qquad \varepsilon_t \sim \mathcal{N}(0, \sigma^2), \qquad\qquad \boldsymbol{\beta}_t = \boldsymbol{\beta}_{t-1} + \boldsymbol{\eta}_t, \qquad \boldsymbol{\eta}_t \sim \mathcal{N}(\mathbf{0}, \boldsymbol{\Omega}),$$
+```math
+y_t = \mathbf{x}_t'\boldsymbol{\beta}_t + \varepsilon_t, \qquad \varepsilon_t \sim \mathcal{N}(0, \sigma^2), \qquad\qquad \boldsymbol{\beta}_t = \boldsymbol{\beta}_{t-1} + \boldsymbol{\eta}_t, \qquad \boldsymbol{\eta}_t \sim \mathcal{N}(\mathbf{0}, \boldsymbol{\Omega}),
+```
 
 with $`\sigma^2`$, $`\boldsymbol{\Omega} = \mathrm{diag}(\omega_1^2, \ldots, \omega_k^2)`$ and
 $`\boldsymbol{\beta}_0`$ unknown. The priors are
 
-$$\boldsymbol{\beta}_0 \sim \mathcal{N}(\mathbf{a}_0, \mathbf{V}_0), \qquad \sigma^2 \sim \mathcal{IG}(\nu_{\sigma^2}, S_{\sigma^2}), \qquad \omega_i^2 \sim \mathcal{IG}(\nu_{\omega^2}, S_{\omega_i^2}), \quad i = 1, \ldots, k,$$
+```math
+\boldsymbol{\beta}_0 \sim \mathcal{N}(\mathbf{a}_0, \mathbf{V}_0), \qquad \sigma^2 \sim \mathcal{IG}(\nu_{\sigma^2}, S_{\sigma^2}), \qquad \omega_i^2 \sim \mathcal{IG}(\nu_{\omega^2}, S_{\omega_i^2}), \quad i = 1, \ldots, k,
+```
 
 where $`\mathcal{IG}(\nu, S)`$ is the inverse-gamma distribution with shape $`\nu`$ and scale
 $`S`$, and the $`\omega_i^2`$ are independent. We assume $`\mathbf{a}_0 = \mathbf{0}`$,
@@ -73,7 +77,9 @@ changes $`\eta_{it} = \beta_{it} - \beta_{i,t-1}`$ of each coefficient, where $`
 entry $`i`$ of $`\boldsymbol{\beta}_0`$. Each variance is then the variance of a normal sample
 with known mean zero, for which the inverse-gamma prior is conjugate:
 
-$$(\sigma^2 \mid \mathbf{y}, \boldsymbol{\beta}) \sim \mathcal{IG}\Big(\nu_{\sigma^2} + \frac{T}{2},\; S_{\sigma^2} + \frac{\boldsymbol{\varepsilon}'\boldsymbol{\varepsilon}}{2}\Big), \qquad (\omega_i^2 \mid \boldsymbol{\beta}, \boldsymbol{\beta}_0) \sim \mathcal{IG}\Big(\nu_{\omega^2} + \frac{T}{2},\; S_{\omega_i^2} + \frac{1}{2}\sum_{t=1}^{T}\eta_{it}^2\Big).$$
+```math
+(\sigma^2 \mid \mathbf{y}, \boldsymbol{\beta}) \sim \mathcal{IG}\Big(\nu_{\sigma^2} + \frac{T}{2},\; S_{\sigma^2} + \frac{\boldsymbol{\varepsilon}'\boldsymbol{\varepsilon}}{2}\Big), \qquad (\omega_i^2 \mid \boldsymbol{\beta}, \boldsymbol{\beta}_0) \sim \mathcal{IG}\Big(\nu_{\omega^2} + \frac{T}{2},\; S_{\omega_i^2} + \frac{1}{2}\sum_{t=1}^{T}\eta_{it}^2\Big).
+```
 
 Each $`\omega_i^2`$ depends only on the path of its own coefficient. The code draws from
 $`\mathcal{IG}(\nu, S)`$ as `1/gamrnd(nu, 1/S)`, as in
@@ -87,7 +93,9 @@ $`(\mathbf{A}, \mathbf{d}, \mathbf{S}) = (1, \beta_{i1}, \omega_i^2)`$, and the 
 $`\beta_{i0} = a_{0i} + e_{0i}`$ with $`e_{0i} \sim \mathcal{N}(0, V_{0i})`$ has
 $`(1, a_{0i}, V_{0i})`$. Adding the two contributions gives
 
-$$(\beta_{i0} \mid \beta_{i1}, \omega_i^2) \sim \mathcal{N}\big(K_i^{-1}c_i,\; K_i^{-1}\big), \qquad K_i = \frac{1}{V_{0i}} + \frac{1}{\omega_i^2}, \qquad c_i = \frac{a_{0i}}{V_{0i}} + \frac{\beta_{i1}}{\omega_i^2}.$$
+```math
+(\beta_{i0} \mid \beta_{i1}, \omega_i^2) \sim \mathcal{N}\big(K_i^{-1}c_i,\; K_i^{-1}\big), \qquad K_i = \frac{1}{V_{0i}} + \frac{1}{\omega_i^2}, \qquad c_i = \frac{a_{0i}}{V_{0i}} + \frac{\beta_{i1}}{\omega_i^2}.
+```
 
 ## Step 3: Write the Loop
 
@@ -213,7 +221,7 @@ level model on $`y_t - \beta_2 x_t`$. The recipe of
 intercept, the slope is the coefficient of a regression of $`\mathbf{y} - \boldsymbol{\tau}`$ on
 $`\mathbf{x} = (x_1, \ldots, x_T)'`$ with a normal prior:
 
-$$(\beta_2 \mid \mathbf{y}, \boldsymbol{\tau}, \sigma^2) \sim \mathcal{N}\big(K_{\beta_2}^{-1}c_{\beta_2},\; K_{\beta_2}^{-1}\big), \qquad K_{\beta_2} = \frac{1}{100} + \frac{\mathbf{x}'\mathbf{x}}{\sigma^2}, \qquad c_{\beta_2} = \frac{\mathbf{x}'(\mathbf{y} - \boldsymbol{\tau})}{\sigma^2}.$$
+$`\displaystyle (\beta_2 \mid \mathbf{y}, \boldsymbol{\tau}, \sigma^2) \sim \mathcal{N}\big(K_{\beta_2}^{-1}c_{\beta_2},\; K_{\beta_2}^{-1}\big), \qquad K_{\beta_2} = \frac{1}{100} + \frac{\mathbf{x}'\mathbf{x}}{\sigma^2}, \qquad c_{\beta_2} = \frac{\mathbf{x}'(\mathbf{y} - \boldsymbol{\tau})}{\sigma^2}.`$
 
 The draws of $`\sigma^2`$, $`\omega_1^2`$ and $`\beta_{10}`$ keep their forms, with
 $`\varepsilon_t = y_t - \beta_{1t} - \beta_2x_t`$. In the loop, these lines replace the draws of

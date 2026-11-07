@@ -25,12 +25,16 @@ run guides/gibbs_sampler/guide.m
 
 The model is
 
-$$y_t = \tau_t + \varepsilon_t, \qquad \varepsilon_t \sim \mathcal{N}(0, \sigma^2), \qquad\qquad \tau_t = \tau_{t-1} + \eta_t, \qquad \eta_t \sim \mathcal{N}(0, \omega^2),$$
+```math
+y_t = \tau_t + \varepsilon_t, \qquad \varepsilon_t \sim \mathcal{N}(0, \sigma^2), \qquad\qquad \tau_t = \tau_{t-1} + \eta_t, \qquad \eta_t \sim \mathcal{N}(0, \omega^2),
+```
 
 with $`\sigma^2`$, $`\omega^2`$ and the initial value $`\tau_0`$ unknown. We use the priors of
 Section 9.1.1 of the book *Bayesian Macroeconometrics* (Chan, 2027),
 
-$$\tau_0 \sim \mathcal{N}(a_0, b_0), \qquad \sigma^2 \sim \mathcal{IG}(\nu_{\sigma^2}, S_{\sigma^2}), \qquad \omega^2 \sim \mathcal{IG}(\nu_{\omega^2}, S_{\omega^2}),$$
+```math
+\tau_0 \sim \mathcal{N}(a_0, b_0), \qquad \sigma^2 \sim \mathcal{IG}(\nu_{\sigma^2}, S_{\sigma^2}), \qquad \omega^2 \sim \mathcal{IG}(\nu_{\omega^2}, S_{\omega^2}),
+```
 
 where $`\mathcal{IG}(\nu, S)`$ is the inverse-gamma distribution with shape $`\nu`$ and scale
 $`S`$. The hyperparameters are those of the book's CPI application in Section 9.1.2: $`a_0 = 5`$,
@@ -64,7 +68,9 @@ $`\boldsymbol{\eta} = \mathbf{H}\boldsymbol{\tau} - \tilde{\boldsymbol{\tau}}_0`
 each variance is the variance of a normal sample with known mean zero, for which the inverse-gamma
 prior is conjugate:
 
-$$(\sigma^2 \mid \mathbf{y}, \boldsymbol{\tau}) \sim \mathcal{IG}\Big(\nu_{\sigma^2} + \frac{T}{2},\; S_{\sigma^2} + \frac{\boldsymbol{\varepsilon}'\boldsymbol{\varepsilon}}{2}\Big), \qquad (\omega^2 \mid \boldsymbol{\tau}, \tau_0) \sim \mathcal{IG}\Big(\nu_{\omega^2} + \frac{T}{2},\; S_{\omega^2} + \frac{\boldsymbol{\eta}'\boldsymbol{\eta}}{2}\Big).$$
+```math
+(\sigma^2 \mid \mathbf{y}, \boldsymbol{\tau}) \sim \mathcal{IG}\Big(\nu_{\sigma^2} + \frac{T}{2},\; S_{\sigma^2} + \frac{\boldsymbol{\varepsilon}'\boldsymbol{\varepsilon}}{2}\Big), \qquad (\omega^2 \mid \boldsymbol{\tau}, \tau_0) \sim \mathcal{IG}\Big(\nu_{\omega^2} + \frac{T}{2},\; S_{\omega^2} + \frac{\boldsymbol{\eta}'\boldsymbol{\eta}}{2}\Big).
+```
 
 To draw from $`\mathcal{IG}(\nu, S)`$, the code uses its relation to the gamma distribution: if
 $`x \sim \mathcal{G}(\nu, S)`$, the gamma distribution with shape $`\nu`$ and rate $`S`$, then
@@ -79,7 +85,9 @@ $`(\mathbf{A}, \mathbf{d}, \mathbf{S}) = (1, \tau_1, \omega^2)`$; the prior, wri
 $`\tau_0 = a_0 + e_0`$ with $`e_0 \sim \mathcal{N}(0, b_0)`$, has $`(1, a_0, b_0)`$. Adding the
 two contributions gives
 
-$$(\tau_0 \mid \tau_1, \omega^2) \sim \mathcal{N}\big(K_{\tau_0}^{-1}c_{\tau_0},\; K_{\tau_0}^{-1}\big), \qquad K_{\tau_0} = \frac{1}{b_0} + \frac{1}{\omega^2}, \qquad c_{\tau_0} = \frac{a_0}{b_0} + \frac{\tau_1}{\omega^2}.$$
+```math
+(\tau_0 \mid \tau_1, \omega^2) \sim \mathcal{N}\big(K_{\tau_0}^{-1}c_{\tau_0},\; K_{\tau_0}^{-1}\big), \qquad K_{\tau_0} = \frac{1}{b_0} + \frac{1}{\omega^2}, \qquad c_{\tau_0} = \frac{a_0}{b_0} + \frac{\tau_1}{\omega^2}.
+```
 
 These are the distributions of Section 9.1.1 of the book, with its AR(1) coefficient set to zero.
 
@@ -191,7 +199,7 @@ $`\boldsymbol{\varepsilon} = \mathbf{y} - \boldsymbol{\tau}`$ is known, and
 $`\varepsilon_t = \rho\varepsilon_{t-1} + u_t`$ for $`t = 2, \ldots, T`$ is a regression of
 $`\varepsilon_t`$ on $`\varepsilon_{t-1}`$, so that
 
-$$(\rho \mid \mathbf{y}, \boldsymbol{\tau}, \sigma^2) \sim \mathcal{TN}_{(-1,1)}\big(\hat{\rho}, K_\rho^{-1}\big), \qquad K_\rho = \frac{1}{\sigma^2}\sum_{t=1}^{T-1}\varepsilon_t^2, \qquad \hat{\rho} = \frac{\sum_{t=1}^{T-1}\varepsilon_{t+1}\varepsilon_t}{\sum_{t=1}^{T-1}\varepsilon_t^2},$$
+$`\displaystyle (\rho \mid \mathbf{y}, \boldsymbol{\tau}, \sigma^2) \sim \mathcal{TN}_{(-1,1)}\big(\hat{\rho}, K_\rho^{-1}\big), \qquad K_\rho = \frac{1}{\sigma^2}\sum_{t=1}^{T-1}\varepsilon_t^2, \qquad \hat{\rho} = \frac{\sum_{t=1}^{T-1}\varepsilon_{t+1}\varepsilon_t}{\sum_{t=1}^{T-1}\varepsilon_t^2},`$
 
 the normal distribution truncated to $`(-1, 1)`$, which
 [`ssm.tnormrnd`](../../core/+ssm/tnormrnd.m) draws. In the loop, the first four lines replace the

@@ -10,7 +10,9 @@
 The integrated likelihood of a state space model, also called the observed-data likelihood, is the
 density of the data given the parameters, with the states integrated out:
 
-$$p(\mathbf{y} \mid \boldsymbol{\theta}) = \int p(\mathbf{y} \mid \boldsymbol{\alpha}, \boldsymbol{\theta})\, p(\boldsymbol{\alpha} \mid \boldsymbol{\theta})\, d\boldsymbol{\alpha}.$$
+```math
+p(\mathbf{y} \mid \boldsymbol{\theta}) = \int p(\mathbf{y} \mid \boldsymbol{\alpha}, \boldsymbol{\theta})\, p(\boldsymbol{\alpha} \mid \boldsymbol{\theta})\, d\boldsymbol{\alpha}.
+```
 
 Model comparison by marginal likelihood needs it, and so does any sampler that draws the
 parameters without the states. For a linear Gaussian model the integral has a closed form, and
@@ -34,7 +36,9 @@ run guides/integrated_likelihood/guide.m
 Section 9.2 of the book *Bayesian Macroeconometrics* (Chan, 2027) writes a linear Gaussian
 state space model in stacked form, as a regression on the states with a Gaussian prior:
 
-$$\mathbf{y} = \mathbf{Z}\boldsymbol{\alpha} + \boldsymbol{\varepsilon}, \qquad \boldsymbol{\varepsilon} \sim \mathcal{N}(\mathbf{0}, \mathbf{R}), \qquad\qquad \boldsymbol{\alpha} \sim \mathcal{N}(\mathbf{b}, \mathbf{P}^{-1}).$$
+```math
+\mathbf{y} = \mathbf{Z}\boldsymbol{\alpha} + \boldsymbol{\varepsilon}, \qquad \boldsymbol{\varepsilon} \sim \mathcal{N}(\mathbf{0}, \mathbf{R}), \qquad\qquad \boldsymbol{\alpha} \sim \mathcal{N}(\mathbf{b}, \mathbf{P}^{-1}).
+```
 
 The prior comes from the state equation
 $`\mathbf{G}\boldsymbol{\alpha} = \tilde{\mathbf{b}} + \boldsymbol{\eta}`$ with
@@ -51,7 +55,9 @@ book.
 
 For any value of $`\boldsymbol{\alpha}`$, Bayes' theorem gives
 
-$$p(\mathbf{y} \mid \boldsymbol{\theta}) = \frac{p(\mathbf{y} \mid \boldsymbol{\alpha}, \boldsymbol{\theta})\, p(\boldsymbol{\alpha} \mid \boldsymbol{\theta})}{p(\boldsymbol{\alpha} \mid \mathbf{y}, \boldsymbol{\theta})}.$$
+```math
+p(\mathbf{y} \mid \boldsymbol{\theta}) = \frac{p(\mathbf{y} \mid \boldsymbol{\alpha}, \boldsymbol{\theta})\, p(\boldsymbol{\alpha} \mid \boldsymbol{\theta})}{p(\boldsymbol{\alpha} \mid \mathbf{y}, \boldsymbol{\theta})}.
+```
 
 The three densities on the right are Gaussian. The one in the denominator is
 $`\mathcal{N}(\hat{\boldsymbol{\alpha}}, \mathbf{K}^{-1})`$, with
@@ -60,7 +66,9 @@ $`\mathbf{K}\hat{\boldsymbol{\alpha}} = \mathbf{P}\mathbf{b} + \mathbf{Z}'\mathb
 (Theorem 9.1 of the book): the $`\mathbf{K}`$ and $`\mathbf{c}`$ of the first guide. At
 $`\boldsymbol{\alpha} = \hat{\boldsymbol{\alpha}}`$ its exponent is zero, and taking logs gives
 
-$$\log p(\mathbf{y} \mid \boldsymbol{\theta}) = -\frac{T}{2}\log(2\pi) + \frac{1}{2}\log|\mathbf{R}^{-1}| + \frac{1}{2}\log|\mathbf{P}| - \frac{1}{2}\log|\mathbf{K}| - \frac{1}{2}(\mathbf{y} - \mathbf{Z}\hat{\boldsymbol{\alpha}})'\mathbf{R}^{-1}(\mathbf{y} - \mathbf{Z}\hat{\boldsymbol{\alpha}}) - \frac{1}{2}(\hat{\boldsymbol{\alpha}} - \mathbf{b})'\mathbf{P}(\hat{\boldsymbol{\alpha}} - \mathbf{b}).$$
+```math
+\log p(\mathbf{y} \mid \boldsymbol{\theta}) = -\frac{T}{2}\log(2\pi) + \frac{1}{2}\log|\mathbf{R}^{-1}| + \frac{1}{2}\log|\mathbf{P}| - \frac{1}{2}\log|\mathbf{K}| - \frac{1}{2}(\mathbf{y} - \mathbf{Z}\hat{\boldsymbol{\alpha}})'\mathbf{R}^{-1}(\mathbf{y} - \mathbf{Z}\hat{\boldsymbol{\alpha}}) - \frac{1}{2}(\hat{\boldsymbol{\alpha}} - \mathbf{b})'\mathbf{P}(\hat{\boldsymbol{\alpha}} - \mathbf{b}).
+```
 
 This is the approach of Chan and Jeliazkov (2009, Section 2.3), who evaluate the identity of Chib
 (1995) at the posterior mean. Every term needs banded matrices only: $`\hat{\boldsymbol{\alpha}}`$
@@ -118,7 +126,9 @@ scaled by the inverse of its negative Hessian there: the normal approximation of
 with heavier tails. A candidate $`\boldsymbol{\varphi}^*`$ replaces the current
 $`\boldsymbol{\varphi}`$ with probability
 
-$$\min\left\{1,\ \frac{p(\boldsymbol{\varphi}^* \mid \mathbf{y})\, q(\boldsymbol{\varphi})}{p(\boldsymbol{\varphi} \mid \mathbf{y})\, q(\boldsymbol{\varphi}^*)}\right\}.$$
+```math
+\min\left\{1,\ \frac{p(\boldsymbol{\varphi}^* \mid \mathbf{y})\, q(\boldsymbol{\varphi})}{p(\boldsymbol{\varphi} \mid \mathbf{y})\, q(\boldsymbol{\varphi}^*)}\right\}.
+```
 
 Given the variances, $`\boldsymbol{\alpha} = (\tau_0, \boldsymbol{\tau}')'`$ is Gaussian with
 $`\mathbf{K} = \mathbf{P} + \mathbf{Z}'\mathbf{Z}/\sigma^2`$ and

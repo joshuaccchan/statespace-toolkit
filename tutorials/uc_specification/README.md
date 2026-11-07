@@ -63,7 +63,9 @@ closely. Bottom: UC-MA, AR-trend-bound and CCK, whose trends are smooth; the CCK
 
 Inflation $`y_t`$ is annualized quarterly CPI inflation. The benchmark is an AR(4),
 
-$$y_t = \beta_1 + \beta_2 y_{t-1} + \cdots + \beta_5 y_{t-4} + \epsilon_t, \qquad \epsilon_t \sim \mathcal{N}(0, \sigma^2),$$
+```math
+y_t = \beta_1 + \beta_2 y_{t-1} + \cdots + \beta_5 y_{t-4} + \epsilon_t, \qquad \epsilon_t \sim \mathcal{N}(0, \sigma^2),
+```
 
 with the independent normal and inverse-gamma prior
 $`\boldsymbol{\beta} \sim \mathcal{N}(\mathbf{0}, 100\mathbf{I})`$ and
@@ -72,9 +74,13 @@ $`x^{-(\nu+1)}\mathrm{e}^{-S/x}`$.
 
 Four of the trend models share one form. Inflation is a trend plus a gap,
 
-$$y_t = \tau_t + u_t + \psi u_{t-1}, \qquad u_t \sim \mathcal{N}(0, \mathrm{e}^{h_t}), \qquad u_0 = 0,$$
+```math
+y_t = \tau_t + u_t + \psi u_{t-1}, \qquad u_t \sim \mathcal{N}(0, \mathrm{e}^{h_t}), \qquad u_0 = 0,
+```
 
-$$\tau_t = \tau_{t-1} + \varepsilon_t, \qquad \varepsilon_t \sim \mathcal{N}(0, \mathrm{e}^{g_t}),$$
+```math
+\tau_t = \tau_{t-1} + \varepsilon_t, \qquad \varepsilon_t \sim \mathcal{N}(0, \mathrm{e}^{g_t}),
+```
 
 where $`\psi = 0`$ outside UC-MA, and each log variance, $`h_t`$ for the gap and $`g_t`$ for the
 trend, is constant, a random walk or a stationary AR(1) process:
@@ -93,7 +99,9 @@ restriction that Chan (2018) tests.
 AR-trend-bound (Chan, Koop and Potter, 2013) has an autoregressive gap with a time-varying
 coefficient,
 
-$$y_t - \tau_t = \rho_t (y_{t-1} - \tau_{t-1}) + \mathrm{e}^{h_t/2}\epsilon_t, \qquad \epsilon_t \sim \mathcal{N}(0, 1),$$
+```math
+y_t - \tau_t = \rho_t (y_{t-1} - \tau_{t-1}) + \mathrm{e}^{h_t/2}\epsilon_t, \qquad \epsilon_t \sim \mathcal{N}(0, 1),
+```
 
 where $`\tau_t`$ and $`\rho_t`$ are random walks whose innovations are truncated so that
 $`0 < \tau_t < 5`$ and $`0 < \rho_t < 1`$, and $`h_t`$ is a random walk. It runs through the
@@ -105,7 +113,9 @@ coefficient $`b_t`$ a random walk on $`(0, 1)`$; the trend $`\pi^*_t`$ is a rand
 equations have random-walk log-volatilities; and the long-run expectation $`z_t`$ loads on the
 trend with a time-varying intercept and slope,
 
-$$z_t = d_{0t} + d_{1t}\pi^*_t + w_t + \psi w_{t-1}, \qquad w_t \sim \mathcal{N}(0, \sigma_w^2),$$
+```math
+z_t = d_{0t} + d_{1t}\pi^*_t + w_t + \psi w_{t-1}, \qquad w_t \sim \mathcal{N}(0, \sigma_w^2),
+```
 
 where $`(d_{0t}, d_{1t})`$ follow stationary AR(1) processes with means near 0 and 1. For $`z_t`$
 we use the median 10-year CPI inflation forecast of the Survey of Professional Forecasters, which

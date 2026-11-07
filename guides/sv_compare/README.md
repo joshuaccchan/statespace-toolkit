@@ -31,7 +31,9 @@ It takes about three minutes on the machine that produced this page.
 The SV model of [How to Estimate a Stochastic Volatility Model by Gibbs Sampling](../sv_gibbs/)
 is
 
-$$y_t = \mu + \mathrm{e}^{h_t/2}\varepsilon_t, \qquad \varepsilon_t \sim \mathcal{N}(0, 1), \qquad\qquad h_t = \mu_h + \phi(h_{t-1} - \mu_h) + u_t, \qquad u_t \sim \mathcal{N}(0, \sigma_h^2),$$
+```math
+y_t = \mu + \mathrm{e}^{h_t/2}\varepsilon_t, \qquad \varepsilon_t \sim \mathcal{N}(0, 1), \qquad\qquad h_t = \mu_h + \phi(h_{t-1} - \mu_h) + u_t, \qquad u_t \sim \mathcal{N}(0, \sigma_h^2),
+```
 
 with $`h_1 \sim \mathcal{N}(\mu_h, \sigma_h^2/(1 - \phi^2))`$. SV-$`t`$, the model of
 [How to Add Student-t Errors to a Stochastic Volatility Model](../sv_t/), replaces
@@ -42,7 +44,9 @@ that $`h_t = \mu_h`$ in every period and $`y_t \sim \mathcal{N}(\mu, \mathrm{e}^
 
 We follow Chan and Grant (2016) to set the priors:
 
-$$\mu \sim \mathcal{N}(0, 10), \qquad \mu_h \sim \mathcal{N}(1, 10), \qquad \phi \sim \mathcal{TN}_{(-1,1)}(0.97, 0.1^2), \qquad \sigma_h^2 \sim \mathcal{IG}(5, 0.16), \qquad \nu \sim \mathcal{U}(2, 100).$$
+```math
+\mu \sim \mathcal{N}(0, 10), \qquad \mu_h \sim \mathcal{N}(1, 10), \qquad \phi \sim \mathcal{TN}_{(-1,1)}(0.97, 0.1^2), \qquad \sigma_h^2 \sim \mathcal{IG}(5, 0.16), \qquad \nu \sim \mathcal{U}(2, 100).
+```
 
 The constant variance has the priors of $`\mu`$ and $`\mu_h`$. The models differ in their
 parameters:
@@ -64,7 +68,9 @@ share the same log-volatilities and errors $`\varepsilon_t`$, so only the tails 
 Let $`\boldsymbol{\theta}`$ hold the parameters of a model. The integrated likelihood averages the
 likelihood over the log-volatilities $`\mathbf{h} = (h_1, \ldots, h_T)'`$:
 
-$$p(\mathbf{y} \mid \boldsymbol{\theta}) = \int p(\mathbf{y} \mid \mathbf{h}, \boldsymbol{\theta})\,p(\mathbf{h} \mid \boldsymbol{\theta})\,d\mathbf{h}.$$
+```math
+p(\mathbf{y} \mid \boldsymbol{\theta}) = \int p(\mathbf{y} \mid \mathbf{h}, \boldsymbol{\theta})\,p(\mathbf{h} \mid \boldsymbol{\theta})\,d\mathbf{h}.
+```
 
 Chan and Grant (2016) estimate it by importance sampling. The importance density is
 $`\mathcal{N}(\hat{\mathbf{h}}, \mathbf{K}_{\mathbf{h}}^{-1})`$, where $`\hat{\mathbf{h}}`$ is the
@@ -73,7 +79,9 @@ negative Hessian of its log there. Newton's method finds the mode, and the bande
 $`\mathbf{K}_{\mathbf{h}}`$ makes each step cheap. With $`M`$ draws
 $`\mathbf{h}^{(i)}`$ from this density,
 
-$$\hat{p}(\mathbf{y} \mid \boldsymbol{\theta}) = \frac{1}{M}\sum_{i=1}^{M} \frac{p(\mathbf{y} \mid \mathbf{h}^{(i)}, \boldsymbol{\theta})\,p(\mathbf{h}^{(i)} \mid \boldsymbol{\theta})}{f_{\mathcal{N}}(\mathbf{h}^{(i)};\, \hat{\mathbf{h}}, \mathbf{K}_{\mathbf{h}}^{-1})}.$$
+```math
+\hat{p}(\mathbf{y} \mid \boldsymbol{\theta}) = \frac{1}{M}\sum_{i=1}^{M} \frac{p(\mathbf{y} \mid \mathbf{h}^{(i)}, \boldsymbol{\theta})\,p(\mathbf{h}^{(i)} \mid \boldsymbol{\theta})}{f_{\mathcal{N}}(\mathbf{h}^{(i)};\, \hat{\mathbf{h}}, \mathbf{K}_{\mathbf{h}}^{-1})}.
+```
 
 The density $`p(\mathbf{y} \mid \mathbf{h}, \boldsymbol{\theta})`$ is the exact normal or
 Student-$`t`$ density of the errors. The mixture approximation of the first guide serves only
@@ -102,7 +110,9 @@ $`\mathbf{h}`$. Each chain keeps 5,000 draws after a burn-in of 500.
 The constant variance needs no sampler. Given $`\mu_h`$, the data are normal and $`\mu`$
 integrates out in closed form:
 
-$$\mathbf{y} \mid \mu_h \sim \mathcal{N}\big(\mu_0\mathbf{1},\; \mathrm{e}^{\mu_h}\mathbf{I}_T + V_\mu\mathbf{1}\mathbf{1}'\big),$$
+```math
+\mathbf{y} \mid \mu_h \sim \mathcal{N}\big(\mu_0\mathbf{1},\; \mathrm{e}^{\mu_h}\mathbf{I}_T + V_\mu\mathbf{1}\mathbf{1}'\big),
+```
 
 with $`\mu_0 = 0`$ and $`V_\mu = 10`$. `cv_posterior` evaluates this density on a fine grid of
 $`\mu_h`$. It draws $`\mu_h`$ from the grid and then $`\mu`$ from its normal conditional
@@ -113,7 +123,9 @@ uses.
 
 The marginal likelihood averages the integrated likelihood over the prior:
 
-$$p(\mathbf{y}) = \int p(\mathbf{y} \mid \boldsymbol{\theta})\,p(\boldsymbol{\theta})\,d\boldsymbol{\theta}.$$
+```math
+p(\mathbf{y}) = \int p(\mathbf{y} \mid \boldsymbol{\theta})\,p(\boldsymbol{\theta})\,d\boldsymbol{\theta}.
+```
 
 We sample in the unconstrained coordinates
 $`\mathbf{z} = (\mu, \mu_h, \operatorname{atanh}\phi, \log\sigma_h^2, \log\frac{\nu - 2}{100 - \nu})'`$,
@@ -177,7 +189,9 @@ SV-$`t`$ against SV, that parameter is $`\nu`$. Suppose the prior is
 $`\nu \sim \mathcal{U}(2, b)`$ with $`b \le 100`$. The ratio of the two priors is
 $`98/(b - 2)`$ for $`\nu < b`$ and zero otherwise, so
 
-$$p_b(\mathbf{y}) = p(\mathbf{y})\,\mathrm{E}\Big[\frac{p_b(\nu)}{p(\nu)} \,\Big|\, \mathbf{y}\Big] = p(\mathbf{y})\,\frac{98}{b - 2}\,\Pr(\nu < b \mid \mathbf{y}).$$
+```math
+p_b(\mathbf{y}) = p(\mathbf{y})\,\mathrm{E}\Big[\frac{p_b(\nu)}{p(\nu)} \,\Big|\, \mathbf{y}\Big] = p(\mathbf{y})\,\frac{98}{b - 2}\,\Pr(\nu < b \mid \mathbf{y}).
+```
 
 The posterior draws of Step 2 estimate $`\Pr(\nu < b \mid \mathbf{y})`$, so no new run is needed.
 The table gives the log Bayes factor of SV-$`t`$ against SV for each upper bound, with the Monte
