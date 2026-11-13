@@ -1,8 +1,9 @@
 # How to Compare Stochastic Volatility Models by the Marginal Likelihood
 
 *Code: [`guide.m`](guide.m), with [`ssm.intlike_sv`](../../core/+ssm/intlike_sv.m),
-[`ssm.intlike_sv_t`](../../core/+ssm/intlike_sv_t.m) and
-[`ssm.ksc_ar1_mean`](../../core/+ssm/ksc_ar1_mean.m). Method:
+[`ssm.intlike_sv_t`](../../core/+ssm/intlike_sv_t.m),
+[`ssm.ksc_ar1_mean`](../../core/+ssm/ksc_ar1_mean.m), [`ssm.sv_params`](../../core/+ssm/sv_params.m)
+and [`ssm.nu_studentt`](../../core/+ssm/nu_studentt.m). Method:
 [Chan and Grant (2016)](../../CITING.md#chan-and-grant-2016b),
 [Chan and Eisenstat (2015)](../../CITING.md#chan-and-eisenstat-2015) and
 [Chan (2027)](../../CITING.md#chan-2027).*
@@ -103,7 +104,8 @@ Chan and Grant (2016) do.
 The importance density of Step 3 is fitted to posterior draws of the parameters. For SV and
 SV-$`t`$, the draws come from the Gibbs samplers of the second and third guides. `guide.m` holds
 their loops as the functions `sv_gibbs` and `svt_gibbs`, which also return the posterior mean of
-$`\mathbf{h}`$. Each chain keeps 5,000 draws after a burn-in of 500.
+$`\mathbf{h}`$. After a burn-in of 500, the SV chain keeps 5,000 draws and the SV-$`t`$ chain
+20,000. Step 5 uses the draws of $`\nu`$ in its lower tail, which a short chain reaches rarely.
 
 The constant variance needs no sampler. Given $`\mu_h`$, the data are normal and $`\mu`$
 integrates out in closed form:
@@ -162,13 +164,13 @@ parentheses and the largest of each column in bold:
 | Model | SV data | SV-$`t`$ data |
 |---|---|---|
 | Constant variance | -1593.99 (0.004) | -1860.31 (0.004) |
-| SV | **-1434.35** (0.015) | -1664.56 (0.046) |
-| SV-$`t`$ | -1435.36 (0.017) | **-1654.23** (0.014) |
+| SV | **-1434.37** (0.015) | -1664.56 (0.029) |
+| SV-$`t`$ | -1435.36 (0.018) | **-1654.23** (0.014) |
 
 We note three results. First, both SV models exceed the constant variance by more than 150 on
 both data sets, so the evidence for time-varying volatility is decisive. Second, on the SV-$`t`$
-data, SV-$`t`$ exceeds SV by 10.33 (numerical standard error 0.048), a Bayes factor of about
-31,000. Third, on the SV data, SV exceeds SV-$`t`$ by 1.01 (0.023), a Bayes factor of about 2.7.
+data, SV-$`t`$ exceeds SV by 10.33 (numerical standard error 0.032), a Bayes factor of about
+31,000. Third, on the SV data, SV exceeds SV-$`t`$ by 0.99 (0.023), a Bayes factor of about 2.7.
 There the posterior of $`\nu`$ lies at large values, where the Student-$`t`$ errors are close to
 normal, so the Bayes factor favors neither model strongly.
 
@@ -189,27 +191,27 @@ Carlo standard error of $`\log\Pr(\nu < b \mid \mathbf{y})`$ in parentheses:
 
 | Upper bound $`b`$ | SV data | SV-$`t`$ data |
 |---|---|---|
-| 5 | no draw of $`\nu`$ below 5 | **12.99** (0.09) |
-| 10 | no draw of $`\nu`$ below 10 | 12.83 (0.00) |
-| 20 | -4.79 (0.68) | 12.02 |
-| 30 | -2.41 (0.49) | 11.58 |
-| 50 | -1.93 (0.29) | 11.04 |
-| 100 | **-1.01** | 10.33 |
+| 5 | no draw of $`\nu`$ below 5 | **12.98** (0.05) |
+| 10 | no draw of $`\nu`$ below 10 | 12.82 (0.01) |
+| 20 | -4.01 (0.62) | 12.02 |
+| 30 | -2.99 (0.34) | 11.58 |
+| 50 | -1.86 (0.12) | 11.04 |
+| 100 | **-0.99** | 10.33 |
 
-Each value also carries the numerical standard error of Step 4, 0.023 on the SV data and 0.048 on
+Each value also carries the numerical standard error of Step 4, 0.023 on the SV data and 0.032 on
 the SV-$`t`$ data. Where $`\Pr(\nu < b \mid \mathbf{y})`$ is 1, the probability adds no error.
 
 We note two patterns. On the SV-$`t`$ data, a prior that concentrates $`\nu`$ on small values
-raises the log Bayes factor, from 10.33 at $`b = 100`$ to 12.83 at $`b = 10`$ (Figure 1). Of the
-posterior draws, 99.9 percent lie below 10, so the narrower prior puts less mass on values that
-the data rule out. A bound of 5 cuts into the posterior, with 43.6 percent of the draws below 5.
-The higher prior density still raises the log Bayes factor slightly, to 12.99, and the curve
+raises the log Bayes factor, from 10.33 at $`b = 100`$ to 12.82 at $`b = 10`$ (Figure 1). Of the
+posterior draws, 99.0 percent lie below 10, so the narrower prior puts less mass on values that
+the data rule out. A bound of 5 cuts into the posterior, with 43.4 percent of the draws below 5.
+The higher prior density still raises the log Bayes factor slightly, to 12.98, and the curve
 peaks between 5 and 10.
 
 On the SV data, the posterior of $`\nu`$ lies at large values, and a smaller bound lowers the log
-Bayes factor, to -1.93 at $`b = 50`$, -2.41 at $`b = 30`$ and -4.79 at $`b = 20`$. The estimate
-loses precision as the probability falls. At $`b = 20`$ only 0.4 percent of the draws lie below
-$`b`$, and the standard error is 0.68. No draw lies below 10, so the draws cannot estimate the
+Bayes factor, to -1.86 at $`b = 50`$, -2.99 at $`b = 30`$ and -4.01 at $`b = 20`$. The estimate
+loses precision as the probability falls. At $`b = 20`$ only 0.9 percent of the draws lie below
+$`b`$, and the standard error is 0.62. No draw lies below 10, so the draws cannot estimate the
 Bayes factor there. A new run with that prior can.
 
 In applications, choose the bound from the tails you consider plausible, and report the Bayes
@@ -232,27 +234,27 @@ identity of Step 5, and the last two measure the stability of the estimates.
 
 The constant variance has a marginal likelihood by quadrature. The trapezoid rule on 20,000
 points and adaptive quadrature give integrals whose ratio differs from 1 by less than 4e-15. The
-estimates by importance sampling lie 1.0 and 0.6 numerical standard errors from the quadrature
+estimates by importance sampling lie 1.0 and 0.5 numerical standard errors from the quadrature
 values, -1593.9948 and -1860.3116.
 
 `ssm.intlike_sv` places its importance density at the mode of the log-volatilities. Importance
 sampling from the prior of $`\mathbf{h}`$ needs no mode, and on the first 50 observations 2
 million draws are enough. At the posterior means, the two estimates of
-$`\log p(\mathbf{y} \mid \boldsymbol{\theta})`$ for SV on the SV data are -68.4826 (numerical
-standard error 0.0013) and -68.4821 (0.0026), 0.2 joint standard errors apart. For SV-$`t`$ on the
-SV-$`t`$ data, they are -79.0177 (0.0007) and -79.0142 (0.0034), 1.0 joint standard errors apart.
+$`\log p(\mathbf{y} \mid \boldsymbol{\theta})`$ for SV on the SV data are -68.4760 (numerical
+standard error 0.0014) and -68.4791 (0.0030), 0.9 joint standard errors apart. For SV-$`t`$ on the
+SV-$`t`$ data, they are -79.0332 (0.0007) and -79.0354 (0.0035), 0.6 joint standard errors apart.
 
-For the third check, a new run of SV-$`t`$ with $`\nu \sim \mathcal{U}(2, 30)`$ on the SV data
-estimates its marginal likelihood directly. It gives -1437.19 (0.015). The identity of Step 5
-gives -1436.76 (0.49) from the draws of Step 2.
+For the third check, a new run of SV-$`t`$ with $`\nu \sim \mathcal{U}(2, 50)`$ on the SV data
+estimates its marginal likelihood directly. It gives -1436.15 (0.014). The identity of Step 5
+gives -1436.23 (0.12) from the draws of Step 2.
 
 The integrated likelihood with 50 draws of $`\mathbf{h}`$ is noisy. Over 20 calls at the posterior
-means of SV, $`\log\hat{p}(\mathbf{y} \mid \boldsymbol{\theta})`$ has a standard deviation of 0.27
-on the SV data and 0.83 on the SV-$`t`$ data. The numerical standard error that
-`ssm.intlike_sv` returns, from a single call, is 0.26 and 0.48. It matches the spread on the SV
-data and understates it on the SV-$`t`$ data, where a few weights dominate. A second seed, and four
+means of SV, $`\log\hat{p}(\mathbf{y} \mid \boldsymbol{\theta})`$ has a standard deviation of 0.51
+on the SV data and 1.18 on the SV-$`t`$ data. The numerical standard error that
+`ssm.intlike_sv` returns, from a single call, is 0.24 and 0.34. It understates the spread on both
+data sets, most on the SV-$`t`$ data, where a few weights dominate. A second seed, and four
 times as many draws of $`\mathbf{h}`$ with $`R = 2500`$, move the four estimates of SV and
-SV-$`t`$ by at most 2.0 joint numerical standard errors, and by at most 0.05.
+SV-$`t`$ by at most 2.2 joint numerical standard errors, and by at most 0.05.
 
 </details>
 
@@ -264,7 +266,7 @@ likelihoods change, and do the Bayes factors?
 <details>
 <summary>Answer</summary>
 
-All six log marginal likelihoods change, by between 0.77 and 1.16. Every model contains
+All six log marginal likelihoods change, by between 0.78 and 1.16. Every model contains
 $`\mu_h`$, so the identity of Step 5 gives each new value from the draws of Step 2:
 
 ```matlab
@@ -275,8 +277,8 @@ lml_n(m,d) = lml(m,d) + logmeanexp(r);                                      % lo
 The posterior of $`\mu_h`$ is narrow in all three models, so each log marginal likelihood shifts
 by about the log of the ratio of the two prior densities at that posterior. The shifts are close
 to one another, so the log Bayes factors hardly move. SV against the constant variance goes from
-159.64 to 159.68 on the SV data and from 195.75 to 196.10 on the SV-$`t`$ data. SV-$`t`$ against
-SV stays at -1.01 and goes from 10.33 to 10.37. The prior of a parameter that all models share has
+159.62 to 159.66 on the SV data and from 195.76 to 196.10 on the SV-$`t`$ data. SV-$`t`$ against
+SV stays at -0.99 and goes from 10.33 to 10.37. The prior of a parameter that all models share has
 little effect on their Bayes factors. The priors of $`\phi`$, $`\sigma_h^2`$ and $`\nu`$, which some
 models lack, matter more.
 

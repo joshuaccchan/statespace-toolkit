@@ -28,6 +28,8 @@ mu0 = 0; Vmu = 10;                                  % mu ~ N(mu0, Vmu)
 muh0 = 1; Vmuh = 10;                                % mu_h ~ N(muh0, Vmuh)
 phi0 = .97; Vphi = .1^2;                            % phi ~ TN(phi0, Vphi) on (-1, 1)
 nuh = 5; Sh = .16;                                  % sigma_h^2 ~ IG(nuh, Sh)
+% the priors of sigma_h^2, phi and mu_h, with the field names of ssm.sv_params
+hyp = struct('nuh', nuh, 'Sh', Sh, 'phi0', phi0, 'Vphi', Vphi, 'mu0', muh0, 'Vmu', Vmuh);
 nuub = 100;                                         % nu ~ U(2, nuub)
 offset = 1e-4;
 nsim = 20000; burnin = 1000;
@@ -46,31 +48,10 @@ for isim = 1:burnin + nsim
     e2 = (y - mu).^2.*exp(-h);  % lambda_t ~ IG((nu + 1)/2, (nu + e2_t)/2)
     lam = 1./gamrnd((nu + 1)/2, 2./(nu + e2));
 
-    s1 = sum(log(lam)); s2 = sum(1./lam);  % nu: log p(lambda | nu), its mode and curvature
-    fnu = @(x) T*(x/2*log(x/2) - gammaln(x/2)) - (x/2 + 1)*s1 - x/2*s2;
-    gradK = @(x) deal(T/2*(log(x/2) + 1 - psi(x/2)) - (s1 + s2)/2, T/4*psi(1, x/2) - T/(2*x));
-    [nuhat, Knu] = ssm.mode_newton(nu, gradK);
-    nuc = nuhat + randn/sqrt(Knu);         % the proposal N(nuhat, 1/K_nu)
-    if nuc > 2 && nuc < nuub && fnu(nuc) - fnu(nu) ...
-            + .5*Knu*((nuc - nuhat)^2 - (nu - nuhat)^2) > log(rand)
-        nu = nuc;
-        nacc = nacc + (isim > burnin);
-    end
+    [nu, acc] = ssm.nu_studentt(lam, nu, nuub);  % nu given lambda
+    nacc = nacc + acc*(isim > burnin);
 
-    hc = h - muh;  % sigma_h^2, phi and mu_h: guides/sv_gibbs
-    u = [sqrt(1 - phi^2)*hc(1); hc(2:T) - phi*hc(1:T-1)];
-    sig2h = 1/gamrnd(nuh + T/2, 1/(Sh + u'*u/2));
-
-    Kphi = 1/Vphi + hc(1:T-1)'*hc(1:T-1)/sig2h;
-    phihat = (phi0/Vphi + hc(1:T-1)'*hc(2:T)/sig2h)/Kphi;
-    phic = 2;
-    while abs(phic) >= 1, phic = phihat + randn/sqrt(Kphi); end
-    g = @(x) .5*log(1 - x^2) - .5*(1 - x^2)*hc(1)^2/sig2h;
-    if g(phic) - g(phi) > log(rand), phi = phic; end
-
-    Kmuh = 1/Vmuh + (1 - phi^2 + (T-1)*(1 - phi)^2)/sig2h;
-    cmuh = muh0/Vmuh + ((1 - phi^2)*h(1) + (1 - phi)*sum(h(2:T) - phi*h(1:T-1)))/sig2h;
-    muh = cmuh/Kmuh + randn/sqrt(Kmuh);
+    [muh, phi, sig2h] = ssm.sv_params(h, muh, phi, hyp, 1);  % guides/sv_gibbs
 
     if isim > burnin
         store_theta(isim - burnin, :) = [mu muh phi sig2h nu];
@@ -111,18 +92,7 @@ for isim = 1:burnin + nsim
     Kmu = 1/Vmu + sum(exp(-h));
     mu = (mu0/Vmu + exp(-h)'*y)/Kmu + randn/sqrt(Kmu);
     h = ssm.ksc_ar1_mean(log((y - mu).^2 + offset), h, muh, phi, sig2h);
-    hc = h - muh;
-    u = [sqrt(1 - phi^2)*hc(1); hc(2:T) - phi*hc(1:T-1)];
-    sig2h = 1/gamrnd(nuh + T/2, 1/(Sh + u'*u/2));
-    Kphi = 1/Vphi + hc(1:T-1)'*hc(1:T-1)/sig2h;
-    phihat = (phi0/Vphi + hc(1:T-1)'*hc(2:T)/sig2h)/Kphi;
-    phic = 2;
-    while abs(phic) >= 1, phic = phihat + randn/sqrt(Kphi); end
-    g = @(x) .5*log(1 - x^2) - .5*(1 - x^2)*hc(1)^2/sig2h;
-    if g(phic) - g(phi) > log(rand), phi = phic; end
-    Kmuh = 1/Vmuh + (1 - phi^2 + (T-1)*(1 - phi)^2)/sig2h;
-    cmuh = muh0/Vmuh + ((1 - phi^2)*h(1) + (1 - phi)*sum(h(2:T) - phi*h(1:T-1)))/sig2h;
-    muh = cmuh/Kmuh + randn/sqrt(Kmuh);
+    [muh, phi, sig2h] = ssm.sv_params(h, muh, phi, hyp, 1);
     if isim > burnin
         store_sv(isim - burnin, :) = [mu muh phi sig2h];
         if mod(isim - burnin, 10) == 0, store_hn(:, (isim - burnin)/10) = h; end
@@ -171,28 +141,9 @@ for isim = 1:burnin + nsim_x
     nacc_h = nacc_h + acc*(isim > burnin);
 
     lam = 1./gamrnd((nu + 1)/2, 2./(nu + (y - mu).^2.*exp(-h)));
-    s1 = sum(log(lam)); s2 = sum(1./lam);
-    fnu = @(x) T*(x/2*log(x/2) - gammaln(x/2)) - (x/2 + 1)*s1 - x/2*s2;
-    gradK = @(x) deal(T/2*(log(x/2) + 1 - psi(x/2)) - (s1 + s2)/2, T/4*psi(1, x/2) - T/(2*x));
-    [nuhat, Knu] = ssm.mode_newton(nu, gradK);
-    nuc = nuhat + randn/sqrt(Knu);
-    if nuc > 2 && nuc < nuub && fnu(nuc) - fnu(nu) ...
-            + .5*Knu*((nuc - nuhat)^2 - (nu - nuhat)^2) > log(rand)
-        nu = nuc;
-    end
+    nu = ssm.nu_studentt(lam, nu, nuub);
 
-    hc = h - muh;
-    u = [sqrt(1 - phi^2)*hc(1); hc(2:T) - phi*hc(1:T-1)];
-    sig2h = 1/gamrnd(nuh + T/2, 1/(Sh + u'*u/2));
-    Kphi = 1/Vphi + hc(1:T-1)'*hc(1:T-1)/sig2h;
-    phihat = (phi0/Vphi + hc(1:T-1)'*hc(2:T)/sig2h)/Kphi;
-    phic = 2;
-    while abs(phic) >= 1, phic = phihat + randn/sqrt(Kphi); end
-    g = @(x) .5*log(1 - x^2) - .5*(1 - x^2)*hc(1)^2/sig2h;
-    if g(phic) - g(phi) > log(rand), phi = phic; end
-    Kmuh = 1/Vmuh + (1 - phi^2 + (T-1)*(1 - phi)^2)/sig2h;
-    cmuh = muh0/Vmuh + ((1 - phi^2)*h(1) + (1 - phi)*sum(h(2:T) - phi*h(1:T-1)))/sig2h;
-    muh = cmuh/Kmuh + randn/sqrt(Kmuh);
+    [muh, phi, sig2h] = ssm.sv_params(h, muh, phi, hyp, 1);
 
     if isim > burnin, store_x(isim - burnin, :) = [mu muh phi sig2h nu]; end
 end
@@ -222,18 +173,7 @@ for isim = 1:burnin + nsim
     nout = nnz(lam > 1);
     p = betarnd(ap + nout, bp + T - nout);  % p ~ B(ap + n_out, bp + T - n_out)
 
-    hc = h - muh;
-    u = [sqrt(1 - phi^2)*hc(1); hc(2:T) - phi*hc(1:T-1)];
-    sig2h = 1/gamrnd(nuh + T/2, 1/(Sh + u'*u/2));
-    Kphi = 1/Vphi + hc(1:T-1)'*hc(1:T-1)/sig2h;
-    phihat = (phi0/Vphi + hc(1:T-1)'*hc(2:T)/sig2h)/Kphi;
-    phic = 2;
-    while abs(phic) >= 1, phic = phihat + randn/sqrt(Kphi); end
-    g = @(x) .5*log(1 - x^2) - .5*(1 - x^2)*hc(1)^2/sig2h;
-    if g(phic) - g(phi) > log(rand), phi = phic; end
-    Kmuh = 1/Vmuh + (1 - phi^2 + (T-1)*(1 - phi)^2)/sig2h;
-    cmuh = muh0/Vmuh + ((1 - phi^2)*h(1) + (1 - phi)*sum(h(2:T) - phi*h(1:T-1)))/sig2h;
-    muh = cmuh/Kmuh + randn/sqrt(Kmuh);
+    [muh, phi, sig2h] = ssm.sv_params(h, muh, phi, hyp, 1);
 
     if isim > burnin
         store_o(isim - burnin, :) = [mu muh phi sig2h p];

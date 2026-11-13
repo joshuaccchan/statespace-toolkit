@@ -13,10 +13,11 @@ functions compared draw for draw under a fixed seed.
 Each twin is its bvar-toolkit original from the function line on, byte for byte, checked by
 `tests/unit/test_twins.m` against the copies in `tests/fixtures/bvar-toolkit/` (bvar-toolkit
 commit `b8f7021`, `8d5c6c7` for `ksc_rw_h0` and `ksc_ar1_mean`, `e6e6e0b` for `ksc_rw_diffuse`,
-and `478dea5` for the four MCMC diagnostics). Only the headers differ, apart from the error
-identifiers of `ssm.diffmat`, `ssm.specvar0` and `ssm.geweke` and the calls to `ssm.specvar0` in
-the diagnostics that use it. Both libraries use the lower Cholesky factor throughout; bvar-toolkit
-switched `ksc_rw_h0` to it in `d3b9494`, with bitwise the same draws. In `fa17f41` it made
+`478dea5` for the four MCMC diagnostics, and `235089b` for `sv_params` and `nu_studentt`). Only
+the headers differ, apart from the error identifiers of `ssm.diffmat`, `ssm.specvar0` and
+`ssm.geweke` and the calls to `ssm.specvar0` in the diagnostics that use it. Both libraries use
+the lower Cholesky factor throughout; bvar-toolkit switched `ksc_rw_h0` to it in `d3b9494`, with
+bitwise the same draws. In `fa17f41` it made
 `ksc_rw_h0` compute the mean with that factor, as `(Ch')\(Ch\b)`, which changes the draws in the
 last bits, and `ssm.ksc_rw_h0` followed. `e412336` corrected the comment on the draw of h in both.
 
@@ -33,6 +34,8 @@ last bits, and `ssm.ksc_rw_h0` followed. `e412336` corrected the comment on the 
 | `ssm.inefficiency_factor` | `bvar.diag.inefficiency_factor`, calling `ssm.specvar0` (fixture at bvar-toolkit `478dea5`) | none | unit (`test_twins`) |
 | `ssm.mcse` | `bvar.diag.mcse`, calling `ssm.specvar0` (fixture at bvar-toolkit `478dea5`) | none | unit (`test_twins`) |
 | `ssm.geweke` | `bvar.diag.geweke`, calling `ssm.specvar0`, with error identifiers `ssm:geweke:*` (fixture at bvar-toolkit `478dea5`) | none | unit (`test_twins`) |
+| `ssm.sv_params` | `bvar.sv.sv_params` (fixture at bvar-toolkit `235089b`) | none as separate files, since the archived scripts draw these inline; bvar-toolkit verifies its twin against `sample_SVpara.m` of chan_koop_yu2024_jbes_oisv | unit (`test_twins`) |
+| `ssm.nu_studentt` | `bvar.sv.nu_studentt` (fixture at bvar-toolkit `235089b`) | none as separate files, since the archived scripts draw these inline; bvar-toolkit verifies its twin against `sample_nu.m` of chan2020_springer_largebvar | unit (`test_twins`) |
 
 ## Written Here
 

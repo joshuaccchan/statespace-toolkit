@@ -43,6 +43,7 @@ lprior = @(mu, muh, phi, sig2h) lnorm(mu, pr.mu0, pr.Vmu) + lnorm(muh, pr.muh0, 
 nuof = @(z) 2 + (pr.nuub - 2)./(1 + exp(-z));          % nu = 2 + (nuub - 2)/(1 + e^{-z})
 ljnu = @(nu) log((nu - 2).*(pr.nuub - nu)/(pr.nuub - 2));  % log dnu/dz
 nsim = 5000; burnin = 500; R = 5000; Mh = 50;
+nsim_t = 20000;                                        % SV-t: the tail of nu needs a longer chain
 lml = zeros(3, 2); nse = lml; post = cell(3, 2); hbar = cell(3, 2);
 lml_q = zeros(1, 2); lratio = lml_q;
 for d = 1:2
@@ -63,7 +64,7 @@ for d = 1:2
     [lml(2,d), nse(2,d)] = is_logml(lp_sv, post{2,d}, R);
 
     % SV-t: z adds log((nu - 2)/(nuub - nu)); the draws of guides/sv_t
-    [th, hbar{3,d}] = svt_gibbs(y, nsim, burnin, pr);
+    [th, hbar{3,d}] = svt_gibbs(y, nsim_t, burnin, pr);
     post{3,d} = [th(:,1:2) atanh(th(:,3)) log(th(:,4)) log((th(:,5) - 2)./(pr.nuub - th(:,5)))];
     hb = hbar{3,d};
     lp_svt = @(z) ssm.intlike_sv_t((y - z(1)).^2, z(2), tanh(z(3)), exp(z(4)), nuof(z(5)), hb, Mh) ...
@@ -185,18 +186,19 @@ for i = 1:numel(bs)
     fprintf('\n');
 end
 
-%% 2. the checks: the marginal likelihood of SV-t on the SV data with nu ~ U(2, 30), from a new run
+%% 2. the checks: the marginal likelihood of SV-t on the SV data with nu ~ U(2, 50), from a new run
 rng(4, 'twister');
-pr30 = pr; pr30.nuub = 30; y = Y{1};
-[th, hb] = svt_gibbs(y, nsim, burnin, pr30);
-z30 = [th(:,1:2) atanh(th(:,3)) log(th(:,4)) log((th(:,5) - 2)./(30 - th(:,5)))];
-nuof30 = @(z) 2 + 28./(1 + exp(-z));
-lp30 = @(z) ssm.intlike_sv_t((y - z(1)).^2, z(2), tanh(z(3)), exp(z(4)), nuof30(z(5)), hb, Mh) ...
-    + lprior(z(1), z(2), tanh(z(3)), exp(z(4))) - log(28) ...
-    + log(1 - tanh(z(3))^2) + z(4) + log((nuof30(z(5)) - 2).*(30 - nuof30(z(5)))/28);
-[l30, n30] = is_logml(lp30, z30, R);
-fprintf(['SV-t on the SV data with nu ~ U(2, 30): new run %.2f (%.3f); from the draws of ' ...
-    'section 1 %.2f (%.2f)\n'], l30, n30, lml(3,1) + log(98/28) + log(pb(bs == 30, 1)), sep(bs == 30, 1));
+bc = 50; prc = pr; prc.nuub = bc; y = Y{1};
+[th, hb] = svt_gibbs(y, nsim_t, burnin, prc);
+zc = [th(:,1:2) atanh(th(:,3)) log(th(:,4)) log((th(:,5) - 2)./(bc - th(:,5)))];
+nuofc = @(z) 2 + (bc - 2)./(1 + exp(-z));
+lpc = @(z) ssm.intlike_sv_t((y - z(1)).^2, z(2), tanh(z(3)), exp(z(4)), nuofc(z(5)), hb, Mh) ...
+    + lprior(z(1), z(2), tanh(z(3)), exp(z(4))) - log(bc - 2) ...
+    + log(1 - tanh(z(3))^2) + z(4) + log((nuofc(z(5)) - 2).*(bc - nuofc(z(5)))/(bc - 2));
+[lc, nc] = is_logml(lpc, zc, R);
+fprintf(['SV-t on the SV data with nu ~ U(2, %d): new run %.2f (%.3f); from the draws of ' ...
+    'section 1 %.2f (%.2f)\n'], bc, lc, nc, lml(3,1) + log((pr.nuub - 2)/(bc - 2)) ...
+    + log(pb(bs == bc, 1)), sep(bs == bc, 1));
 
 %% the figure: the log Bayes factor of SV-t against SV against the upper bound of the prior of nu
 bgrid = linspace(4, 100, 193);
@@ -204,7 +206,7 @@ fig = figure('Visible', 'off', 'Units', 'centimeters', 'Position', [2 2 16 10]);
 st = {'-', '--'}; hl = gobjects(1, 2);
 for d = [2 1]
     p = arrayfun(@(b) mean(nuof(post{3,d}(:,5)) < b), bgrid);
-    ok = p*nsim >= 50;                                 % at least 50 draws of nu below b
+    ok = p*nsim_t >= 50;                               % at least 50 draws of nu below b
     v = lml(3,d) - lml(2,d) + log((pr.nuub - 2)./(bgrid - 2)) + log(p);
     hl(d) = plot(bgrid(ok), v(ok), st{d}, 'Color', 'k', 'LineWidth', 1.2);
 end
@@ -240,6 +242,7 @@ function [store_theta, hbar] = sv_gibbs(y, nsim, burnin, pr)
 T = numel(y); offset = 1e-4;
 mu0 = pr.mu0; Vmu = pr.Vmu; muh0 = pr.muh0; Vmuh = pr.Vmuh;
 phi0 = pr.phi0; Vphi = pr.Vphi; nuh = pr.nuh; Sh = pr.Sh;
+hyp = struct('nuh', nuh, 'Sh', Sh, 'phi0', phi0, 'Vphi', Vphi, 'mu0', muh0, 'Vmu', Vmuh);
 muh = log(var(y)); phi = .98; sig2h = .04;              % starting values
 h = muh*ones(T,1);
 store_theta = zeros(nsim, 4); hbar = zeros(T,1);
@@ -250,20 +253,7 @@ for isim = 1:burnin + nsim
     ystar = log((y - mu).^2 + offset);  % s, then h: guides/sv_states
     h = ssm.ksc_ar1_mean(ystar, h, muh, phi, sig2h);
 
-    hc = h - muh;                                          % h_t - mu_h
-    u = [sqrt(1 - phi^2)*hc(1); hc(2:T) - phi*hc(1:T-1)];  % the state errors u_t
-    sig2h = 1/gamrnd(nuh + T/2, 1/(Sh + u'*u/2));          % IG(nu_h + T/2, S_h + u'u/2)
-
-    Kphi = 1/Vphi + hc(1:T-1)'*hc(1:T-1)/sig2h;             % K_phi and phihat of the proposal
-    phihat = (phi0/Vphi + hc(1:T-1)'*hc(2:T)/sig2h)/Kphi;
-    phic = 2;
-    while abs(phic) >= 1, phic = phihat + randn/sqrt(Kphi); end
-    g = @(x) .5*log(1 - x^2) - .5*(1 - x^2)*hc(1)^2/sig2h;  % log g(phi)
-    if g(phic) - g(phi) > log(rand), phi = phic; end
-
-    Kmuh = 1/Vmuh + (1 - phi^2 + (T-1)*(1 - phi)^2)/sig2h;  % mu_h given h, phi and sigma_h^2
-    cmuh = muh0/Vmuh + ((1 - phi^2)*h(1) + (1 - phi)*sum(h(2:T) - phi*h(1:T-1)))/sig2h;
-    muh = cmuh/Kmuh + randn/sqrt(Kmuh);
+    [muh, phi, sig2h] = ssm.sv_params(h, muh, phi, hyp, 1);  % guides/sv_gibbs
 
     if isim > burnin
         store_theta(isim - burnin, :) = [mu muh phi sig2h];
@@ -277,6 +267,7 @@ function [store_theta, hbar] = svt_gibbs(y, nsim, burnin, pr)
 T = numel(y); offset = 1e-4;
 mu0 = pr.mu0; Vmu = pr.Vmu; muh0 = pr.muh0; Vmuh = pr.Vmuh;
 phi0 = pr.phi0; Vphi = pr.Vphi; nuh = pr.nuh; Sh = pr.Sh; nuub = pr.nuub;
+hyp = struct('nuh', nuh, 'Sh', Sh, 'phi0', phi0, 'Vphi', Vphi, 'mu0', muh0, 'Vmu', Vmuh);
 muh = log(var(y)); phi = .98; sig2h = .04; nu = 5;     % starting values
 h = muh*ones(T,1); lam = ones(T,1);
 store_theta = zeros(nsim, 5); hbar = zeros(T,1);
@@ -291,28 +282,9 @@ for isim = 1:burnin + nsim
     e2 = (y - mu).^2.*exp(-h);  % lambda_t ~ IG((nu + 1)/2, (nu + e2_t)/2)
     lam = 1./gamrnd((nu + 1)/2, 2./(nu + e2));
 
-    s1 = sum(log(lam)); s2 = sum(1./lam);  % nu: log p(lambda | nu), its mode and curvature
-    fnu = @(x) T*(x/2*log(x/2) - gammaln(x/2)) - (x/2 + 1)*s1 - x/2*s2;
-    gradK = @(x) deal(T/2*(log(x/2) + 1 - psi(x/2)) - (s1 + s2)/2, T/4*psi(1, x/2) - T/(2*x));
-    [nuhat, Knu] = ssm.mode_newton(nu, gradK);
-    nuc = nuhat + randn/sqrt(Knu);         % the proposal N(nuhat, 1/K_nu)
-    if nuc > 2 && nuc < nuub && fnu(nuc) - fnu(nu) ...
-            + .5*Knu*((nuc - nuhat)^2 - (nu - nuhat)^2) > log(rand)
-        nu = nuc;
-    end
+    nu = ssm.nu_studentt(lam, nu, nuub);
 
-    hc = h - muh;  % sigma_h^2, phi and mu_h: guides/sv_gibbs
-    u = [sqrt(1 - phi^2)*hc(1); hc(2:T) - phi*hc(1:T-1)];
-    sig2h = 1/gamrnd(nuh + T/2, 1/(Sh + u'*u/2));
-    Kphi = 1/Vphi + hc(1:T-1)'*hc(1:T-1)/sig2h;
-    phihat = (phi0/Vphi + hc(1:T-1)'*hc(2:T)/sig2h)/Kphi;
-    phic = 2;
-    while abs(phic) >= 1, phic = phihat + randn/sqrt(Kphi); end
-    g = @(x) .5*log(1 - x^2) - .5*(1 - x^2)*hc(1)^2/sig2h;
-    if g(phic) - g(phi) > log(rand), phi = phic; end
-    Kmuh = 1/Vmuh + (1 - phi^2 + (T-1)*(1 - phi)^2)/sig2h;
-    cmuh = muh0/Vmuh + ((1 - phi^2)*h(1) + (1 - phi)*sum(h(2:T) - phi*h(1:T-1)))/sig2h;
-    muh = cmuh/Kmuh + randn/sqrt(Kmuh);
+    [muh, phi, sig2h] = ssm.sv_params(h, muh, phi, hyp, 1);  % guides/sv_gibbs
 
     if isim > burnin
         store_theta(isim - burnin, :) = [mu muh phi sig2h nu];

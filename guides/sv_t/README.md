@@ -1,7 +1,7 @@
 # How to Add Student-t Errors to a Stochastic Volatility Model
 
 *Code: [`guide.m`](guide.m), with [`ssm.ksc_ar1_mean`](../../core/+ssm/ksc_ar1_mean.m),
-[`ssm.mode_newton`](../../core/+ssm/mode_newton.m),
+[`ssm.nu_studentt`](../../core/+ssm/nu_studentt.m), [`ssm.sv_params`](../../core/+ssm/sv_params.m),
 [`ssm.inefficiency_factor`](../../core/+ssm/inefficiency_factor.m) and
 [`ssm.armh`](../../core/+ssm/armh.m). Method:
 [Chan and Grant (2016)](../../CITING.md#chan-and-grant-2016b),
@@ -95,8 +95,9 @@ negative second derivative there. Its gradient and negative second derivative ar
 \frac{T}{2}\Big(\log\frac{\nu}{2} + 1 - \psi\Big(\frac{\nu}{2}\Big)\Big) - \frac{1}{2}\sum_{t=1}^{T}\Big(\log\lambda_t + \frac{1}{\lambda_t}\Big) \qquad\text{and}\qquad \frac{T}{4}\psi'\Big(\frac{\nu}{2}\Big) - \frac{T}{2\nu},
 ```
 
-where $`\psi`$ is the digamma function. [`ssm.mode_newton`](../../core/+ssm/mode_newton.m) finds
-the mode by Newton's method. The candidate is accepted with probability
+where $`\psi`$ is the digamma function. [`ssm.nu_studentt`](../../core/+ssm/nu_studentt.m) takes
+this step: it finds the mode by Newton's method, draws the candidate and accepts it with
+probability
 
 ```math
 \min\Big\{1,\; \frac{p(\nu^* \mid \boldsymbol{\lambda})\, f_{\mathcal{N}}(\nu;\, \hat{\nu}, K_\nu^{-1})}{p(\nu \mid \boldsymbol{\lambda})\, f_{\mathcal{N}}(\nu^*;\, \hat{\nu}, K_\nu^{-1})}\Big\},
@@ -111,6 +112,8 @@ mu0 = 0; Vmu = 10;                                  % mu ~ N(mu0, Vmu)
 muh0 = 1; Vmuh = 10;                                % mu_h ~ N(muh0, Vmuh)
 phi0 = .97; Vphi = .1^2;                            % phi ~ TN(phi0, Vphi) on (-1, 1)
 nuh = 5; Sh = .16;                                  % sigma_h^2 ~ IG(nuh, Sh)
+% the priors of sigma_h^2, phi and mu_h, with the field names of ssm.sv_params
+hyp = struct('nuh', nuh, 'Sh', Sh, 'phi0', phi0, 'Vphi', Vphi, 'mu0', muh0, 'Vmu', Vmuh);
 nuub = 100;                                         % nu ~ U(2, nuub)
 offset = 1e-4;
 nsim = 20000; burnin = 1000;
@@ -129,31 +132,10 @@ for isim = 1:burnin + nsim
     e2 = (y - mu).^2.*exp(-h);  % lambda_t ~ IG((nu + 1)/2, (nu + e2_t)/2)
     lam = 1./gamrnd((nu + 1)/2, 2./(nu + e2));
 
-    s1 = sum(log(lam)); s2 = sum(1./lam);  % nu: log p(lambda | nu), its mode and curvature
-    fnu = @(x) T*(x/2*log(x/2) - gammaln(x/2)) - (x/2 + 1)*s1 - x/2*s2;
-    gradK = @(x) deal(T/2*(log(x/2) + 1 - psi(x/2)) - (s1 + s2)/2, T/4*psi(1, x/2) - T/(2*x));
-    [nuhat, Knu] = ssm.mode_newton(nu, gradK);
-    nuc = nuhat + randn/sqrt(Knu);         % the proposal N(nuhat, 1/K_nu)
-    if nuc > 2 && nuc < nuub && fnu(nuc) - fnu(nu) ...
-            + .5*Knu*((nuc - nuhat)^2 - (nu - nuhat)^2) > log(rand)
-        nu = nuc;
-        nacc = nacc + (isim > burnin);
-    end
+    [nu, acc] = ssm.nu_studentt(lam, nu, nuub);  % nu given lambda
+    nacc = nacc + acc*(isim > burnin);
 
-    hc = h - muh;  % sigma_h^2, phi and mu_h: guides/sv_gibbs
-    u = [sqrt(1 - phi^2)*hc(1); hc(2:T) - phi*hc(1:T-1)];
-    sig2h = 1/gamrnd(nuh + T/2, 1/(Sh + u'*u/2));
-
-    Kphi = 1/Vphi + hc(1:T-1)'*hc(1:T-1)/sig2h;
-    phihat = (phi0/Vphi + hc(1:T-1)'*hc(2:T)/sig2h)/Kphi;
-    phic = 2;
-    while abs(phic) >= 1, phic = phihat + randn/sqrt(Kphi); end
-    g = @(x) .5*log(1 - x^2) - .5*(1 - x^2)*hc(1)^2/sig2h;
-    if g(phic) - g(phi) > log(rand), phi = phic; end
-
-    Kmuh = 1/Vmuh + (1 - phi^2 + (T-1)*(1 - phi)^2)/sig2h;
-    cmuh = muh0/Vmuh + ((1 - phi^2)*h(1) + (1 - phi)*sum(h(2:T) - phi*h(1:T-1)))/sig2h;
-    muh = cmuh/Kmuh + randn/sqrt(Kmuh);
+    [muh, phi, sig2h] = ssm.sv_params(h, muh, phi, hyp, 1);  % guides/sv_gibbs
 
     if isim > burnin
         store_theta(isim - burnin, :) = [mu muh phi sig2h nu];
@@ -163,7 +145,8 @@ for isim = 1:burnin + nsim
 end
 ```
 
-The blocks of $`\sigma_h^2`$, $`\phi`$ and $`\mu_h`$ are those of the second guide. The chain
+[`ssm.sv_params`](../../core/+ssm/sv_params.m) takes the blocks of $`\sigma_h^2`$, $`\phi`$ and
+$`\mu_h`$, as in the second guide. The chain
 starts from $`\boldsymbol{\lambda} = \mathbf{1}`$ and $`\nu = 5`$, and from the starting values of
 the second guide for the other blocks.
 
@@ -173,34 +156,34 @@ The table compares SV-$`t`$ with the SV model of the second guide on the same da
 
 | | True value | SV-$`t`$: posterior mean | 90% interval | Inefficiency factor | SV: posterior mean | 90% interval |
 |---|---|---|---|---|---|---|
-| $`\mu`$ | 0.1 | 0.1200 | (0.0708, 0.1698) | 1.4 | 0.1149 | (0.0646, 0.1648) |
-| $`\mu_h`$ | 0 | -0.0250 | (-0.5230, 0.4857) | 4.4 | 0.2759 | (-0.0692, 0.6331) |
-| $`\phi`$ | 0.97 | 0.9736 | (0.9545, 0.9895) | 32.7 | 0.9397 | (0.9030, 0.9698) |
-| $`\sigma_h^2`$ | 0.04 | 0.0472 | (0.0276, 0.0757) | 79.3 | 0.1375 | (0.0739, 0.2188) |
-| $`\nu`$ | 5 | 5.61 | (3.96, 8.10) | 74.1 | | |
+| $`\mu`$ | 0.1 | 0.1202 | (0.0706, 0.1695) | 2.5 | 0.1150 | (0.0648, 0.1649) |
+| $`\mu_h`$ | 0 | -0.0343 | (-0.5235, 0.4661) | 3.4 | 0.2750 | (-0.0667, 0.6300) |
+| $`\phi`$ | 0.97 | 0.9731 | (0.9530, 0.9894) | 50.2 | 0.9390 | (0.9014, 0.9697) |
+| $`\sigma_h^2`$ | 0.04 | 0.0483 | (0.0264, 0.0796) | 114.9 | 0.1392 | (0.0744, 0.2239) |
+| $`\nu`$ | 5 | 5.42 | (3.94, 7.74) | 78.9 | | |
 
 We note three results. First, the posterior of $`\nu`$ covers its true value of 5: its median is
-5.33 and its 90 percent interval is (3.96, 8.10). Second, under the SV model the outliers raise
-the estimated volatility. Its posterior mean of $`\sigma_h^2`$ is 3.4 times the true value, and
+5.19 and its 90 percent interval is (3.94, 7.74). Second, under the SV model the outliers raise
+the estimated volatility. Its posterior mean of $`\sigma_h^2`$ is 3.5 times the true value, and
 the true value lies below its 90 percent interval. Its posterior mean of $`\phi`$ falls to 0.94.
 Under SV-$`t`$ both true values lie inside the intervals. Third, the volatility estimated by
 SV-$`t`$ is closer to the truth (Figure 1). The root mean squared error of the posterior mean of
-$`\mathrm{e}^{h_t/2}`$ is 0.247, against 0.428 under SV. The 90 percent intervals of SV-$`t`$
-contain the true volatility in 929 of the 1,000 periods.
+$`\mathrm{e}^{h_t/2}`$ is 0.246, against 0.429 under SV. The 90 percent intervals of SV-$`t`$
+contain the true volatility in 927 of the 1,000 periods.
 
 The five periods with the largest $`\lambda_t`$ show the mechanism:
 
 | Period | True $`\lambda_t`$ | Posterior mean of $`\lambda_t`$ | True $`\lvert\varepsilon_t\rvert`$ | True $`\mathrm{e}^{h_t/2}`$ | SV-$`t`$ | SV |
 |---|---|---|---|---|---|---|
-| 396 | 18.08 | 13.30 | 1.75 | 1.50 | 1.75 | 3.70 |
-| 664 | 16.00 | 1.32 | 0.21 | 0.54 | 0.71 | 0.79 |
-| 668 | 11.52 | 1.25 | 0.03 | 1.09 | 0.77 | 0.99 |
-| 158 | 10.89 | 7.18 | 1.69 | 0.86 | 1.06 | 1.94 |
-| 118 | 10.74 | 2.12 | 0.58 | 0.88 | 0.91 | 1.22 |
+| 396 | 18.08 | 13.59 | 1.75 | 1.50 | 1.73 | 3.74 |
+| 664 | 16.00 | 1.34 | 0.21 | 0.54 | 0.70 | 0.79 |
+| 668 | 11.52 | 1.24 | 0.03 | 1.09 | 0.77 | 0.99 |
+| 158 | 10.89 | 7.20 | 1.69 | 0.86 | 1.06 | 1.94 |
+| 118 | 10.74 | 2.17 | 0.58 | 0.88 | 0.90 | 1.20 |
 
 In period 396, the error $`\sqrt{\lambda_t}\varepsilon_t`$ is 7.5 times the volatility. SV puts
-the volatility at 3.70, about 2.5 times its true value of 1.50, while SV-$`t`$ puts it at 1.75 and
-gives $`\lambda_t`$ a posterior mean of 13.30. A large $`\lambda_t`$ produces a large observation
+the volatility at 3.74, about 2.5 times its true value of 1.50, while SV-$`t`$ puts it at 1.73 and
+gives $`\lambda_t`$ a posterior mean of 13.59. A large $`\lambda_t`$ produces a large observation
 only when $`\varepsilon_t`$ is not small. In periods 664 and 668, $`|\varepsilon_t|`$ is 0.21 and
 0.03, so the data carry little information about $`\lambda_t`$, and its posterior mean stays near
 1.
@@ -217,9 +200,9 @@ credible intervals of SV-$`t`$.*
 *Figure 2: The 20,000 draws of $`\nu`$ kept after the burn-in, and their histogram.*
 
 The draws of $`\phi`$, $`\sigma_h^2`$ and $`\nu`$ are the most autocorrelated. With Bartlett
-weights up to lag 400, their inefficiency factors are 32.7, 79.3 and 74.1. The 20,000 draws thus
-carry the information of about 250 to 610 independent draws. Geweke's Z with $`L = 400`$ is 1.48,
-1.04, $`-1.32`$, 1.51 and $`-0.23`$ for the five parameters, all inside $`\pm 1.96`$. The
+weights up to lag 400, their inefficiency factors are 50.2, 114.9 and 78.9. The 20,000 draws thus
+carry the information of about 170 to 400 independent draws. Geweke's Z with $`L = 400`$ is
+$`-0.37`$, 0.90, $`-1.47`$, 1.50 and 0.69 for the five parameters, all inside $`\pm 1.96`$. The
 candidate $`\nu^*`$ is accepted in 98 percent of the iterations.
 
 ## How We Check It
@@ -233,10 +216,10 @@ It draws $`\mathbf{h}`$ from its exact conditional distribution given $`\boldsym
 the accept-reject Metropolis-Hastings step of
 [How to Draw the Log-Volatilities of a Stochastic Volatility Model](../sv_states/). `guide.m` runs
 it on the same data with the same priors, for 10,000 draws after a burn-in of 1,000, starting the
-log-volatilities at the mode. Its Metropolis-Hastings step takes the candidate path in 62.7
+log-volatilities at the mode. Its Metropolis-Hastings step takes the candidate path in 64.2
 percent of the iterations.
 
-The posterior means of the two samplers differ by $`-0.9`$, $`-1.4`$, $`-1.5`$, 1.1 and $`-0.7`$
+The posterior means of the two samplers differ by 0.1, $`-2.2`$, $`-2.2`$, 2.1 and $`-1.5`$
 Monte Carlo standard errors for $`\mu`$, $`\mu_h`$, $`\phi`$, $`\sigma_h^2`$ and $`\nu`$.
 
 </details>
@@ -279,10 +262,10 @@ these lines replace the blocks of $`\boldsymbol{\lambda}`$ and $`\nu`$ in the lo
 
 `guide.m` runs this sampler on the data of this guide, with $`\kappa = 10`$ and
 $`p \sim \mathcal{B}(1, 19)`$. It checks the outlier probability against the two normal densities
-it comes from, and the two agree to within 4e-16. The posterior mean of $`p`$ is 0.059, with 90
-percent interval (0.025, 0.103). Eighteen periods have an outlier probability above 0.5, and seven
+it comes from, and the two agree to within 6e-16. The posterior mean of $`p`$ is 0.060, with 90
+percent interval (0.024, 0.107). Nineteen periods have an outlier probability above 0.5, and eight
 of them are among the ten largest true errors $`\sqrt{\lambda_t}\varepsilon_t`$. The posterior
-mean of $`\sigma_h^2`$ is 0.0578, between 0.0472 under SV-$`t`$ and 0.1375 under SV. With
+mean of $`\sigma_h^2`$ is 0.0567, between 0.0483 under SV-$`t`$ and 0.1392 under SV. With
 $`\kappa`$ fixed, only the largest errors enter the outlier component, and the others raise the
 estimated volatility.
 

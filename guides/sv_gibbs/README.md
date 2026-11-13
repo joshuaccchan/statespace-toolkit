@@ -1,7 +1,7 @@
 # How to Estimate a Stochastic Volatility Model by Gibbs Sampling
 
 *Code: [`guide.m`](guide.m), with [`ssm.ksc_ar1_mean`](../../core/+ssm/ksc_ar1_mean.m),
-[`ssm.inefficiency_factor`](../../core/+ssm/inefficiency_factor.m),
+[`ssm.sv_params`](../../core/+ssm/sv_params.m), [`ssm.inefficiency_factor`](../../core/+ssm/inefficiency_factor.m),
 [`ssm.mcse`](../../core/+ssm/mcse.m), [`ssm.geweke`](../../core/+ssm/geweke.m) and
 [`ssm.armh`](../../core/+ssm/armh.m). Method:
 [Kim, Shephard and Chib (1998)](../../CITING.md#kim-shephard-and-chib-1998),
@@ -90,8 +90,8 @@ $`u_t = h_t - \mu_h - \phi(h_{t-1} - \mu_h)`$ for $`t > 1`$. The inverse-gamma p
 ```
 
 **The persistence.** The state equations for $`t > 1`$ form a regression of $`h_t - \mu_h`$ on
-$`h_{t-1} - \mu_h`$ with coefficient $`\phi`$. Combined with the prior, they give the truncated
-normal density $`q(\phi)`$ of $`\mathcal{TN}_{(-1,1)}(\hat{\phi}, K_\phi^{-1})`$, with
+$`h_{t-1} - \mu_h`$ with coefficient $`\phi`$. Combined with the normal part of the prior, they
+give the normal density $`q(\phi)`$ of $`\mathcal{N}(\hat{\phi}, K_\phi^{-1})`$, with
 
 ```math
 K_\phi = \frac{1}{V_\phi} + \frac{1}{\sigma_h^2}\sum_{t=2}^{T}(h_{t-1} - \mu_h)^2, \qquad \hat{\phi} = K_\phi^{-1}\Big(\frac{\phi_0}{V_\phi} + \frac{1}{\sigma_h^2}\sum_{t=2}^{T}(h_{t-1} - \mu_h)(h_t - \mu_h)\Big).
@@ -105,9 +105,10 @@ proportional to $`g(\phi)q(\phi)`$ on $`(-1, 1)`$, with
 g(\phi) = \sqrt{1 - \phi^2}\,\exp\Big(-\frac{(1 - \phi^2)(h_1 - \mu_h)^2}{2\sigma_h^2}\Big).
 ```
 
-An independence-chain Metropolis-Hastings step draws a candidate $`\phi^*`$ from $`q`$ and accepts
-it with probability $`\min\{1, g(\phi^*)/g(\phi)\}`$. The factor $`g`$ comes from one period only,
-so the acceptance rate is high.
+An independence-chain Metropolis-Hastings step draws a candidate $`\phi^*`$ from $`q`$. It rejects
+the candidate if $`|\phi^*| \geq 1`$, and otherwise accepts it with probability
+$`\min\{1, g(\phi^*)/g(\phi)\}`$. The factor $`g`$ comes from one period only, so the acceptance
+rate is high.
 
 **The mean of the log-volatility.** Written as
 $`h_1 = \mu_h + \sqrt{\sigma_h^2/(1 - \phi^2)}\,e_1`$ with $`e_1 \sim \mathcal{N}(0, 1)`$, and
@@ -129,6 +130,8 @@ mu0 = 0; Vmu = 10;                                      % mu ~ N(mu0, Vmu)
 muh0 = 1; Vmuh = 10;                                    % mu_h ~ N(muh0, Vmuh)
 phi0 = .97; Vphi = .1^2;                                % phi ~ TN(phi0, Vphi) on (-1, 1)
 nuh = 5; Sh = .16;                                      % sigma_h^2 ~ IG(nuh, Sh)
+% the priors of sigma_h^2, phi and mu_h, with the field names of ssm.sv_params
+hyp = struct('nuh', nuh, 'Sh', Sh, 'phi0', phi0, 'Vphi', Vphi, 'mu0', muh0, 'Vmu', Vmuh);
 offset = 1e-4;
 nsim = 20000; burnin = 1000;
 muh = log(var(y)); phi = .98; sig2h = .04;              % starting values
@@ -142,23 +145,8 @@ for isim = 1:burnin + nsim
     ystar = log((y - mu).^2 + offset);  % s, then h: guides/sv_states
     h = ssm.ksc_ar1_mean(ystar, h, muh, phi, sig2h);
 
-    hc = h - muh;                                          % h_t - mu_h
-    u = [sqrt(1 - phi^2)*hc(1); hc(2:T) - phi*hc(1:T-1)];  % the state errors u_t
-    sig2h = 1/gamrnd(nuh + T/2, 1/(Sh + u'*u/2));          % IG(nu_h + T/2, S_h + u'u/2)
-
-    Kphi = 1/Vphi + hc(1:T-1)'*hc(1:T-1)/sig2h;             % K_phi and phihat of the proposal
-    phihat = (phi0/Vphi + hc(1:T-1)'*hc(2:T)/sig2h)/Kphi;
-    phic = 2;
-    while abs(phic) >= 1, phic = phihat + randn/sqrt(Kphi); end
-    g = @(x) .5*log(1 - x^2) - .5*(1 - x^2)*hc(1)^2/sig2h;  % log g(phi)
-    if g(phic) - g(phi) > log(rand)
-        phi = phic;
-        nacc = nacc + (isim > burnin);
-    end
-
-    Kmuh = 1/Vmuh + (1 - phi^2 + (T-1)*(1 - phi)^2)/sig2h;  % mu_h given h, phi and sigma_h^2
-    cmuh = muh0/Vmuh + ((1 - phi^2)*h(1) + (1 - phi)*sum(h(2:T) - phi*h(1:T-1)))/sig2h;
-    muh = cmuh/Kmuh + randn/sqrt(Kmuh);
+    [muh, phi, sig2h, acc] = ssm.sv_params(h, muh, phi, hyp, 1);  % sigma_h^2, phi, then mu_h
+    nacc = nacc + acc*(isim > burnin);
 
     if isim > burnin
         store_theta(isim - burnin, :) = [mu muh phi sig2h];
@@ -169,18 +157,18 @@ end
 
 The chain starts from the starting values of Chan and Grant (2016): $`\mu_h`$ equal to the log of
 the sample variance of $`y_t`$, $`\phi = 0.98`$ and $`\sigma_h^2 = 0.04`$. The path of the
-log-volatilities starts flat, at $`\mu_h`$. The loop draws the candidate $`\phi^*`$ from the
-truncated normal distribution by drawing from the normal distribution until the draw falls in
-$`(-1, 1)`$. The first 1,000 iterations are discarded as burn-in.
+log-volatilities starts flat, at $`\mu_h`$. [`ssm.sv_params`](../../core/+ssm/sv_params.m) takes
+blocks 3 to 5, in that order. Its last argument is the bound on $`|\phi|`$, here 1, the edge of
+the support of the prior. The first 1,000 iterations are discarded as burn-in.
 
 ## Step 4: Check the Chain
 
 Figure 1 shows the draws of the four parameters after the burn-in. The draws of $`\mu`$ and
 $`\mu_h`$ are nearly independent, while those of $`\phi`$ and $`\sigma_h^2`$ are strongly
-correlated. The draws of $`\mu_h`$ have spikes in both directions. The three farthest from 0, at
-$`-5.76`$, 4.37 and $`-4.00`$, occur with $`\phi`$ between 0.9967 and 0.9993. There the state
+correlated. The draws of $`\mu_h`$ have spikes. The three farthest from 0, at 6.83, 5.25 and
+4.65, occur with $`\phi`$ between 0.9990 and 0.9996. There the state
 equation carries little information about the mean of the log-volatility. Draws of $`\phi`$ above
-0.995 make up 367 of the 20,000. The sampler draws $`\phi`$ and $`\sigma_h^2`$ given the path of
+0.995 make up 341 of the 20,000. The sampler draws $`\phi`$ and $`\sigma_h^2`$ given the path of
 the log-volatilities, and the path given $`\phi`$ and $`\sigma_h^2`$. The two depend strongly on
 each other in the posterior. [`ssm.inefficiency_factor`](../../core/+ssm/inefficiency_factor.m)
 estimates the long-run variance of the draws with Bartlett weights up to a truncation lag $`L`$.
@@ -189,28 +177,28 @@ $`\sigma_h^2`$ the inefficiency factors grow up to $`L = 200`$ and then stay put
 
 | Truncation lag $`L`$ | 50 | 100 | 200 | 400 |
 |---|---|---|---|---|
-| $`\phi`$ | 12.0 | 17.0 | 20.9 | 21.7 |
-| $`\sigma_h^2`$ | 33.0 | 47.7 | 57.9 | 58.6 |
+| $`\phi`$ | 11.8 | 16.7 | 21.2 | 20.1 |
+| $`\sigma_h^2`$ | 32.8 | 48.0 | 61.4 | 59.2 |
 
-With $`L = 200`$, the 20,000 draws of $`\sigma_h^2`$ carry about as much information as 350
+With $`L = 200`$, the 20,000 draws of $`\sigma_h^2`$ carry about as much information as 330
 independent draws. The Monte Carlo standard errors from [`ssm.mcse`](../../core/+ssm/mcse.m)
 measure how far each posterior mean can be from its value in an infinitely long chain.
 
 | | True value | Posterior mean | 90% interval | Inefficiency factor | Monte Carlo standard error |
 |---|---|---|---|---|---|
-| $`\mu`$ | 0.1 | 0.1129 | (0.0696, 0.1557) | 1.5 | 0.0002 |
-| $`\mu_h`$ | 0 | -0.0545 | (-0.6068, 0.5296) | 1.2 | 0.0030 |
-| $`\phi`$ | 0.97 | 0.9800 | (0.9653, 0.9925) | 20.9 | 0.0003 |
-| $`\sigma_h^2`$ | 0.04 | 0.0346 | (0.0220, 0.0519) | 57.9 | 0.0005 |
+| $`\mu`$ | 0.1 | 0.1126 | (0.0695, 0.1559) | 1.4 | 0.0002 |
+| $`\mu_h`$ | 0 | -0.0526 | (-0.5990, 0.5201) | 1.2 | 0.0030 |
+| $`\phi`$ | 0.97 | 0.9799 | (0.9654, 0.9923) | 21.2 | 0.0003 |
+| $`\sigma_h^2`$ | 0.04 | 0.0348 | (0.0226, 0.0518) | 61.4 | 0.0005 |
 
 All four true values lie inside their 90 percent intervals. The candidate $`\phi^*`$ is accepted
-in 92.5 percent of the iterations.
+in 92.4 percent of the iterations.
 
 Geweke's (1992) diagnostic compares the mean of the first 10 percent of the draws with the mean of
 the last half. It divides the difference by its standard error.
 [`ssm.geweke`](../../core/+ssm/geweke.m) returns it, and it is approximately standard normal if
 the chain has converged. Its standard error needs the same truncation lag. With $`L = 200`$ the
-four values are 0.05, 0.71, $`-1.43`$ and 1.29, all inside $`\pm 1.96`$.
+four values are $`-1.00`$, 0.36, $`-0.68`$ and 0.68, all inside $`\pm 1.96`$.
 
 ![The draws of the four parameters and their histograms](fig_chain.png)
 
@@ -221,7 +209,7 @@ values.*
 
 The volatility estimated with the parameters unknown is close to that of the first guide. The 90
 percent intervals of $`\mathrm{e}^{h_t/2}`$ are 0.64 wide on average, against 0.66 with the
-parameters known. They contain the true volatility in 880 of the 1,000 periods.
+parameters known. They contain the true volatility in 882 of the 1,000 periods.
 
 ## How We Check It
 
@@ -234,11 +222,11 @@ $`\mathbf{h}`$ from its exact conditional distribution, by the accept-reject Met
 step of [How to Draw the Log-Volatilities of a Stochastic Volatility Model](../sv_states/). It
 does not use the mixture. `guide.m` runs it on the same data with the same priors, for 20,000
 draws after a burn-in of 1,000, starting the log-volatilities at the mode. Its Metropolis-Hastings
-step takes the candidate path in 70.4 percent of the iterations.
+step takes the candidate path in 69.0 percent of the iterations.
 
-The posterior means of the two samplers differ by $`-1.2`$, $`-0.6`$, $`-0.9`$ and 0.9 Monte Carlo
-standard errors for $`\mu`$, $`\mu_h`$, $`\phi`$ and $`\sigma_h^2`$. Their posterior standard
-deviations differ by at most 6.3 percent.
+The posterior means of the two samplers differ by $`-1.5`$, $`-1.1`$, 0.5 and $`-0.1`$ Monte
+Carlo standard errors for $`\mu`$, $`\mu_h`$, $`\phi`$ and $`\sigma_h^2`$. Their posterior
+standard deviations differ by at most 7.1 percent.
 
 </details>
 

@@ -131,6 +131,8 @@ sampler from them.
 | `ssm.ksc_ar1_mean` | Draws the log-volatility path of a stationary AR(1) by the same sampler | ex08, the UC tutorial |
 | `ssm.ksc_rw_diffuse` | Draws the log-volatility path of a random walk whose first value has a normal prior with mean zero, by the same sampler | both tutorials |
 | `ssm.ksc_rw_noncentered` | Draws a random-walk log-volatility in the noncentered form of Chan (2018), and returns the conditional mean and variance of its scale, which the Savage-Dickey ratio of that paper uses | not yet in an example |
+| `ssm.sv_params` | Draws the mean, persistence and innovation variance of stationary AR(1) log-volatilities, given their paths | the guides on SV by Gibbs sampling, Student-t errors and SV model comparison |
+| `ssm.nu_studentt` | Draws the degrees of freedom of Student-t errors, given the latent scales of the errors | the guides on Student-t errors and SV model comparison |
 | `ssm.tnormrnd` | Draws from a truncated normal distribution | ex02, the UC tutorial |
 | `ssm.shaded_band` | Shades credible bands in figures | ex01, ex03, ex04, ex07-ex09, the MIDAS tutorial |
 | `ssm.inefficiency_factor` | Computes the inefficiency factor of MCMC draws, the number of draws that carry the information of one independent draw | the Gibbs sampling, integrated likelihood and TVP Gibbs sampling guides, the UC tutorial |
@@ -138,9 +140,10 @@ sampler from them.
 | `ssm.geweke` | Computes the convergence diagnostic of Geweke (1992), which compares the means of an early and a late segment of a chain | not yet in an example |
 | `ssm.specvar0` | Estimates the long-run variance of the mean of MCMC draws, for the three diagnostics above | through the diagnostics |
 
-Eleven of these functions, `ssm.diffmat`, `ssm.geweke`, `ssm.inefficiency_factor`,
-`ssm.ksc_ar1_mean`, `ssm.ksc_rw_diffuse`, `ssm.ksc_rw_h0`, `ssm.mcse`, `ssm.shaded_band`,
-`ssm.specvar0`, `ssm.surform` and `ssm.tnormrnd`, have the same code as their counterparts in
+Thirteen of these functions, `ssm.diffmat`, `ssm.geweke`, `ssm.inefficiency_factor`,
+`ssm.ksc_ar1_mean`, `ssm.ksc_rw_diffuse`, `ssm.ksc_rw_h0`, `ssm.mcse`, `ssm.nu_studentt`,
+`ssm.shaded_band`, `ssm.specvar0`, `ssm.surform`, `ssm.sv_params` and `ssm.tnormrnd`, have the
+same code as their counterparts in
 [bvar-toolkit](https://github.com/joshuaccchan/bvar-toolkit), apart from error identifiers and the
 diagnostics' calls to `ssm.specvar0`. A unit test checks each against a pinned copy of the
 bvar-toolkit original.

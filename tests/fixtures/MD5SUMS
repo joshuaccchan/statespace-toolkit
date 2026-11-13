@@ -6,6 +6,8 @@ cac48b95633f873a3429dc9d12ec18ce *bayesian-macroeconometrics/code/matlab/chapter
 964d785066931701a2a3ead09caf571a *bvar-toolkit/core/+bvar/+sv/ksc_ar1_mean.m
 d9d5392d2b7f0d9dd27a0d926c6143b7 *bvar-toolkit/core/+bvar/+sv/ksc_rw_diffuse.m
 1f7c2a18310b0ca71781cce26c873e30 *bvar-toolkit/core/+bvar/+sv/ksc_rw_h0.m
+7c4df4cb5d54bf3676d0610aff84de88 *bvar-toolkit/core/+bvar/+sv/nu_studentt.m
+044cdbfbe77d3d7a2ca534144dc60773 *bvar-toolkit/core/+bvar/+sv/sv_params.m
 152a3098766f468daaadcd2c87a1d7eb *bvar-toolkit/core/+bvar/+util/diffmat.m
 a23ffc8e8ac9a05fe7288ecdbad2ad77 *bvar-toolkit/core/+bvar/+util/shaded_band.m
 cde5e63627a6300fcd316b66c7962c1b *bvar-toolkit/core/+bvar/+util/surform.m

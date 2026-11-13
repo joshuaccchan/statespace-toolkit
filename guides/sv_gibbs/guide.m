@@ -25,6 +25,8 @@ mu0 = 0; Vmu = 10;                                      % mu ~ N(mu0, Vmu)
 muh0 = 1; Vmuh = 10;                                    % mu_h ~ N(muh0, Vmuh)
 phi0 = .97; Vphi = .1^2;                                % phi ~ TN(phi0, Vphi) on (-1, 1)
 nuh = 5; Sh = .16;                                      % sigma_h^2 ~ IG(nuh, Sh)
+% the priors of sigma_h^2, phi and mu_h, with the field names of ssm.sv_params
+hyp = struct('nuh', nuh, 'Sh', Sh, 'phi0', phi0, 'Vphi', Vphi, 'mu0', muh0, 'Vmu', Vmuh);
 offset = 1e-4;
 nsim = 20000; burnin = 1000;
 muh = log(var(y)); phi = .98; sig2h = .04;              % starting values
@@ -38,23 +40,8 @@ for isim = 1:burnin + nsim
     ystar = log((y - mu).^2 + offset);  % s, then h: guides/sv_states
     h = ssm.ksc_ar1_mean(ystar, h, muh, phi, sig2h);
 
-    hc = h - muh;                                          % h_t - mu_h
-    u = [sqrt(1 - phi^2)*hc(1); hc(2:T) - phi*hc(1:T-1)];  % the state errors u_t
-    sig2h = 1/gamrnd(nuh + T/2, 1/(Sh + u'*u/2));          % IG(nu_h + T/2, S_h + u'u/2)
-
-    Kphi = 1/Vphi + hc(1:T-1)'*hc(1:T-1)/sig2h;             % K_phi and phihat of the proposal
-    phihat = (phi0/Vphi + hc(1:T-1)'*hc(2:T)/sig2h)/Kphi;
-    phic = 2;
-    while abs(phic) >= 1, phic = phihat + randn/sqrt(Kphi); end
-    g = @(x) .5*log(1 - x^2) - .5*(1 - x^2)*hc(1)^2/sig2h;  % log g(phi)
-    if g(phic) - g(phi) > log(rand)
-        phi = phic;
-        nacc = nacc + (isim > burnin);
-    end
-
-    Kmuh = 1/Vmuh + (1 - phi^2 + (T-1)*(1 - phi)^2)/sig2h;  % mu_h given h, phi and sigma_h^2
-    cmuh = muh0/Vmuh + ((1 - phi^2)*h(1) + (1 - phi)*sum(h(2:T) - phi*h(1:T-1)))/sig2h;
-    muh = cmuh/Kmuh + randn/sqrt(Kmuh);
+    [muh, phi, sig2h, acc] = ssm.sv_params(h, muh, phi, hyp, 1);  % sigma_h^2, phi, then mu_h
+    nacc = nacc + acc*(isim > burnin);
 
     if isim > burnin
         store_theta(isim - burnin, :) = [mu muh phi sig2h];
@@ -115,20 +102,7 @@ for isim = 1:burnin + nsim
     [h, acc] = ssm.armh(h, logf, gradK, 'ForceAccept', isim == 1);
     nacc_h = nacc_h + acc*(isim > burnin);
 
-    hc = h - muh;
-    u = [sqrt(1 - phi^2)*hc(1); hc(2:T) - phi*hc(1:T-1)];
-    sig2h = 1/gamrnd(nuh + T/2, 1/(Sh + u'*u/2));
-
-    Kphi = 1/Vphi + hc(1:T-1)'*hc(1:T-1)/sig2h;
-    phihat = (phi0/Vphi + hc(1:T-1)'*hc(2:T)/sig2h)/Kphi;
-    phic = 2;
-    while abs(phic) >= 1, phic = phihat + randn/sqrt(Kphi); end
-    g = @(x) .5*log(1 - x^2) - .5*(1 - x^2)*hc(1)^2/sig2h;
-    if g(phic) - g(phi) > log(rand), phi = phic; end
-
-    Kmuh = 1/Vmuh + (1 - phi^2 + (T-1)*(1 - phi)^2)/sig2h;
-    cmuh = muh0/Vmuh + ((1 - phi^2)*h(1) + (1 - phi)*sum(h(2:T) - phi*h(1:T-1)))/sig2h;
-    muh = cmuh/Kmuh + randn/sqrt(Kmuh);
+    [muh, phi, sig2h] = ssm.sv_params(h, muh, phi, hyp, 1);
 
     if isim > burnin, store_x(isim - burnin, :) = [mu muh phi sig2h]; end
 end
