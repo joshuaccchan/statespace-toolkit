@@ -126,7 +126,7 @@ p(\mathbf{y}) = \int p(\mathbf{y} \mid \boldsymbol{\theta})\,p(\boldsymbol{\thet
 ```
 
 We sample in the unconstrained coordinates
-$`\mathbf{z} = (\mu, \mu_h, \operatorname{atanh}\phi, \log\sigma_h^2, \log\frac{\nu - 2}{100 - \nu})'`$,
+$`\mathbf{z} = (\mu, \mu_h, \mathrm{atanh}\,\phi, \log\sigma_h^2, \log\frac{\nu - 2}{100 - \nu})'`$,
 whose log density adds the log Jacobian of the transformation to
 $`\log p(\mathbf{y} \mid \boldsymbol{\theta}) + \log p(\boldsymbol{\theta})`$. In code, for
 SV-$`t`$:
