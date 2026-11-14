@@ -19,6 +19,7 @@ To credit the software as well, cite the toolkit record at the end.
 | Stochastic volatility in a noncentered parameterization, and tests of whether a model needs its time variation or its stochastic volatility | `ssm.ksc_rw_noncentered`; `replications/chan2018_er_spectest` | [Chan (2018)](#chan-2018) |
 | The accept-reject Metropolis-Hastings step for states whose conditional distribution is not Gaussian; stochastic volatility in mean | `ssm.armh`; ex09; `replications/chan2017_jbes_svm` | [Chan (2017)](#chan-2017) |
 | Stochastic volatility with MA(1) and Student-t errors | ex08; `replications/chan_hsiao2014_wiley_sv`, `replications/chan2013_joe_masv` | [Chan and Hsiao (2014)](#chan-and-hsiao-2014); [Chan (2013)](#chan-2013) for moving average stochastic volatility |
+| Stochastic volatility models with a stationary AR(1) or random-walk log-volatility, MA(1) or ARMA(1,1) errors, and normal or Student-t errors | `ssm.models.sv`, `ssm.ma_params`, `ssm.arma_params` | [Chan (2013)](#chan-2013) for MA(1) errors; [Zhang, Chan and Cross (2020)](#zhang-chan-and-cross-2020) for ARMA(1,1) errors; [Kim, Shephard and Chib (1998)](#kim-shephard-and-chib-1998) for the auxiliary mixture sampler |
 | Unobserved components models of trend inflation: a random-walk trend and a gap, with constant variances or stochastic volatility, and an MA(1) gap | `ssm.models.uc`, `ssm.models.uc_forecast`; the UC tutorial | [Stock and Watson (2007)](#stock-and-watson-2007) for UCSV; [Chan (2013)](#chan-2013) for the MA(1) gap with stochastic volatility |
 | Time-varying parameter MIDAS | `ssm.models.tvp_midas`, `ssm.midas_basis`; ex10; the MIDAS nowcasting tutorial | [Chan, Poon and Zhu (2026)](#chan-poon-and-zhu-2026); [Ghysels, Sinko and Valkanov (2007)](#ghysels-sinko-and-valkanov-2007) for MIDAS regressions |
 | The output gap from an unobserved components model, and the Hodrick-Prescott filter as one | ex04; `replications/grant_chan2017_jedc_hpfilter` | [Grant and Chan (2017b)](#grant-and-chan-2017b); [Morley, Nelson and Zivot (2003)](#morley-nelson-and-zivot-2003) for the AR(2) cycle; [Ritter and Tanner (1992)](#ritter-and-tanner-1992) for the Griddy-Gibbs step |
@@ -762,6 +763,31 @@ compares it with other trend models.
   number  = {s1},
   pages   = {3--33},
   doi     = {10.1111/j.1538-4616.2007.00014.x}
+}
+```
+
+### Zhang, Chan and Cross (2020)
+
+Zhang, B., Chan, J. C. C. and Cross, J. L. (2020). Stochastic Volatility Models with ARMA
+Innovations: An Application to G7 Inflation Forecasts. *International Journal of Forecasting*
+36(4): 1318-1328.
+[Journal version](https://doi.org/10.1016/j.ijforecast.2020.01.004) ·
+[Working paper](https://joshuachan.org/papers/SV-ARMA.pdf)
+
+Stochastic volatility with ARMA errors, in autoregressive and unobserved components models of
+inflation. `ssm.models.sv` estimates the ARMA(1,1) case with a constant mean.
+
+```bibtex
+@article{ZCC20,
+  author  = {Zhang, B. and Chan, J. C. C. and Cross, J. L.},
+  title   = {Stochastic Volatility Models with {ARMA} Innovations: An Application to {G7}
+             Inflation Forecasts},
+  journal = {International Journal of Forecasting},
+  year    = {2020},
+  volume  = {36},
+  number  = {4},
+  pages   = {1318--1328},
+  doi     = {10.1016/j.ijforecast.2020.01.004}
 }
 ```
 

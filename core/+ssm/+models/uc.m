@@ -58,9 +58,8 @@
 % Each sweep draws the trend in one block by ssm.simulate_states (with the MA term, through
 % s = Hpsi\tau, whose gap errors are independent); each log variance and its parameters, a
 % random walk by ssm.ksc_rw_h0 and an AR(1) by ssm.ksc_ar1_mean, its AR coefficient by
-% independence Metropolis-Hastings; tau0; and psi by independence Metropolis-Hastings at the
-% mode of its conditional density, found by Newton steps. The auxiliary mixture works on
-% log(e.^2 + 1e-4).
+% independence Metropolis-Hastings; tau0; and psi by ssm.ma_params. The auxiliary mixture
+% works on log(e.^2 + 1e-4).
 %
 % See:
 % Chan, J.C.C. (2013). Moving Average Stochastic Volatility Models with Application to
@@ -121,7 +120,6 @@ if thin > 0
     Dtau = zeros(nsave, T); Dsdh = zeros(nsave, T); Dsdg = zeros(nsave, T);
 end
 acc = struct('psi', 0, 'gap_phi', 0, 'trend_phi', 0);
-psic = linspace(-.975, .975, 40)';
 
 for loop = 1:nsim + burnin
     % tau: yt = s + u, and b = G*s - c ~ N(0, diag(v)), with b_1 = tau_1 - tau0
@@ -156,20 +154,10 @@ for loop = 1:nsim + burnin
         tau0 = (m.tau1.a0/m.tau1.b0 + tau(1)/v1)/K0 + randn/sqrt(K0);
     end
 
-    % psi | y, tau, h
+    % psi | y, tau, h, and the errors under the retained psi
     if m.ma
-        x = y - tau; ehh = exp(-st.gap.x);
-        fc = psi_logcond(psic, x, ehh);
-        [~, j] = max(fc);
-        [pm, Dp] = psi_mode(psic(j), x, ehh);
-        pc = pm + sqrt(Dp)*randn;
-        ua = rand;
-        if abs(pc) < 1
-            la = psi_logcond(pc, x, ehh) - psi_logcond(psi, x, ehh) ...
-                + .5*(pc - pm)^2/Dp - .5*(psi - pm)^2/Dp;
-            if log(ua) < la, psi = pc; acc.psi = acc.psi + 1; end
-        end
-        u = filter(1, [1 psi], x);                      % the errors under the retained psi
+        [psi, u, a] = ssm.ma_params(y - tau, exp(-st.gap.x), psi, struct('psi0', 0, 'Vpsi', 1));
+        acc.psi = acc.psi + a;
     end
 
     if loop > burnin
@@ -313,38 +301,6 @@ for c = {'gap', 'trend'}
     end
 end
 if m.ma, v = [v atanh(psi)]; end
-end
-
-function f = psi_logcond(q, x, eh)
-% log p(psi | y, tau, h) up to a constant, from the MA(1) residuals
-% u = filter(1, [1 psi], x) and the N(0,1) prior
-f = zeros(numel(q), 1);
-for k = 1:numel(q)
-    u = filter(1, [1 q(k)], x);
-    f(k) = -.5*(eh'*u.^2) - .5*q(k)^2;
-end
-end
-
-function [pm, Dp] = psi_mode(p, x, eh)
-% Newton steps on the log conditional of psi, with the derivatives of the
-% residuals v = du/dpsi and w = d2u/dpsi2 from the same recursion
-for it = 1:100
-    [d1, d2] = derivs(p);
-    if d2 >= 0, break; end
-    pn = min(max(p - d1/d2, -.999), .999);
-    if abs(pn - p) < 1e-10, p = pn; break; end
-    p = pn;
-end
-pm = p;
-[~, d2] = derivs(p);
-if d2 < 0, Dp = -1/d2; else, Dp = .05^2; end
-    function [d1, d2] = derivs(q)
-        u = filter(1, [1 q], x);
-        v = filter(1, [1 q], -[0; u(1:end-1)]);
-        w = filter(1, [1 q], -2*[0; v(1:end-1)]);
-        d1 = -sum(eh.*u.*v) - q;
-        d2 = -sum(eh.*(v.^2 + u.*w)) - 1;
-    end
 end
 
 function x = mixquantile(p, m, v)

@@ -133,6 +133,8 @@ sampler from them.
 | `ssm.ksc_rw_noncentered` | Draws a random-walk log-volatility in the noncentered form of Chan (2018), and returns the conditional mean and variance of its scale, which the Savage-Dickey ratio of that paper uses | not yet in an example |
 | `ssm.sv_params` | Draws the mean, persistence and innovation variance of stationary AR(1) log-volatilities, given their paths | the guides on SV by Gibbs sampling, Student-t errors and SV model comparison |
 | `ssm.nu_studentt` | Draws the degrees of freedom of Student-t errors, given the latent scales of the errors | the guides on Student-t errors and SV model comparison |
+| `ssm.ma_params` | Draws the coefficient of MA(1) errors whose variances change over time, given the errors and their variances | through `ssm.models.uc` and `ssm.models.sv` |
+| `ssm.arma_params` | Draws the two coefficients of ARMA(1,1) errors whose variances change over time, by the same step for the MA coefficient | through `ssm.models.sv` |
 | `ssm.tnormrnd` | Draws from a truncated normal distribution | ex02, the UC tutorial |
 | `ssm.shaded_band` | Shades credible bands in figures | ex01, ex03, ex04, ex07-ex09, the MIDAS tutorial |
 | `ssm.inefficiency_factor` | Computes the inefficiency factor of MCMC draws, the number of draws that carry the information of one independent draw | the Gibbs sampling, integrated likelihood and TVP Gibbs sampling guides, the UC tutorial |
@@ -158,7 +160,10 @@ nowcasts the next period. The MIDAS tutorial calls it. [`ssm.models.uc`](core/+s
 estimates unobserved components models, among them UCSV. Each has a random-walk trend and a gap.
 The variances of the trend innovations and of the gap can each be constant or time-varying, and
 the gap can have MA(1) errors. [`ssm.models.uc_forecast`](core/+ssm/+models/uc_forecast.m)
-forecasts with these models. The UC tutorial calls both.
+forecasts with these models. The UC tutorial calls both. [`ssm.models.sv`](core/+ssm/+models/sv.m)
+estimates stochastic volatility models. Its options set the log-volatility, a stationary AR(1)
+or a random walk; the dependence of the errors, none, MA(1) or ARMA(1,1); and their
+distribution, normal or Student-t.
 
 ## Verification
 
@@ -192,7 +197,11 @@ restriction. `ssm.midas_basis` with averaged rows must equal, bit for bit, the l
 the MIDAS tutorial. `ssm.models.uc` and `ssm.models.uc_forecast` must reproduce, draw for draw,
 the code with which the UC tutorial's results were computed, in each of its four models. That code
 is kept in `tests/unit/private/`. Their forecasts at every horizon must match paths simulated
-forward from the same draws.
+forward from the same draws. The MA(1) model checks `ssm.ma_params` the same way.
+`ssm.models.sv` must reproduce, draw for draw, the samplers of the guides on SV by Gibbs sampling
+and on Student-t errors, and its 99 percent intervals must contain the MA(1) and ARMA(1,1)
+coefficients of generated data. Chains of `ssm.ma_params` and `ssm.arma_params`, with the errors
+and their variances held fixed, must match the conditional density computed on a grid.
 
 Files from other repositories that the tests run are held verbatim in
 [`tests/fixtures/`](tests/fixtures/), with their md5s. On every push to `main` and every pull
