@@ -26,6 +26,8 @@
 %   res.lam_mean : with 't', T x 1 posterior mean of lam_t
 %   res.acc      : acceptance rates over all sweeps of the Metropolis-Hastings steps for
 %                  phi, psi and nu that the model has
+%   res.last     : nsim x 3 draws of [h_T e_T u_T], where the forecasts of
+%                  ssm.models.sv_forecast start
 %   res.draws.h  : with thin > 0, draws x T
 %   res.spec, and the settings
 %
@@ -134,7 +136,7 @@ if ~strcmp(errors, 'iid')
     hyp.psi0 = p.psi0; hyp.Vpsi = p.Vpsi;
     if strcmp(errors, 'arma'), hyp.rho0 = p.rho0; hyp.Vrho = p.Vrho; end
 end
-params = zeros(nsim, numel(m.names));
+params = zeros(nsim, numel(m.names)); last = zeros(nsim, 3);
 sdh_sum = zeros(T,1); lam_sum = zeros(T,1);
 if thin > 0, Dh = zeros(floor(nsim/thin), T); end
 acc = struct('phi', 0, 'psi', 0, 'nu', 0);
@@ -191,6 +193,7 @@ for loop = 1:nsim + burnin
         i = loop - burnin;
         v = [mu rho psi muh phi sig2h nu];
         params(i,:) = v(m.cols);
+        last(i,:) = [h(T) e(T) u(T)];
         sdh_sum = sdh_sum + exp(h/2);
         if is_t, lam_sum = lam_sum + lam; end
         if thin > 0 && mod(i, thin) == 0, Dh(i/thin,:) = h'; end
@@ -201,7 +204,7 @@ keep = [is_ar1, ~strcmp(errors, 'iid'), is_t];
 acc = rmfield(acc, f(~keep));
 for j = find(keep), acc.(f{j}) = acc.(f{j})/(nsim + burnin); end
 
-res.params = params; res.param_names = m.names;
+res.params = params; res.param_names = m.names; res.last = last;
 res.sdh_mean = sdh_sum/nsim;
 if is_t, res.lam_mean = lam_sum/nsim; end
 res.acc = acc;

@@ -78,6 +78,10 @@ a script that runs the same analysis on your own series.
 - [Which Parameters of a GDP Nowcasting Model Should Vary over Time?](tutorials/midas_nowcast/)
   The coefficients of a mixed-frequency (MIDAS) regression: letting them vary improves the
   nowcasts of US real GDP growth, and letting the weights vary adds little.
+- [Which Stochastic Volatility Model Forecasts Best?](tutorials/sv_volatility/)
+  One with Student-t errors: it forecasts the daily return on the dollar-euro rate better than the
+  RiskMetrics EWMA and than SV with normal errors, and a random-walk log-volatility or an MA(1)
+  term does not help.
 
 ## Reproduce a Paper
 
@@ -117,30 +121,30 @@ sampler from them.
 
 | Function | Does | Shown in |
 |---|---|---|
-| `ssm.simulate_states` | Draws a state path from its posterior, given the banded precision matrix of the states: the precision sampler of Chan and Jeliazkov (2009) | ex01-ex06, ex09, ex10, both tutorials |
+| `ssm.simulate_states` | Draws a state path from its posterior, given the banded precision matrix of the states: the precision sampler of Chan and Jeliazkov (2009) | ex01-ex06, ex09, ex10, the UC and MIDAS tutorials |
 | `ssm.intlike` | Computes the log likelihood of a linear Gaussian state space model, with the states integrated out | ex02, the UC tutorial |
 | `ssm.select_obs` | Splits the stacked data into observed and missing values, keeping the precision matrix of the missing values banded | ex05 |
 | `ssm.restrict` | Conditions draws from a Gaussian on linear restrictions M*x = z, reusing the Cholesky factor that `ssm.simulate_states` returns | ex05, ex10, the MIDAS tutorial |
-| `ssm.diffmat` | Builds the first-difference matrix of a state equation, I - aL | ex01-ex03, ex06, ex07, ex09, ex10, both tutorials |
+| `ssm.diffmat` | Builds the first-difference matrix of a state equation, I - aL | ex01-ex03, ex06, ex07, ex09, ex10, the UC and MIDAS tutorials |
 | `ssm.lagpolymat` | Builds the matrix of a lag polynomial, such as second differences or an AR(2) | ex04 |
-| `ssm.surform` | Builds the design matrix of a regression whose coefficients vary over time | ex03, ex09, ex10, both tutorials |
+| `ssm.surform` | Builds the design matrix of a regression whose coefficients vary over time | ex03, ex09, ex10, the UC and MIDAS tutorials |
 | `ssm.midas_basis` | Builds the regressors and restriction rows of a high-frequency predictor in a MIDAS regression with a Fourier weighting function, over the window of each period | the MIDAS tutorial |
 | `ssm.mode_newton` | Finds the mode of a concave log density by Newton-Raphson, with a banded Hessian | ex08, and through `ssm.armh` |
 | `ssm.armh` | Takes the accept-reject Metropolis-Hastings step of Chan (2017), for states whose conditional distribution is not Gaussian | ex09 |
 | `ssm.ksc_rw_h0` | Draws the log-volatility path of a random walk by the auxiliary mixture sampler of Kim, Shephard and Chib (1998) | ex07, ex10, the UC tutorial |
-| `ssm.ksc_ar1_mean` | Draws the log-volatility path of a stationary AR(1) by the same sampler | ex08, the UC tutorial |
-| `ssm.ksc_rw_diffuse` | Draws the log-volatility path of a random walk whose first value has a normal prior with mean zero, by the same sampler | both tutorials |
+| `ssm.ksc_ar1_mean` | Draws the log-volatility path of a stationary AR(1) by the same sampler | ex08, the UC and volatility tutorials |
+| `ssm.ksc_rw_diffuse` | Draws the log-volatility path of a random walk whose first value has a normal prior with mean zero, by the same sampler | all three tutorials |
 | `ssm.ksc_rw_noncentered` | Draws a random-walk log-volatility in the noncentered form of Chan (2018), and returns the conditional mean and variance of its scale, which the Savage-Dickey ratio of that paper uses | not yet in an example |
-| `ssm.sv_params` | Draws the mean, persistence and innovation variance of stationary AR(1) log-volatilities, given their paths | the guides on SV by Gibbs sampling, Student-t errors and SV model comparison |
-| `ssm.nu_studentt` | Draws the degrees of freedom of Student-t errors, given the latent scales of the errors | the guides on Student-t errors and SV model comparison |
-| `ssm.ma_params` | Draws the coefficient of MA(1) errors whose variances change over time, given the errors and their variances | through `ssm.models.uc` and `ssm.models.sv` |
+| `ssm.sv_params` | Draws the mean, persistence and innovation variance of stationary AR(1) log-volatilities, given their paths | the guides on SV by Gibbs sampling, Student-t errors and SV model comparison, the volatility tutorial |
+| `ssm.nu_studentt` | Draws the degrees of freedom of Student-t errors, given the latent scales of the errors | the guides on Student-t errors and SV model comparison, the volatility tutorial |
+| `ssm.ma_params` | Draws the coefficient of MA(1) errors whose variances change over time, given the errors and their variances | through `ssm.models.uc` and `ssm.models.sv`; the volatility tutorial |
 | `ssm.arma_params` | Draws the two coefficients of ARMA(1,1) errors whose variances change over time, by the same step for the MA coefficient | through `ssm.models.sv` |
 | `ssm.tnormrnd` | Draws from a truncated normal distribution | ex02, the UC tutorial |
 | `ssm.shaded_band` | Shades credible bands in figures | ex01, ex03, ex04, ex07-ex09, the MIDAS tutorial |
-| `ssm.inefficiency_factor` | Computes the inefficiency factor of MCMC draws, the number of draws that carry the information of one independent draw | the Gibbs sampling, integrated likelihood and TVP Gibbs sampling guides, the UC tutorial |
+| `ssm.inefficiency_factor` | Computes the inefficiency factor of MCMC draws, the number of draws that carry the information of one independent draw | the Gibbs sampling, integrated likelihood and TVP Gibbs sampling guides, the UC and volatility tutorials |
 | `ssm.mcse` | Computes the Monte Carlo standard error of a posterior mean estimated from MCMC draws | the Gibbs sampling, integrated likelihood and TVP Gibbs sampling guides |
 | `ssm.geweke` | Computes the convergence diagnostic of Geweke (1992), which compares the means of an early and a late segment of a chain | not yet in an example |
-| `ssm.specvar0` | Estimates the long-run variance of the mean of MCMC draws, for the three diagnostics above | through the diagnostics |
+| `ssm.specvar0` | Estimates the long-run variance of the mean of MCMC draws, for the three diagnostics above | through the diagnostics; the volatility tutorial |
 
 Thirteen of these functions, `ssm.diffmat`, `ssm.geweke`, `ssm.inefficiency_factor`,
 `ssm.ksc_ar1_mean`, `ssm.ksc_rw_diffuse`, `ssm.ksc_rw_h0`, `ssm.mcse`, `ssm.nu_studentt`,
@@ -163,7 +167,8 @@ the gap can have MA(1) errors. [`ssm.models.uc_forecast`](core/+ssm/+models/uc_f
 forecasts with these models. The UC tutorial calls both. [`ssm.models.sv`](core/+ssm/+models/sv.m)
 estimates stochastic volatility models. Its options set the log-volatility, a stationary AR(1)
 or a random walk; the dependence of the errors, none, MA(1) or ARMA(1,1); and their
-distribution, normal or Student-t.
+distribution, normal or Student-t. [`ssm.models.sv_forecast`](core/+ssm/+models/sv_forecast.m)
+forecasts the next value with these models. The volatility tutorial calls both.
 
 ## Verification
 
@@ -200,8 +205,11 @@ is kept in `tests/unit/private/`. Their forecasts at every horizon must match pa
 forward from the same draws. The MA(1) model checks `ssm.ma_params` the same way.
 `ssm.models.sv` must reproduce, draw for draw, the samplers of the guides on SV by Gibbs sampling
 and on Student-t errors, and its 99 percent intervals must contain the MA(1) and ARMA(1,1)
-coefficients of generated data. Chains of `ssm.ma_params` and `ssm.arma_params`, with the errors
-and their variances held fixed, must match the conditional density computed on a grid.
+coefficients of generated data. The means, variances and densities of
+`ssm.models.sv_forecast` must equal those of its header, and its distribution function must match
+values simulated forward from the same draws. Chains of `ssm.ma_params` and `ssm.arma_params`,
+with the errors and their variances held fixed, must match the conditional density computed on a
+grid.
 
 Files from other repositories that the tests run are held verbatim in
 [`tests/fixtures/`](tests/fixtures/), with their md5s. On every push to `main` and every pull

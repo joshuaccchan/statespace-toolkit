@@ -3,7 +3,8 @@ function test_sv
 % guides/sv_t (SV-t), whose loops are copied below; draw a random-walk log-volatility with
 % h_1 ~ N(h0, Vh), as a direct draw with that prior, by shifting ssm.ksc_rw_diffuse by h0;
 % recover the coefficients of MA(1) and ARMA(1,1) errors on generated data; run every
-% combination of its options; and reject malformed input.
+% combination of its options, storing h_T, e_T and u_T of each draw; and reject malformed
+% input.
 
 offset = 1e-4; nsim = 300; burnin = 50;
 rng(42, 'twister');
@@ -111,6 +112,15 @@ for vol = {'ar1', 'rw'}
                 assert(isequal(r.param_names, names(used)) && all(isfinite(r.params(:))) ...
                     && isequal(size(r.draws.h), [5 T]) && isfield(r, 'lam_mean') == strcmp(dist{1}, 't'), ...
                     'sv: the output differs from the documentation, %s %s %s %d', vol{1}, errors{1}, dist{1}, has_mean);
+                % last: h_T of each draw, and e_T and u_T from y and the draw's mu, rho and psi
+                pv = zeros(20, 7); pv(:, used) = r.params;
+                assert(isequal(size(r.last), [20 3]) && isequal(r.last(4:4:20, 1), r.draws.h(:, end)), ...
+                    'sv: last does not hold h_T, %s %s %s %d', vol{1}, errors{1}, dist{1}, has_mean);
+                for i = 1:20
+                    e = y - pv(i,1); u = filter([1 -pv(i,2)], [1 pv(i,3)], e);
+                    assert(r.last(i,2) == e(T) && abs(r.last(i,3) - u(T)) < 1e-10*(1 + abs(u(T))), ...
+                        'sv: last does not hold e_T and u_T, %s %s %s %d', vol{1}, errors{1}, dist{1}, has_mean);
+                end
             end
         end
     end
