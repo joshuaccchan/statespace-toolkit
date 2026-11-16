@@ -5,12 +5,12 @@
 % log-volatilities out, the Gibbs samplers of guides/sv_gibbs and guides/sv_t draw the
 % parameters, and importance sampling with the cross-entropy importance density estimates the
 % marginal likelihoods. Section 2 computes the Bayes factor of SV-t against SV under other
-% priors of nu from the same draws. Section 3 changes the prior of mu_h. The sections called
-% "the code to adapt" are all a comparison needs. The checks compute the marginal likelihood
-% of the constant variance by quadrature, the integrated likelihood of the first 50
-% observations by importance sampling from the prior of h, the estimates under another seed
-% and with more draws of h, and one marginal likelihood of section 2 from a new run. Saves
-% fig_prior.png next to this file.
+% priors of nu from the same importance draws. Section 3 changes the prior of mu_h. The
+% sections called "the code to adapt" are all a comparison needs. The checks compute the
+% marginal likelihood of the constant variance by quadrature, the integrated likelihood of the
+% first 50 observations by importance sampling from the prior of h, the estimates under
+% another seed and with more draws of h, and one marginal likelihood of section 2 from a new
+% run. Saves fig_prior.png next to this file.
 
 here = fileparts(mfilename('fullpath'));
 run(fullfile(fileparts(fileparts(here)), 'setup.m'));
@@ -43,16 +43,17 @@ lprior = @(mu, muh, phi, sig2h) lnorm(mu, pr.mu0, pr.Vmu) + lnorm(muh, pr.muh0, 
 nuof = @(z) 2 + (pr.nuub - 2)./(1 + exp(-z));          % nu = 2 + (nuub - 2)/(1 + e^{-z})
 ljnu = @(nu) log((nu - 2).*(pr.nuub - nu)/(pr.nuub - 2));  % log dnu/dz
 nsim = 5000; burnin = 500; R = 5000; Mh = 50;
-nsim_t = 20000;                                        % SV-t: the tail of nu needs a longer chain
+nsim_t = 20000;                                        % SV-t: the draws of nu are highly autocorrelated
 lml = zeros(3, 2); nse = lml; post = cell(3, 2); hbar = cell(3, 2);
 lml_q = zeros(1, 2); lratio = lml_q;
+lw = cell(3, 2); zr = lw;                              % the log weights and the importance draws
 for d = 1:2
     y = Y{d};
     % constant variance: y_t ~ N(mu, e^{mu_h}), z = (mu, mu_h); exact draws and quadrature
     [lml_q(d), post{1,d}, lratio(d)] = cv_posterior(y, pr, nsim);
     lp_cv = @(z) sum(lnorm(y, z(1), exp(z(2)))) + lnorm(z(1), pr.mu0, pr.Vmu) ...
         + lnorm(z(2), pr.muh0, pr.Vmuh);
-    [lml(1,d), nse(1,d)] = is_logml(lp_cv, post{1,d}, R);
+    [lml(1,d), nse(1,d), lw{1,d}, zr{1,d}] = is_logml(lp_cv, post{1,d}, R);
 
     % SV: z = (mu, mu_h, atanh(phi), log sigma_h^2); the draws of guides/sv_gibbs
     [th, hbar{2,d}] = sv_gibbs(y, nsim, burnin, pr);
@@ -61,7 +62,7 @@ for d = 1:2
     lp_sv = @(z) ssm.intlike_sv((y - z(1)).^2, z(2), tanh(z(3)), exp(z(4)), hb, Mh) ...
         + lprior(z(1), z(2), tanh(z(3)), exp(z(4))) ...
         + log(1 - tanh(z(3))^2) + z(4);                % log Jacobian of (phi, sigma_h^2)
-    [lml(2,d), nse(2,d)] = is_logml(lp_sv, post{2,d}, R);
+    [lml(2,d), nse(2,d), lw{2,d}, zr{2,d}] = is_logml(lp_sv, post{2,d}, R);
 
     % SV-t: z adds log((nu - 2)/(nuub - nu)); the draws of guides/sv_t
     [th, hbar{3,d}] = svt_gibbs(y, nsim_t, burnin, pr);
@@ -70,7 +71,7 @@ for d = 1:2
     lp_svt = @(z) ssm.intlike_sv_t((y - z(1)).^2, z(2), tanh(z(3)), exp(z(4)), nuof(z(5)), hb, Mh) ...
         + lprior(z(1), z(2), tanh(z(3)), exp(z(4))) - log(pr.nuub - 2) ...  % nu ~ U(2, nuub)
         + log(1 - tanh(z(3))^2) + z(4) + ljnu(nuof(z(5)));
-    [lml(3,d), nse(3,d)] = is_logml(lp_svt, post{3,d}, R);
+    [lml(3,d), nse(3,d), lw{3,d}, zr{3,d}] = is_logml(lp_svt, post{3,d}, R);
 end
 
 %% 1. the results and the checks
@@ -162,25 +163,25 @@ for d = 1:2
     end
 end
 
-%% 2. the prior of nu: the log Bayes factor of SV-t against SV, from the same draws
+%% 2. the prior of nu: the log Bayes factor of SV-t against SV, from the same importance draws
 % p_b(y) = p(y) * E[p_b(nu)/p(nu) | y] for nu ~ U(2, b), b <= nuub, under which
-% p_b(nu)/p(nu) = (nuub - 2)/(b - 2) for nu < b and 0 otherwise
+% p_b(nu)/p(nu) = (nuub - 2)/(b - 2) for nu < b and 0 otherwise. With the importance draws
+% and weights of section 1, p_b(y) is the mean of w_r*(nuub - 2)/(b - 2)*1(nu_r < b).
 bs = [5 10 20 30 50 100];
-fprintf(['\nlog Bayes factor of SV-t against SV for nu ~ U(2, b): value (Monte Carlo standard ' ...
-    'error of log P), P = posterior probability of nu < b\n']);
-fprintf('%6s %34s %34s\n', 'b', dnames{:});
-lbf_b = zeros(numel(bs), 2); pb = lbf_b; sep = lbf_b;
+fprintf(['\nlog Bayes factor of SV-t against SV for nu ~ U(2, b): value (numerical standard ' ...
+    'error), P = posterior probability of nu < b, n = importance draws of nu below b\n']);
+fprintf('%6s %40s %40s\n', 'b', dnames{:});
+lml_b = zeros(numel(bs), 2); nse_b = lml_b; pb = lml_b; nb = lml_b;
 for i = 1:numel(bs)
     fprintf('%6d', bs(i));
     for d = 1:2
-        ind = double(nuof(post{3,d}(:,5)) < bs(i));
-        pb(i,d) = mean(ind);
-        sep(i,d) = ssm.mcse(ind, 200)/pb(i,d);  % the standard error of log P, by the delta method
-        lbf_b(i,d) = lml(3,d) - lml(2,d) + log((pr.nuub - 2)/(bs(i) - 2)) + log(pb(i,d));
-        if pb(i,d) > 0
-            fprintf(' %12.2f (%.2f), P = %.3f', lbf_b(i,d), sep(i,d), pb(i,d));
+        [lml_b(i,d), nse_b(i,d), pb(i,d), nb(i,d)] = is_bound(lw{3,d}, nuof(zr{3,d}(5,:)), ...
+            bs(i), pr.nuub);
+        if nb(i,d) >= 100                              % at least 100 importance draws below b
+            fprintf(' %10.2f (%.3f), P = %.3f, n = %4d', lml_b(i,d) - lml(2,d), ...
+                hypot(nse_b(i,d), nse(2,d)), pb(i,d), nb(i,d));
         else
-            fprintf(' %34s', 'no draw of nu below b');
+            fprintf(' %40s', sprintf('%d importance draws below b', nb(i,d)));
         end
     end
     fprintf('\n');
@@ -196,19 +197,22 @@ lpc = @(z) ssm.intlike_sv_t((y - z(1)).^2, z(2), tanh(z(3)), exp(z(4)), nuofc(z(
     + lprior(z(1), z(2), tanh(z(3)), exp(z(4))) - log(bc - 2) ...
     + log(1 - tanh(z(3))^2) + z(4) + log((nuofc(z(5)) - 2).*(bc - nuofc(z(5)))/(bc - 2));
 [lc, nc] = is_logml(lpc, zc, R);
-fprintf(['SV-t on the SV data with nu ~ U(2, %d): new run %.2f (%.3f); from the draws of ' ...
-    'section 1 %.2f (%.2f)\n'], bc, lc, nc, lml(3,1) + log((pr.nuub - 2)/(bc - 2)) ...
-    + log(pb(bs == bc, 1)), sep(bs == bc, 1));
+ib = find(bs == bc);
+fprintf(['SV-t on the SV data with nu ~ U(2, %d): new run %.2f (%.3f); from the importance ' ...
+    'draws of section 1 %.2f (%.3f); %.1f joint standard errors apart\n'], bc, lc, nc, ...
+    lml_b(ib,1), nse_b(ib,1), (lml_b(ib,1) - lc)/hypot(nc, nse_b(ib,1)));
 
 %% the figure: the log Bayes factor of SV-t against SV against the upper bound of the prior of nu
 bgrid = linspace(4, 100, 193);
 fig = figure('Visible', 'off', 'Units', 'centimeters', 'Position', [2 2 16 10]); hold on
 st = {'-', '--'}; hl = gobjects(1, 2);
 for d = [2 1]
-    p = arrayfun(@(b) mean(nuof(post{3,d}(:,5)) < b), bgrid);
-    ok = p*nsim_t >= 50;                               % at least 50 draws of nu below b
-    v = lml(3,d) - lml(2,d) + log((pr.nuub - 2)./(bgrid - 2)) + log(p);
-    hl(d) = plot(bgrid(ok), v(ok), st{d}, 'Color', 'k', 'LineWidth', 1.2);
+    v = zeros(size(bgrid)); n = v;
+    for k = 1:numel(bgrid)
+        [v(k), ~, ~, n(k)] = is_bound(lw{3,d}, nuof(zr{3,d}(5,:)), bgrid(k), pr.nuub);
+    end
+    ok = n >= 100;                                     % at least 100 importance draws below b
+    hl(d) = plot(bgrid(ok), v(ok) - lml(2,d), st{d}, 'Color', 'k', 'LineWidth', 1.2);
 end
 yline(0, ':');
 hold off; box off
@@ -218,13 +222,15 @@ legend boxoff
 exportgraphics(fig, fullfile(here, 'fig_prior.png'), 'Resolution', 150); close(fig);
 
 %% 3. another prior of mu_h, mu_h ~ N(0, 1), in all three models: the adaptation
-% p_new(y) = p(y) * E[p_new(mu_h)/p(mu_h) | y], from the draws of section 1
+% p_new(y) = p(y) * E[p_new(mu_h)/p(mu_h) | y]. With the importance draws and weights of
+% section 1, p_new(y) is the mean of w_r*p_new(mu_h_r)/p(mu_h_r).
 fprintf('\nmu_h ~ N(0, 1): log marginal likelihoods and their change\n');
 lml_n = zeros(3, 2);
 for d = 1:2
     for m = 1:3
-        r = lnorm(post{m,d}(:,2), 0, 1) - lnorm(post{m,d}(:,2), pr.muh0, pr.Vmuh);
-        lml_n(m,d) = lml(m,d) + logmeanexp(r);
+        mh = zr{m,d}(2,:)';                                  % the importance draws of mu_h
+        r = lnorm(mh, 0, 1) - lnorm(mh, pr.muh0, pr.Vmuh);   % log p_new(mu_h) - log p(mu_h)
+        lml_n(m,d) = logmeanexp(lw{m,d} + r);                % log p_new(y)
     end
 end
 for m = 1:3
@@ -320,11 +326,11 @@ mu = (pr.mu0/V + sum(y)./s)./Kmu + randn(nsim,1)./sqrt(Kmu);
 draws = [mu muh];
 end
 
-function [lml, nse] = is_logml(lp, draws, R)
+function [lml, nse, logw, phi] = is_logml(lp, draws, R)
 % log p(y) by importance sampling, as in guides/tvp_compare: a t density with 5 degrees of
 % freedom at the mean and covariance of the posterior draws, the cross-entropy fit of a normal
 % density (Chan and Eisenstat, 2015), with heavier tails. lml is the log of the mean of all R
-% weights; nse comes from 20 batches.
+% weights; nse comes from 20 batches. logw and phi are the log weights and the R draws.
 nu = 5; d = size(draws, 2);
 m = mean(draws, 1)'; C = chol(cov(draws), 'lower');
 z = randn(d, R)./sqrt(chi2rnd(nu, 1, R)/nu);
@@ -340,6 +346,20 @@ for b = 1:20
     lb(b) = logmeanexp(wb(:,b));
 end
 nse = std(lb)/sqrt(20);
+end
+
+function [lml, nse, p, n] = is_bound(logw, nu, b, nuub)
+% log p(y) under nu ~ U(2, b), from the log weights logw and the draws nu of is_logml under
+% nu ~ U(2, nuub): the log of the mean of w_r*(nuub - 2)/(b - 2)*1(nu_r < b). nse comes from
+% the 20 batches of is_logml, by the delta method, since a batch can hold no draw below b.
+% p = Pr(nu < b | y), the share of the weights on the draws below b; n = their number.
+R = numel(logw); in = nu(:) < b; n = nnz(in);
+mx = max(logw); w = exp(logw(:) - mx);
+wb = w.*in*(nuub - 2)/(b - 2);
+lml = mx + log(mean(wb));
+mb = mean(reshape(wb, R/20, 20), 1);                   % the batch means
+nse = std(mb)/(sqrt(20)*mean(mb));
+p = sum(w(in))/sum(w);
 end
 
 function [lml, se] = prior_is(s2, muh, phi, sig2h, nu, N, nb)

@@ -105,7 +105,8 @@ The importance density of Step 3 is fitted to posterior draws of the parameters.
 SV-$`t`$, the draws come from the Gibbs samplers of the second and third guides. `guide.m` holds
 their loops as the functions `sv_gibbs` and `svt_gibbs`, which also return the posterior mean of
 $`\mathbf{h}`$. After a burn-in of 500, the SV chain keeps 5,000 draws and the SV-$`t`$ chain
-20,000. Step 5 uses the draws of $`\nu`$ in its lower tail, which a short chain reaches rarely.
+20,000. The SV-$`t`$ chain is longer because its draws of $`\nu`$ are highly autocorrelated, and
+the importance density of Step 3 is fitted to them.
 
 The constant variance needs no sampler. Given $`\mu_h`$, the data are normal and $`\mu`$
 integrates out in closed form:
@@ -139,21 +140,28 @@ ljnu = @(nu) log((nu - 2).*(pr.nuub - nu)/(pr.nuub - 2));  % log dnu/dz
 lp_svt = @(z) ssm.intlike_sv_t((y - z(1)).^2, z(2), tanh(z(3)), exp(z(4)), nuof(z(5)), hb, Mh) ...
     + lprior(z(1), z(2), tanh(z(3)), exp(z(4))) - log(pr.nuub - 2) ...  % nu ~ U(2, 100)
     + log(1 - tanh(z(3))^2) + z(4) + ljnu(nuof(z(5)));                   % the log Jacobian
-[lml(3,d), nse(3,d)] = is_logml(lp_svt, post{3,d}, R);
+[lml(3,d), nse(3,d), lw{3,d}, zr{3,d}] = is_logml(lp_svt, post{3,d}, R);
 ```
 
 `is_logml` is the function of
 [How to Tell Whether a Coefficient Varies over Time](../tvp_compare/). Its importance density is
 the cross-entropy fit of a normal density to the posterior draws, the method of Chan and
 Eisenstat (2015). For the normal family, the fit is the mean and covariance of the draws. The
-importance density is a $`t`$ distribution with 5 degrees of freedom at that location and scale,
-whose heavier tails keep the weights bounded. Let $`f(\mathbf{z})`$ be the density whose log
+importance density is a $`t`$ distribution with 5 degrees of freedom at that location and scale.
+Its tails are heavier than those of the posterior. Let $`f(\mathbf{z})`$ be the density whose log
 `lp_svt` returns, and $`g`$ the importance density. With $`R = 5000`$ draws
 $`\mathbf{z}^{(r)}`$ from $`g`$ and weights $`w_r = f(\mathbf{z}^{(r)})/g(\mathbf{z}^{(r)})`$, the
 estimate is
 $`\log\hat{p}(\mathbf{y}) = \log\big(\frac{1}{R}\sum_r w_r\big)`$, the log of the mean of all
-the weights. The numerical standard error is the standard deviation of the estimates from 20
-batches of 250 draws, divided by $`\sqrt{20}`$.
+the weights. `is_logml` also returns the log weights and the draws. The numerical standard error
+is the standard deviation of the estimates from 20 batches of 250 draws, divided by
+$`\sqrt{20}`$.
+
+This standard error assumes that the weights have finite variance. Each weight contains the
+estimate of $`p(\mathbf{y} \mid \boldsymbol{\theta})`$ of Step 1, whose Gaussian importance
+density can have thinner tails than $`p(\mathbf{h} \mid \mathbf{y}, \boldsymbol{\theta})`$. The
+weights can then have infinite variance, and the standard error can understate the Monte Carlo
+error.
 
 ## Step 4: Compare the Models
 
@@ -185,34 +193,43 @@ $`98/(b - 2)`$ for $`\nu < b`$ and zero otherwise, so
 p_b(\mathbf{y}) = p(\mathbf{y})\,\mathrm{E}\Big[\frac{p_b(\nu)}{p(\nu)} \,\Big|\, \mathbf{y}\Big] = p(\mathbf{y})\,\frac{98}{b - 2}\,\Pr(\nu < b \mid \mathbf{y}).
 ```
 
-The posterior draws of Step 2 estimate $`\Pr(\nu < b \mid \mathbf{y})`$, so no new run is needed.
-The table gives the log Bayes factor of SV-$`t`$ against SV for each upper bound, with the Monte
-Carlo standard error of $`\log\Pr(\nu < b \mid \mathbf{y})`$ in parentheses:
+The importance draws and weights of Step 3 estimate $`p_b(\mathbf{y})`$ directly, so no new run is
+needed:
+
+```math
+\hat{p}_b(\mathbf{y}) = \frac{1}{R}\sum_{r=1}^{R} w_r\,\frac{98}{b - 2}\,\mathrm{I}\big(\nu^{(r)} < b\big),
+```
+
+where $`\nu^{(r)}`$ is the value of $`\nu`$ in the draw $`\mathbf{z}^{(r)}`$. The share of the
+weights on the draws with $`\nu^{(r)} < b`$ estimates $`\Pr(\nu < b \mid \mathbf{y})`$. Like
+$`\hat{p}(\mathbf{y})`$, both estimates use the exact likelihood. The Gibbs draws of Step 2 come
+from the mixture approximation, and the importance weights correct for it.
+
+We report a value only where at least 100 of the 5,000 draws have $`\nu^{(r)} < b`$. The
+numerical standard error of $`\log\hat{p}_b(\mathbf{y})`$ comes from the 20 batches of Step 3, by
+the delta method, since a batch can hold no draw below $`b`$. The table gives the log Bayes factor
+of SV-$`t`$ against SV for each upper bound, with its numerical standard error in parentheses:
 
 | Upper bound $`b`$ | SV data | SV-$`t`$ data |
 |---|---|---|
-| 5 | no draw of $`\nu`$ below 5 | **12.98** (0.05) |
-| 10 | no draw of $`\nu`$ below 10 | 12.82 (0.01) |
-| 20 | -4.01 (0.62) | 12.02 |
-| 30 | -2.99 (0.34) | 11.58 |
-| 50 | -1.86 (0.12) | 11.04 |
-| 100 | **-0.99** | 10.33 |
-
-Each value also carries the numerical standard error of Step 4, 0.023 on the SV data and 0.032 on
-the SV-$`t`$ data. Where $`\Pr(\nu < b \mid \mathbf{y})`$ is 1, the probability adds no error.
+| 5 | 47 draws of $`\nu`$ below 5 | 12.75 (0.036) |
+| 10 | -9.39 (0.289) | **12.82** (0.032) |
+| 20 | -4.28 (0.154) | 12.02 (0.032) |
+| 30 | -2.90 (0.083) | 11.58 (0.032) |
+| 50 | -1.87 (0.044) | 11.04 (0.032) |
+| 100 | **-0.99** (0.023) | 10.33 (0.032) |
 
 We note two patterns. On the SV-$`t`$ data, a prior that concentrates $`\nu`$ on small values
-raises the log Bayes factor, from 10.33 at $`b = 100`$ to 12.82 at $`b = 10`$ (Figure 1). Of the
-posterior draws, 99.0 percent lie below 10, so the narrower prior puts less mass on values that
-the data rule out. A bound of 5 cuts into the posterior, with 43.4 percent of the draws below 5.
-The higher prior density still raises the log Bayes factor slightly, to 12.98, and the curve
-peaks between 5 and 10.
+raises the log Bayes factor, from 10.33 at $`b = 100`$ to 12.82 at $`b = 10`$ (Figure 1). The
+posterior probability of $`\nu < 10`$ is 0.984, so the narrower prior puts less mass on values
+that the data rule out. A bound of 5 cuts into the posterior, whose probability below 5 is 0.346,
+and the log Bayes factor falls to 12.75. The curve peaks between 5 and 10.
 
 On the SV data, the posterior of $`\nu`$ lies at large values, and a smaller bound lowers the log
-Bayes factor, to -1.86 at $`b = 50`$, -2.99 at $`b = 30`$ and -4.01 at $`b = 20`$. The estimate
-loses precision as the probability falls. At $`b = 20`$ only 0.9 percent of the draws lie below
-$`b`$, and the standard error is 0.62. No draw lies below 10, so the draws cannot estimate the
-Bayes factor there. A new run with that prior can.
+Bayes factor. It falls to -1.87 at $`b = 50`$, -2.90 at $`b = 30`$, -4.28 at $`b = 20`$ and -9.39
+at $`b = 10`$. The estimate loses precision as the probability falls. At $`b = 10`$ only 131 of
+the 5,000 draws lie below $`b`$, and the standard error is 0.289. Only 47 lie below 5, so the
+table reports no value there. A new run with that prior can estimate it.
 
 In applications, choose the bound from the tails you consider plausible, and report the Bayes
 factor for a range of bounds around that choice.
@@ -220,8 +237,8 @@ factor for a range of bounds around that choice.
 ![The log Bayes factor of SV-t against SV against the upper bound of the prior of nu](fig_prior.png)
 
 *Figure 1: The log Bayes factor of SV-$`t`$ against SV when $`\nu \sim \mathcal{U}(2, b)`$,
-against the upper bound $`b`$. Each curve starts where at least 50 posterior draws of $`\nu`$ lie
-below $`b`$. A positive value favors SV-$`t`$.*
+against the upper bound $`b`$. Each curve starts where at least 100 of the 5,000 importance
+draws have $`\nu`$ below $`b`$. A positive value favors SV-$`t`$.*
 
 ## How We Check It
 
@@ -246,7 +263,8 @@ SV-$`t`$ data, they are -79.0332 (0.0007) and -79.0354 (0.0035), 0.6 joint stand
 
 For the third check, a new run of SV-$`t`$ with $`\nu \sim \mathcal{U}(2, 50)`$ on the SV data
 estimates its marginal likelihood directly. It gives -1436.15 (0.014). The identity of Step 5
-gives -1436.23 (0.12) from the draws of Step 2.
+gives -1436.24 (0.042) from the importance draws of Step 3, 2.1 joint numerical standard errors
+apart.
 
 The integrated likelihood with 50 draws of $`\mathbf{h}`$ is noisy. Over 20 calls at the posterior
 means of SV, $`\log\hat{p}(\mathbf{y} \mid \boldsymbol{\theta})`$ has a standard deviation of 0.51
@@ -267,11 +285,12 @@ likelihoods change, and do the Bayes factors?
 <summary>Answer</summary>
 
 All six log marginal likelihoods change, by between 0.78 and 1.16. Every model contains
-$`\mu_h`$, so the identity of Step 5 gives each new value from the draws of Step 2:
+$`\mu_h`$, so the identity of Step 5 gives each new value from the importance draws of Step 3:
 
 ```matlab
-r = lnorm(post{m,d}(:,2), 0, 1) - lnorm(post{m,d}(:,2), pr.muh0, pr.Vmuh);  % log p_new(mu_h) - log p(mu_h)
-lml_n(m,d) = lml(m,d) + logmeanexp(r);                                      % log p_new(y)
+mh = zr{m,d}(2,:)';                                  % the importance draws of mu_h
+r = lnorm(mh, 0, 1) - lnorm(mh, pr.muh0, pr.Vmuh);   % log p_new(mu_h) - log p(mu_h)
+lml_n(m,d) = logmeanexp(lw{m,d} + r);                % log p_new(y)
 ```
 
 The posterior of $`\mu_h`$ is narrow in all three models, so each log marginal likelihood shifts
