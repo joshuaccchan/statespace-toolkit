@@ -15,6 +15,9 @@
 % stay so. The SVRW.m files in this repository are different samplers with
 % different signatures (tests/variant_map.md).
 %
+% When all seven mixture densities of a period underflow, its indicator probabilities are
+% computed in logs.
+%
 % See:
 % Chan, J.C.C. (2027). Bayesian Macroeconometrics: Methods and
 % Applications, Chapman & Hall/CRC, Section 10.1.1.
@@ -36,6 +39,11 @@ sqrtsigi = sqrt(sigi);
 %% sample S from a 7-point discrete distribution
 temprand = rand(T,1);
 q = repmat(pi,T,1).*normpdf(repmat(Ystar,1,7),repmat(h,1,7)+repmat(mi,T,1), repmat(sqrtsigi,T,1));
+bad = ~(sum(q,2) > 0);    % all seven densities underflow: weigh them in logs
+if any(bad)
+    lq = log(pi) - log(sqrtsigi) - .5*((Ystar(bad) - h(bad) - mi)./sqrtsigi).^2;
+    q(bad,:) = exp(lq - max(lq, [], 2));
+end
 q = q./repmat(sum(q,2),1,7);
 S = 7 - sum(repmat(temprand,1,7)<cumsum(q,2),2)+1;
 

@@ -16,6 +16,9 @@
 % h0 = 0. Never merge with ssm.ksc_rw_h0, whose h_1 ~ N(h0,sig) has another
 % initial condition.
 %
+% When all seven mixture densities of a period underflow, its indicator probabilities are
+% computed in logs.
+%
 % See:
 % Chan, J.C.C. (2027). Bayesian Macroeconometrics: Methods and
 % Applications, Chapman & Hall/CRC, Section 10.1.1.
@@ -39,6 +42,11 @@ sigmai = sqrt(sigma2i);
 temprand = rand(T,1);
 q = repmat(pi,T,1).*normpdf(repmat(ystar,1,7),repmat(h,1,7) ...
     +repmat(mui,T,1),repmat(sigmai,T,1));
+bad = ~(sum(q,2) > 0);    % all seven densities underflow: weigh them in logs
+if any(bad)
+    lq = log(pi) - log(sigmai) - .5*((ystar(bad) - h(bad) - mui)./sigmai).^2;
+    q(bad,:) = exp(lq - max(lq, [], 2));
+end
 q = q./repmat(sum(q,2),1,7);
 S = 7 - sum(repmat(temprand,1,7)<cumsum(q,2),2)+1;
 

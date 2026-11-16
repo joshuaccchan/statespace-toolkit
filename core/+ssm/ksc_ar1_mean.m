@@ -16,6 +16,9 @@
 % stay so; it draws what SV.m of chan2013_joe_masv draws, with the arguments in
 % another order. Not interchangeable with ssm.ksc_rw_h0: another state equation.
 %
+% When all seven mixture densities of a period underflow, its indicator probabilities are
+% computed in logs.
+%
 % See:
 % Chan, J.C.C. (2027). Bayesian Macroeconometrics: Methods and
 % Applications, Chapman & Hall/CRC, Section 10.1.1.
@@ -39,6 +42,11 @@ sig2_N = [5.79596 2.61369 5.17950 .16735 .64009 .34023 1.26261];
 tmprand = rand(T,1);
 q = repmat(p_N,T,1).*normpdf(repmat(ystar,1,7),repmat(h,1,7)+repmat(m_N,T,1),...
     repmat(sqrt(sig2_N),T,1));
+bad = ~(sum(q,2) > 0);    % all seven densities underflow: weigh them in logs
+if any(bad)
+    lq = log(p_N) - log(sqrt(sig2_N)) - .5*((ystar(bad) - h(bad) - m_N)./sqrt(sig2_N)).^2;
+    q(bad,:) = exp(lq - max(lq, [], 2));
+end
 q = q./repmat(sum(q,2),1,7);
 S = 7 - sum(repmat(tmprand,1,7)<cumsum(q,2),2)+1;
 
