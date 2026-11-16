@@ -104,19 +104,25 @@ for i = 1:4
     fprintf('%-10s posterior mean %7.4f, 90%% interval (%7.4f, %7.4f)\n', names{i}, ...
         mean(store_sv(:,i)), qsv(1,i), qsv(2,i));
 end
-vt = exp(h_true/2);                                      % the volatility of eps_t's scale
+vt = exp(h_true/2);                                      % the scale e^{h_t/2}
 vm_t = mean(exp(store_h/2), 2); vm_n = mean(exp(store_hn/2), 2);
 bt = quantile(exp(store_h/2), [.05 .95], 2);
 [~, big] = sort(lam_true, 'descend');
 fprintf('posterior mean of e^{h_t/2} against the truth: RMSE %.3f under SV-t, %.3f under SV\n', ...
     sqrt(mean((vm_t - vt).^2)), sqrt(mean((vm_n - vt).^2)));
+% the sd of y_t given h_t: e^{h_t/2} under SV, e^{h_t/2}*sqrt(nu/(nu - 2)) under SV-t
+st = vt*sqrt(nu_true/(nu_true - 2));
+nu10 = store_theta(10:10:end, 5)';                       % nu at the stored draws of h
+sm_t = mean(exp(store_h/2).*sqrt(nu10./(nu10 - 2)), 2);
+fprintf(['posterior mean of the sd of y_t given h_t against the truth: RMSE %.3f under SV-t, ' ...
+    '%.3f under SV\n'], sqrt(mean((sm_t - st).^2)), sqrt(mean((vm_n - st).^2)));
 fprintf('SV-t: 90%% intervals contain the true e^{h_t/2} in %d of %d periods\n', ...
     nnz(vt >= bt(:,1) & vt <= bt(:,2)), T);
 fprintf('the five largest lambda_t:\n');
 fprintf(['  period %4d: lambda_t %6.2f, posterior mean %5.2f; |eps_t| %.2f, |sqrt(lambda_t)*eps_t| %.2f; ' ...
-    'e^{h_t/2} true %.2f, SV-t %.2f, SV %.2f\n'], [big(1:5)'; lam_true(big(1:5))'; store_lam(big(1:5))'; ...
-    abs(epsn(big(1:5)))'; abs(sqrt(lam_true(big(1:5))).*epsn(big(1:5)))'; vt(big(1:5))'; vm_t(big(1:5))'; ...
-    vm_n(big(1:5))']);
+    'e^{h_t/2} true %.2f, SV-t %.2f, SV %.2f; sd true %.2f, SV-t %.2f\n'], [big(1:5)'; lam_true(big(1:5))'; ...
+    store_lam(big(1:5))'; abs(epsn(big(1:5)))'; abs(sqrt(lam_true(big(1:5))).*epsn(big(1:5)))'; ...
+    vt(big(1:5))'; vm_t(big(1:5))'; vm_n(big(1:5))'; st(big(1:5))'; sm_t(big(1:5))']);
 
 %% 3. the check: the sampler of Chan and Grant (2016), with the exact conditional of h
 nsim_x = 10000;

@@ -168,10 +168,14 @@ the estimated volatility. Its posterior mean of $`\sigma_h^2`$ is 3.5 times the 
 the true value lies below its 90 percent interval. Its posterior mean of $`\phi`$ falls to 0.94.
 Under SV-$`t`$ both true values lie inside the intervals. Third, the volatility estimated by
 SV-$`t`$ is closer to the truth (Figure 1). The root mean squared error of the posterior mean of
-$`\mathrm{e}^{h_t/2}`$ is 0.246, against 0.429 under SV. The 90 percent intervals of SV-$`t`$
-contain the true volatility in 927 of the 1,000 periods.
+the scale $`\mathrm{e}^{h_t/2}`$ is 0.246, against 0.429 under SV. Under SV, the scale is also the
+standard deviation of $`y_t`$ given $`h_t`$. Under SV-$`t`$ this standard deviation is
+$`\mathrm{e}^{h_t/2}\sqrt{\nu/(\nu - 2)}`$, and the root mean squared error of its posterior mean
+is 0.316, against 0.364 under SV. The 90 percent intervals of SV-$`t`$ contain the true scale in
+927 of the 1,000 periods.
 
-The five periods with the largest $`\lambda_t`$ show the mechanism:
+The five periods with the largest $`\lambda_t`$ show the mechanism. The last three columns give
+the true scale $`\mathrm{e}^{h_t/2}`$ and its posterior means under SV-$`t`$ and SV:
 
 | Period | True $`\lambda_t`$ | Posterior mean of $`\lambda_t`$ | True $`\lvert\varepsilon_t\rvert`$ | True $`\mathrm{e}^{h_t/2}`$ | SV-$`t`$ | SV |
 |---|---|---|---|---|---|---|
@@ -181,17 +185,17 @@ The five periods with the largest $`\lambda_t`$ show the mechanism:
 | 158 | 10.89 | 7.20 | 1.69 | 0.86 | 1.06 | 1.94 |
 | 118 | 10.74 | 2.17 | 0.58 | 0.88 | 0.90 | 1.20 |
 
-In period 396, the error $`\sqrt{\lambda_t}\varepsilon_t`$ is 7.5 times the volatility. SV puts
-the volatility at 3.74, about 2.5 times its true value of 1.50, while SV-$`t`$ puts it at 1.73 and
-gives $`\lambda_t`$ a posterior mean of 13.59. A large $`\lambda_t`$ produces a large observation
-only when $`\varepsilon_t`$ is not small. In periods 664 and 668, $`|\varepsilon_t|`$ is 0.21 and
-0.03, so the data carry little information about $`\lambda_t`$, and its posterior mean stays near
-1.
+In period 396, the error $`y_t - \mu`$ is 7.5 times the scale. SV puts the scale at 3.74. Under
+SV this is also the standard deviation of $`y_t`$ given $`h_t`$, about 1.9 times its true value of
+1.94. SV-$`t`$ puts the scale at 1.73 and gives $`\lambda_t`$ a posterior mean of 13.59. A large
+$`\lambda_t`$ produces a large observation only when $`\varepsilon_t`$ is not small. In periods 664
+and 668, $`|\varepsilon_t|`$ is 0.21 and 0.03, so the data carry little information about
+$`\lambda_t`$, and its posterior mean stays near 1.
 
 ![The data and the volatility under SV-t and SV](fig_vol.png)
 
 *Figure 1: SV-$`t`$ and SV on data generated with Student-$`t`$ errors, $`\nu = 5`$, and the
-log-volatilities of the first guide. Top, the data. Bottom, the true volatility
+log-volatilities of the first guide. Top, the data. Bottom, the true scale
 $`\mathrm{e}^{h_t/2}`$, its posterior means under SV-$`t`$ and SV, and the 90 percent pointwise
 credible intervals of SV-$`t`$.*
 
