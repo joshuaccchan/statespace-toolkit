@@ -9,15 +9,42 @@ jointly, with reusable routines for integrated likelihood evaluation and stochas
 sampling. Worked [examples](examples/) cover unobserved components, time-varying parameter,
 stochastic volatility and dynamic factor models.
 
+A Python version,
+[statespace-toolkit-python](https://github.com/joshuaccchan/statespace-toolkit-python), has the
+same functions under the same names, each tested against its MATLAB twin, and the ten how-to
+guides with Python code. The five functions of `ssm.models` have no Python version yet.
+
+## Installation
+
+Download the repository as a ZIP file (the Code button, then Download ZIP) and unzip it, or clone
+it with git. The latest release is also on
+[File Exchange](https://www.mathworks.com/matlabcentral/fileexchange/184886-statespace-toolkit-bayesian-state-space-models).
+In MATLAB, go to the folder that contains `setup.m` and run it:
+
 ```matlab
 run setup.m                 % adds core/ to the path
-cd examples
-ex01_precision_sampler      % the precision sampler on a local level model
 ```
 
 The code needs MATLAB with the Statistics and Machine Learning Toolbox. `setup.m` also checks for
 the Optimization Toolbox, which four of the archived packages use. The library and the examples
 are tested on MATLAB R2025b, on Windows and, in the repository's continuous integration, on Linux.
+
+## A First Example
+
+The trend of a local level model, drawn given its parameters:
+
+```matlab
+T = 200; sig2 = 1; omega2 = .05;
+rng(1)
+y = cumsum(sqrt(omega2)*randn(T, 1)) + sqrt(sig2)*randn(T, 1);
+H = ssm.diffmat(T);                          % first differences
+K = H'*H/omega2 + speye(T)/sig2;             % the precision of the trend given y
+[draws, tauhat] = ssm.simulate_states(K, y/sig2, 1000);
+```
+
+[How to Draw the States of an Unobserved Components Model](guides/uc_states/) explains each line.
+The script [`ex01_precision_sampler`](examples/ex01_precision_sampler.m) in `examples/` checks the
+sampler against a Kalman smoother and then estimates the trend of US CPI inflation.
 
 ## Learn the Methods
 
