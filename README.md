@@ -12,7 +12,7 @@ stochastic volatility and dynamic factor models.
 A Python version,
 [statespace-toolkit-python](https://github.com/joshuaccchan/statespace-toolkit-python), has the
 same functions under the same names, each tested against its MATLAB twin, and the ten how-to
-guides with Python code. The five functions of `ssm.models` have no Python version yet.
+guides with Python code.
 
 ## Installation
 
