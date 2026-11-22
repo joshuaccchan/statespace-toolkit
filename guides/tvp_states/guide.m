@@ -1,10 +1,7 @@
-%% guide - the code of guides/tvp_states/README.md: the coefficients of a time-varying
-% parameter regression drawn by the precision sampler, given the parameters, on generated
-% data; then the same with coefficients that revert to a mean, and with a prior of their
-% own for the first coefficients. The sections called "the code to adapt" are all a
-% sampler needs. The sections called "the checks" form K^{-1} and other dense matrices,
-% which only a small example can afford. Saves fig_spy.png, fig_coef.png and fig_mean.png
-% next to this file.
+%% guide - the code of guides/tvp_states/README.md: the coefficients of a time-varying parameter
+% regression, drawn by the precision sampler given the parameters. The sections called "the code
+% to adapt" are all a sampler needs. Saves fig_spy.png, fig_coef.png and fig_mean.png next to this
+% file.
 
 here = fileparts(mfilename('fullpath'));
 run(fullfile(fileparts(fileparts(here)), 'setup.m'));

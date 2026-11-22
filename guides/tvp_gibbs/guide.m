@@ -1,9 +1,6 @@
-%% guide - the code of guides/tvp_gibbs/README.md: a Gibbs sampler that estimates the error
-% variance, the variances of the random walks and the initial coefficients of the TVP
-% regression of guides/tvp_states, along with the coefficients, on the data of that guide;
-% then the same with a constant slope. The sections called "the code to adapt" are all a
-% sampler needs. The checks compute the posterior on a grid with ssm.intlike, without the
-% sampler. Saves fig_chain.png next to this file.
+%% guide - the code of guides/tvp_gibbs/README.md: a Gibbs sampler for the TVP regression of
+% guides/tvp_states. The sections called "the code to adapt" are all a sampler needs. Saves
+% fig_chain.png next to this file.
 
 here = fileparts(mfilename('fullpath'));
 run(fullfile(fileparts(fileparts(here)), 'setup.m'));

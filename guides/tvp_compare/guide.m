@@ -1,14 +1,6 @@
 %% guide - the code of guides/tvp_compare/README.md: four TVP regressions, which differ in the
-% coefficients that follow random walks, compared by their marginal likelihoods on two data
-% sets: the data of guides/tvp_states, whose intercept and slope both vary, and the data of
-% guides/tvp_gibbs whose slope is constant. For each model, ssm.intlike integrates the
-% coefficients out, an independence-chain Metropolis-Hastings sampler draws the variances,
-% and importance sampling with the cross-entropy importance density estimates the marginal
-% likelihood. Section 2 computes the Bayes factor of a varying slope under other priors of
-% its variance. The sections called "the code to adapt" are all a comparison needs. The
-% checks compute each marginal likelihood on a grid and compare ssm.intlike with the dense
-% normal density of y, also for the eight models of three regressors in section 3. Saves
-% fig_prior.png next to this file.
+% coefficients that follow random walks, compared by their marginal likelihoods. The sections
+% called "the code to adapt" are all a comparison needs. Saves fig_prior.png next to this file.
 
 here = fileparts(mfilename('fullpath'));
 run(fullfile(fileparts(fileparts(here)), 'setup.m'));

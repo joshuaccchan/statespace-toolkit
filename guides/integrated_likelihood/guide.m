@@ -1,10 +1,6 @@
-%% guide - the code of guides/integrated_likelihood/README.md: the integrated
-% likelihood of the local level model of guides/uc_states, from ssm.intlike, first with
-% the initial value of the trend known and then with it integrated out as well; then a
-% sampler that draws the two variances with the trend integrated out, on the data of
-% that guide. The sections called "the code to adapt" are all a sampler needs. The
-% checks compare ssm.intlike with the dense normal density of y, and the sampler with the
-% Gibbs sampler of guides/gibbs_sampler and with the posterior on a grid. Saves
+%% guide - the code of guides/integrated_likelihood/README.md: the integrated likelihood of the
+% local level model of guides/uc_states, and a sampler that draws the two variances with the trend
+% integrated out. The sections called "the code to adapt" are all a sampler needs. Saves
 % fig_acf.png next to this file.
 
 here = fileparts(mfilename('fullpath'));

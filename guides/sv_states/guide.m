@@ -1,9 +1,7 @@
-%% guide - the code of guides/sv_states/README.md: the log-volatilities of a stochastic
-% volatility model with a stationary AR(1) log-volatility, drawn given the parameters on
-% generated data, first by the auxiliary mixture sampler and then from their exact
-% conditional distribution by accept-reject Metropolis-Hastings; then the mixture step for
-% a random-walk log-volatility. The sections called "the code to adapt" are all a sampler
-% needs. Saves fig_mixture.png and fig_vol.png next to this file.
+%% guide - the code of guides/sv_states/README.md: the log-volatilities of a stochastic volatility
+% model, drawn given the parameters by the auxiliary mixture sampler and from their exact
+% conditional distribution. The sections called "the code to adapt" are all a sampler needs. Saves
+% fig_mixture.png and fig_vol.png next to this file.
 
 here = fileparts(mfilename('fullpath'));
 run(fullfile(fileparts(fileparts(here)), 'setup.m'));

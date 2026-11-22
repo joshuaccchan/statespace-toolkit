@@ -1,9 +1,6 @@
-%% guide - the code of guides/gibbs_sampler/README.md: a Gibbs sampler that estimates the
-% two variances and the initial value of the trend of the local level model of
-% guides/uc_states, along with the trend, on the data of that guide; then the same with an
-% AR(1) transitory component. The sections called "the code to adapt" are all a sampler
-% needs. The checks compute the posterior on a grid with ssm.intlike, without the sampler.
-% Saves fig_chain.png next to this file.
+%% guide - the code of guides/gibbs_sampler/README.md: a Gibbs sampler for the local level model
+% of guides/uc_states. The sections called "the code to adapt" are all a sampler needs. Saves
+% fig_chain.png next to this file.
 
 here = fileparts(mfilename('fullpath'));
 run(fullfile(fileparts(fileparts(here)), 'setup.m'));

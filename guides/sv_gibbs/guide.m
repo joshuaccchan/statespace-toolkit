@@ -1,10 +1,6 @@
-%% guide - the code of guides/sv_gibbs/README.md: a Gibbs sampler that estimates the mean,
-% the log-volatilities and the three parameters of their AR(1) process in the stochastic
-% volatility model of guides/sv_states, on the data of that guide; then the same posterior
-% by the sampler of Chan and Grant (2016), which draws the log-volatilities from their
-% exact conditional distribution, as a check; then a random-walk log-volatility. The
-% sections called "the code to adapt" are all a sampler needs. Saves fig_chain.png next to
-% this file.
+%% guide - the code of guides/sv_gibbs/README.md: a Gibbs sampler for the stochastic volatility
+% model of guides/sv_states. The sections called "the code to adapt" are all a sampler needs.
+% Saves fig_chain.png next to this file.
 
 here = fileparts(mfilename('fullpath'));
 run(fullfile(fileparts(fileparts(here)), 'setup.m'));

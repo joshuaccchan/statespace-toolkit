@@ -1,9 +1,6 @@
-%% guide - the code of guides/uc_states/README.md: the trend of a local level model drawn
-% by the precision sampler, given the parameters, on generated data; then the same with a
-% persistent transitory component, and with a known variance that changes over time. The
-% sections called "the code to adapt" are all a sampler needs. The sections called "the
-% checks" form K^{-1} and other dense matrices, which only a small example can afford.
-% Saves fig_spy.png, fig_level.png and fig_ar1.png next to this file.
+%% guide - the code of guides/uc_states/README.md: the trend of a local level model, drawn by the
+% precision sampler given the parameters. The sections called "the code to adapt" are all a
+% sampler needs. Saves fig_spy.png, fig_level.png and fig_ar1.png next to this file.
 
 here = fileparts(mfilename('fullpath'));
 run(fullfile(fileparts(fileparts(here)), 'setup.m'));

@@ -1,11 +1,6 @@
-%% guide - the code of guides/sv_t/README.md: a Gibbs sampler for the stochastic volatility
-% model of guides/sv_gibbs with Student-t errors, on data generated with the log-volatilities
-% and errors of guides/sv_states and t errors with 5 degrees of freedom; the model with
-% normal errors on the same data, to show what the t errors change; the same posterior by
-% the sampler of Chan and Grant (2016), which draws the log-volatilities from their exact
-% conditional distribution, as a check; then errors with an outlier component. The sections
-% called "the code to adapt" are all a sampler needs. Saves fig_vol.png and fig_nu.png next
-% to this file.
+%% guide - the code of guides/sv_t/README.md: a Gibbs sampler for the stochastic volatility model
+% of guides/sv_gibbs with Student-t errors. The sections called "the code to adapt" are all a
+% sampler needs. Saves fig_vol.png and fig_nu.png next to this file.
 
 here = fileparts(mfilename('fullpath'));
 run(fullfile(fileparts(fileparts(here)), 'setup.m'));
