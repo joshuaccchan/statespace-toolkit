@@ -34,7 +34,8 @@ only time-varying coefficients the most accurate.
 
 ## Try It Now
 
-Two commands, from the root of the repository:
+Open a script in MATLAB and click Run, or type its command in the Command Window from the root of
+the repository:
 
 | Command | What it produces | Time |
 |---|---|---|
@@ -358,7 +359,8 @@ the settings behind it.
 
 ## Reproducing the Results
 
-To reproduce all results on this page, run the build script from the root of the repository:
+To reproduce all results on this page, open the build script and click Run, or type in the Command
+Window from the root of the repository:
 
 ```matlab
 run tutorials/midas_nowcast/build.m
