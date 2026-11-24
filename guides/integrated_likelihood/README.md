@@ -25,7 +25,8 @@ use it to draw the two variances of
 draws of $`\omega^2`$, whose inefficiency factor is 27 in that guide's Gibbs sampler, become
 nearly independent.
 
-To draw the figure first, run from the root of the repository:
+To draw the figure first, open guide.m and click Run, or type in the Command Window from the root
+of the repository:
 
 ```matlab
 run guides/integrated_likelihood/guide.m

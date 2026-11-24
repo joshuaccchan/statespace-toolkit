@@ -18,7 +18,8 @@ component of each period, the model is linear and Gaussian, and the precision sa
 whole path of the log-volatilities at once. In this guide the parameters are known;
 [How to Estimate a Stochastic Volatility Model by Gibbs Sampling](../sv_gibbs/) draws them as well.
 
-To draw the figures first, run from the root of the repository:
+To draw the figures first, open guide.m and click Run, or type in the Command Window from the root
+of the repository:
 
 ```matlab
 run guides/sv_states/guide.m

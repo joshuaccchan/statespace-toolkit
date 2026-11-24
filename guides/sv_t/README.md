@@ -15,7 +15,8 @@ the tail of the error distribution. We add Student-$`t`$ errors to the sampler o
 SV-$`t`$, needs two new blocks: a latent scale for each period and the degrees of freedom. On data
 with Student-$`t`$ errors, SV-$`t`$ estimates the volatility more accurately than the SV model.
 
-To draw the figures first, run from the root of the repository:
+To draw the figures first, open guide.m and click Run, or type in the Command Window from the root
+of the repository:
 
 ```matlab
 run guides/sv_t/guide.m

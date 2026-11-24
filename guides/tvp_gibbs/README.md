@@ -18,7 +18,8 @@ distribution given the data and the current values of the other blocks.
 local level model. Each iteration of our sampler draws the path of the coefficients as in the
 first guide, and then the parameters, each from a standard distribution.
 
-To draw the figure first, run from the root of the repository:
+To draw the figure first, open guide.m and click Run, or type in the Command Window from the root
+of the repository:
 
 ```matlab
 run guides/tvp_gibbs/guide.m

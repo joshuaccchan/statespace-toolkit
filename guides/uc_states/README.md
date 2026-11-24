@@ -16,7 +16,8 @@ parameters and the initial value of the trend are known, and we draw the trend g
 data; [How to Estimate a State Space Model by Gibbs Sampling](../gibbs_sampler/) draws the
 parameters as well.
 
-To draw the figures first, run from the root of the repository:
+To draw the figures first, open guide.m and click Run, or type in the Command Window from the root
+of the repository:
 
 ```matlab
 run guides/uc_states/guide.m

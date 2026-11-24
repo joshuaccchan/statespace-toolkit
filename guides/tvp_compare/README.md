@@ -18,7 +18,8 @@ On data whose intercept and slope both vary, the model in which both vary has th
 likelihood. On data whose slope is constant, the model in which only the intercept varies has the
 largest. The evidence for a constant slope grows with the prior mean of the slope's variance.
 
-To draw the figure first, run from the root of the repository:
+To draw the figure first, open guide.m and click Run, or type in the Command Window from the root
+of the repository:
 
 ```matlab
 run guides/tvp_compare/guide.m

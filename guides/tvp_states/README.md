@@ -16,7 +16,8 @@ call [`ssm.simulate_states`](../../core/+ssm/simulate_states.m). The new parts a
 design matrix and the order of the states. In this guide the parameters are known;
 [How to Estimate a TVP Regression by Gibbs Sampling](../tvp_gibbs/) draws them as well.
 
-To draw the figures first, run from the root of the repository:
+To draw the figures first, open guide.m and click Run, or type in the Command Window from the root
+of the repository:
 
 ```matlab
 run guides/tvp_states/guide.m

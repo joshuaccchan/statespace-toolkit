@@ -15,7 +15,8 @@ two variances, $`\sigma^2`$ and $`\omega^2`$, and the initial value of the trend
 their true values; here we estimate them along with the trend. Each iteration draws the trend as
 in that guide and then the three parameters, each from a standard distribution.
 
-To draw the figure first, run from the root of the repository:
+To draw the figure first, open guide.m and click Run, or type in the Command Window from the root
+of the repository:
 
 ```matlab
 run guides/gibbs_sampler/guide.m

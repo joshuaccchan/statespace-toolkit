@@ -17,7 +17,8 @@ estimate them along with the log-volatilities. Each iteration of the sampler dra
 log-volatilities by the auxiliary mixture sampler of the first guide. It then draws three
 parameters from standard distributions and $`\phi`$ by a Metropolis-Hastings step.
 
-To draw the figure first, run from the root of the repository:
+To draw the figure first, open guide.m and click Run, or type in the Command Window from the root
+of the repository:
 
 ```matlab
 run guides/sv_gibbs/guide.m
